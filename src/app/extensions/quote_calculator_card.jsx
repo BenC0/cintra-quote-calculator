@@ -6,13 +6,10 @@ import {
     Divider,
     Button,
     hubspot,
-    Text,
     Flex,
     Heading,
 } from "@hubspot/ui-extensions";
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";
-
-import { debugPlanIdsByType, debugSelectedValues } from "./components/debug/debugValues"
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";
 
 // Register the extension in HubSpot CRM sidebar
@@ -25,12 +22,14 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 ));
 
 const Extension = ({ context, runServerless, actions }) => {
+    // debug options, used for enabling/disabling certain console logs.
     const debug = true
     const debugPlans = true
     const debugProductDetails = false
     const debugQuote = false
-    const debugPage = 1
+    const debugPSQ = false
 
+    // Function to build a productDef object based on expected columns
     const buildProductDef = (r) => {
         return {
             field: r?.id ?? "",
@@ -43,6 +42,7 @@ const Extension = ({ context, runServerless, actions }) => {
         };
     }
 
+    // Function to build a standardImplementationDaysRef object based on expected columns
     const standardImplementationDaysDefs = useFetchDefs("cintra_calculator_implementation_product_days", r => ({
         id: r.id,
         days: r.values.days,
@@ -392,14 +392,6 @@ const Extension = ({ context, runServerless, actions }) => {
             }
             if (isQty || isFrequency) {
                 planObj[`${field.field}_value`] = value
-                // console.log({
-                //     event: "Qty or Frequency Value Updated",
-                //     isQty,
-                //     isFrequency,
-                //     planObj,
-                //     recorded_value: planObj[`${field.field}_value`],
-                //     recieved_value: value
-                // })
             } else {
                 const idx = planObj.fields.findIndex((f) => f.field === field.field);
                 if (idx > -1) {
@@ -487,9 +479,9 @@ const Extension = ({ context, runServerless, actions }) => {
     }, [planIdsByType, selectedValues, selectedPSQValues]);
 
     useEffect(() => {
-        // if (debug && debugPlans) {
-        //     console.log("PSQ Fee Required:", { RequiresPSQFee });
-        // }
+        if (debug && debugPSQ) {
+            console.log("PSQ Fee Required:", { RequiresPSQFee });
+        }
     }, [RequiresPSQFee]);
 
     if (debug && debugProductDetails) {
