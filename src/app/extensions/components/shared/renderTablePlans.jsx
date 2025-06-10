@@ -54,7 +54,7 @@ export const renderTablePlans = (
                     <TableRow>
                         <TableHeader>{countHeaderText}</TableHeader>
                         <TableHeader>
-                            <Flex gap="sm">
+                            <Flex gap="sm" justify="end">
                                 <Button
                                 variant="transparent"
                                 overlay={
@@ -103,7 +103,7 @@ export const renderTablePlans = (
                         return (
                             <TableRow key={field.field}>
                                 <TableCell>{field.label}</TableCell>
-                                <TableCell> {cell ? <Icon name="success" /> : <Icon name="remove" />} </TableCell>
+                                <TableCell align="right"> {cell ? <Icon name="success" /> : <Icon name="remove" />} </TableCell>
                             </TableRow>
                         );
                     })}

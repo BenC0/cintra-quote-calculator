@@ -47,9 +47,9 @@ export const renderInlineTablePlans = (
                     <TableRow>
                         <TableHeader>Tasks</TableHeader>
                         <TableHeader>
-                            <Flex gap="sm">
+                            <Flex gap="sm" justify="end">
                                 <Button
-                                    variant="secondary"
+                                    variant="transparent"
                                     onClick={_ => setEditing(!editing)}
                                 >
                                     <Icon name="edit"/> Edit
@@ -65,7 +65,7 @@ export const renderInlineTablePlans = (
                         return (
                             <TableRow key={field.field}>
                                 <TableCell>{field.label}</TableCell>
-                                <TableCell>
+                                <TableCell  align="right">
                                     {editing ? (
                                         renderField(field, handler, planId, cell.value)
                                     ) : (

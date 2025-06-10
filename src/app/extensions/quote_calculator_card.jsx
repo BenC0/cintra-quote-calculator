@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";
 import { useFetchDefs, useDynamicFetchDefs, getFirstValue } from "./components/shared/utils";
@@ -11,6 +11,7 @@ import {
 } from "@hubspot/ui-extensions";
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";
+import { quoteReducer } from "./components/shared/quoteReducer";
 
 // Register the extension in HubSpot CRM sidebar
 hubspot.extend(({ context, runServerlessFunction, actions }) => (
@@ -28,6 +29,20 @@ const Extension = ({ context, runServerless, actions }) => {
     const debugProductDetails = false
     const debugQuote = false
     const debugPSQ = false
+
+    const initialState = {
+        // all plans stored here by their unique ID
+        plansById: {},
+        // if you still need grouping logic, include it here
+        planIdsByType: { },
+        // tracked user inputs per plan
+        selectedValues: {},
+        // any other flags/results you were holding in useState…
+        quoteResult: null,
+        loading: false,
+        error: null,
+    };
+    const [state, dispatch] = useReducer(quoteReducer, initialState);
 
     // Function to build a productDef object based on expected columns
     const buildProductDef = (r) => {
