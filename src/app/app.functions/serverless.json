@@ -1,0 +1,8 @@
+{
+  "appFunctions": {
+    "get_table_rows": {
+      "file": "get_table_rows.js",
+      "secrets": []
+    }
+  }
+}

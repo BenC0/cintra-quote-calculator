@@ -1,0 +1,1003 @@
+[
+    {
+        "field": "241712266462",
+        "label": "Client Details",
+        "sort_order": 0,
+        "max_items": -1,
+        "input_display_type": "inline",
+        "fields": [
+            {
+                "field": "241709571284",
+                "label": "Interface",
+                "input_values_table": "cintra_calculator_interface_types",
+                "input_type": "Dropdown",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266462",
+                    "name": "Client Details",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "3",
+                    "name": "na",
+                    "label": "N/A",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:50:42.137Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:50:42.137Z",
+                    "updatedByUserId": 44251996,
+                    "order": 2
+                },
+                "values": [
+                    {
+                        "id": "241706083515",
+                        "values": {
+                            "default": 0,
+                            "label": "Custom",
+                            "value": "custom"
+                        }
+                    },
+                    {
+                        "id": "241709571285",
+                        "values": {
+                            "default": 1,
+                            "label": "Standard",
+                            "value": "standard"
+                        }
+                    }
+                ]
+            },
+            {
+                "field": "241712266460",
+                "label": "Is this a public sector client?",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266462",
+                    "name": "Client Details",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "3",
+                    "name": "na",
+                    "label": "N/A",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:50:42.137Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:50:42.137Z",
+                    "updatedByUserId": 44251996,
+                    "order": 2
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241712266463",
+                "label": "Groups Insight",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266462",
+                    "name": "Client Details",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "3",
+                    "name": "na",
+                    "label": "N/A",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:50:42.137Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:50:42.137Z",
+                    "updatedByUserId": 44251996,
+                    "order": 2
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                },
+                "selected_value": true
+            },
+            {
+                "field": "241712266465",
+                "label": "Contract Length",
+                "input_values_table": "cintra_calculator_contract_lengths",
+                "input_type": "Dropdown",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266462",
+                    "name": "Client Details",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "3",
+                    "name": "na",
+                    "label": "N/A",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:50:42.137Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:50:42.137Z",
+                    "updatedByUserId": 44251996,
+                    "order": 2
+                },
+                "values": [
+                    {
+                        "id": "241706083518",
+                        "values": {
+                            "discount": 1,
+                            "label": "12 Months",
+                            "value": 12
+                        }
+                    },
+                    {
+                        "id": "241706083519",
+                        "values": {
+                            "discount": 0.85,
+                            "label": "60 Months",
+                            "value": 60
+                        }
+                    },
+                    {
+                        "id": "241709571287",
+                        "values": {
+                            "discount": 0.9,
+                            "label": "48 Months",
+                            "value": 48
+                        }
+                    },
+                    {
+                        "id": "241712266466",
+                        "values": {
+                            "discount": 1,
+                            "label": "36 Months",
+                            "value": 36
+                        }
+                    }
+                ]
+            },
+            {
+                "field": "241731552473",
+                "label": "Is this an education client?",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266462",
+                    "name": "Client Details",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "3",
+                    "name": "na",
+                    "label": "N/A",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:50:42.137Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:50:42.137Z",
+                    "updatedByUserId": 44251996,
+                    "order": 2
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            }
+        ]
+    },
+    {
+        "field": "241712266439",
+        "label": "Payroll",
+        "sort_order": 1,
+        "max_items": -1,
+        "input_display_type": "table",
+        "fields": [
+            {
+                "field": "241706082523",
+                "label": "Cintra SaaS Payroll",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846690",
+                    "name": "Per Payslip",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "1",
+                    "name": "core",
+                    "label": "Core",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 0
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241706082532",
+                "label": "Payrolled Benefits (Source Only)",
+                "input_type": "Number",
+                "pricing_structure": {
+                    "id": "241702846691",
+                    "name": "Per Employee per Month",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "min": 0
+                }
+            },
+            {
+                "field": "241706082533",
+                "label": "Business Continuity Payroll (SaaS Only)",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846690",
+                    "name": "Per Payslip",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241709571262",
+                "label": "Holiday and Absence Management",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846690",
+                    "name": "Per Payslip",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241709571263",
+                "label": "Cintra Admin Support (SaaS Only)",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846690",
+                    "name": "Per Payslip",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241709571264",
+                "label": "Payrolled Car Benefits (Source Only)",
+                "input_type": "Number",
+                "pricing_structure": {
+                    "id": "241702846691",
+                    "name": "Per Employee per Month",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "min": 0
+                }
+            },
+            {
+                "field": "241709571266",
+                "label": "Faster Payments Module",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846692",
+                    "name": "Per Payslip - Add on",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241712266444",
+                "label": "Cintra Outsourced Payroll",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846690",
+                    "name": "Per Payslip",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "1",
+                    "name": "core",
+                    "label": "Core",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 0
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241712266445",
+                "label": "Time Sheets - Self Service",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846690",
+                    "name": "Per Payslip",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "242118906061",
+                "label": "Number of Employees",
+                "input_type": "Number",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "4",
+                    "name": "details",
+                    "label": "Details",
+                    "type": "option",
+                    "createdAt": "2025-06-03T11:54:16.671Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-03T11:54:16.671Z",
+                    "updatedByUserId": 44251996,
+                    "order": 3
+                },
+                "values": {
+                    "min": 0
+                }
+            },
+            {
+                "field": "242118906062",
+                "label": "Frequency",
+                "input_values_table": "cintra_calculator_payroll_frequency",
+                "input_type": "Dropdown",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266439",
+                    "name": "Payroll",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "4",
+                    "name": "details",
+                    "label": "Details",
+                    "type": "option",
+                    "createdAt": "2025-06-03T11:54:16.671Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-03T11:54:16.671Z",
+                    "updatedByUserId": 44251996,
+                    "order": 3
+                },
+                "values": [
+                    {
+                        "id": "240071400674",
+                        "values": {
+                            "discount": 0.969230769230769,
+                            "payslips": 1.083,
+                            "label": "Lunar",
+                            "sort_order": 3,
+                            "value": "lunar"
+                        }
+                    },
+                    {
+                        "id": "240071400675",
+                        "values": {
+                            "discount": 0.380772159785844,
+                            "payslips": 4.3333333,
+                            "label": "Weekly",
+                            "sort_order": 1,
+                            "value": "weekly"
+                        }
+                    },
+                    {
+                        "id": "240079360191",
+                        "values": {
+                            "discount": 1,
+                            "payslips": 1,
+                            "label": "Monthly",
+                            "sort_order": 4,
+                            "value": "monthly"
+                        }
+                    },
+                    {
+                        "id": "240079360192",
+                        "values": {
+                            "discount": 0.7,
+                            "payslips": 2.17,
+                            "label": "Fortnightly",
+                            "sort_order": 2,
+                            "value": "fortnightly"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "field": "241712266440",
+        "label": "CintraHR",
+        "sort_order": 2,
+        "max_items": 1,
+        "input_display_type": "table",
+        "fields": [
+            {
+                "field": "241709571268",
+                "label": "HR Software",
+                "input_values_table": "cintra_calculator_cintrahr_products",
+                "input_type": "Dropdown",
+                "pricing_structure": {
+                    "id": "241702846691",
+                    "name": "Per Employee per Month",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266440",
+                    "name": "CintraHR",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "4",
+                    "name": "details",
+                    "label": "Details",
+                    "type": "option",
+                    "createdAt": "2025-06-03T11:54:16.671Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-03T11:54:16.671Z",
+                    "updatedByUserId": 44251996,
+                    "order": 3
+                },
+                "values": [
+                    {
+                        "id": "240117744884",
+                        "values": {
+                            "default": 1,
+                            "label": "CintraHR Essential",
+                            "value": "essential"
+                        }
+                    },
+                    {
+                        "id": "240117744885",
+                        "values": {
+                            "default": 0,
+                            "label": "CintraHR Professional",
+                            "value": "professional"
+                        }
+                    },
+                    {
+                        "id": "240117744886",
+                        "values": {
+                            "default": 0,
+                            "label": "CintraHR Intelligent",
+                            "value": "intelligent"
+                        }
+                    }
+                ]
+            },
+            {
+                "field": "242118906089",
+                "label": "Quantity",
+                "input_type": "Number",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266440",
+                    "name": "CintraHR",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "4",
+                    "name": "details",
+                    "label": "Details",
+                    "type": "option",
+                    "createdAt": "2025-06-03T11:54:16.671Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-03T11:54:16.671Z",
+                    "updatedByUserId": 44251996,
+                    "order": 3
+                },
+                "values": {
+                    "min": 0
+                }
+            }
+        ]
+    },
+    {
+        "field": "241706082530",
+        "label": "HR Outsourcing",
+        "sort_order": 3,
+        "max_items": -1,
+        "input_display_type": "table",
+        "fields": [
+            {
+                "field": "241706083520",
+                "label": "HR Admin",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846693",
+                    "name": "Price Per Employee",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241706082530",
+                    "name": "HR Outsourcing",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "3",
+                    "name": "na",
+                    "label": "N/A",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:50:42.137Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:50:42.137Z",
+                    "updatedByUserId": 44251996,
+                    "order": 2
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241712266467",
+                "label": "HR Advice",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241702846693",
+                    "name": "Price Per Employee",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241706082530",
+                    "name": "HR Outsourcing",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "3",
+                    "name": "na",
+                    "label": "N/A",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:50:42.137Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:50:42.137Z",
+                    "updatedByUserId": 44251996,
+                    "order": 2
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "242118906077",
+                "label": "Headcount",
+                "input_type": "Number",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241706082530",
+                    "name": "HR Outsourcing",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "4",
+                    "name": "details",
+                    "label": "Details",
+                    "type": "option",
+                    "createdAt": "2025-06-03T11:54:16.671Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-03T11:54:16.671Z",
+                    "updatedByUserId": 44251996,
+                    "order": 3
+                },
+                "values": {
+                    "min": 0
+                }
+            }
+        ]
+    },
+    {
+        "field": "241712266441",
+        "label": "Capture Expense",
+        "sort_order": 4,
+        "max_items": -1,
+        "input_display_type": "table",
+        "fields": [
+            {
+                "field": "241706083522",
+                "label": "AI Module",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241706083523",
+                    "name": "Minimum Active Users",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266441",
+                    "name": "Capture Expense",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241706083524",
+                "label": "Timesheets",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241706083523",
+                    "name": "Minimum Active Users",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266441",
+                    "name": "Capture Expense",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241706083525",
+                "label": "Onboarding fee",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241712266470",
+                    "name": "One Time Fee",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266441",
+                    "name": "Capture Expense",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241709571288",
+                "label": "Expense Management Software ",
+                "input_values_table": "cintra_calculator_capture_expense_products",
+                "input_type": "Dropdown",
+                "pricing_structure": {
+                    "id": "241706083523",
+                    "name": "Minimum Active Users",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266441",
+                    "name": "Capture Expense",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "1",
+                    "name": "core",
+                    "label": "Core",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 0
+                },
+                "values": [
+                    {
+                        "id": "240117745900",
+                        "values": {
+                            "label": "Enterprise",
+                            "value": "enterprise"
+                        }
+                    },
+                    {
+                        "id": "240117745901",
+                        "values": {
+                            "label": "Business",
+                            "value": "business"
+                        }
+                    }
+                ]
+            },
+            {
+                "field": "241709571293",
+                "label": "Cards",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241706083523",
+                    "name": "Minimum Active Users",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266441",
+                    "name": "Capture Expense",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "241712266469",
+                "label": "Zynk",
+                "input_type": "Toggle",
+                "pricing_structure": {
+                    "id": "241709571294",
+                    "name": "Monthly Fixed",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266441",
+                    "name": "Capture Expense",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "2",
+                    "name": "add-on",
+                    "label": "Add-on",
+                    "type": "option",
+                    "createdAt": "2025-06-02T10:37:56.199Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-02T10:37:56.199Z",
+                    "updatedByUserId": 44251996,
+                    "order": 1
+                },
+                "values": {
+                    "active": "Yes",
+                    "inactive": "No"
+                }
+            },
+            {
+                "field": "242118906079",
+                "label": "Headcount",
+                "input_type": "Number",
+                "pricing_structure": {
+                    "id": "241706083514",
+                    "name": "N/A",
+                    "type": "foreignid"
+                },
+                "product_type": {
+                    "id": "241712266441",
+                    "name": "Capture Expense",
+                    "type": "foreignid"
+                },
+                "product_sub_type": {
+                    "id": "4",
+                    "name": "details",
+                    "label": "Details",
+                    "type": "option",
+                    "createdAt": "2025-06-03T11:54:16.671Z",
+                    "createdByUserId": 44251996,
+                    "updatedAt": "2025-06-03T11:54:16.671Z",
+                    "updatedByUserId": 44251996,
+                    "order": 3
+                },
+                "values": {
+                    "min": 0
+                }
+            }
+        ]
+    }
+]

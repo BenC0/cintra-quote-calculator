@@ -1,0 +1,12 @@
+{
+  "type": "crm-card",
+  "data": {
+    "title": "Quote Calculator",
+    "uid": "quote_calculator_card",
+    "location": "crm.record.tab",
+    "module": {
+      "file": "quote_calculator_card.jsx"
+    },
+    "objectTypes": [{ "name": "deals" }]
+  }
+}

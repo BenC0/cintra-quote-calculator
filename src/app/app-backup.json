@@ -1,0 +1,20 @@
+{
+    "name": "Cintra Quote Calculator",
+    "description": "",
+    "uid": "cintra_quote_calculator",
+    "scopes": ["crm.objects.deals.read", "crm.objects.deals.write"],
+    "public": false,
+    "extensions": {
+      "crm": {
+        "cards": [
+          {
+            "file": "extensions/example-card.json"
+          }
+        ]
+      }
+    },
+    "webhooks": {
+      "file": "./webhooks/webhooks.json"
+    }
+  }
+  

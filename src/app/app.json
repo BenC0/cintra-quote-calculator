@@ -1,0 +1,20 @@
+{
+  "name": "Fluidity",
+  "description": "",
+  "uid": "cintra_quote_calculator",
+  "scopes": [
+    "crm.objects.deals.read",
+    "crm.objects.deals.write",
+    "hubdb"
+  ],
+  "public": false,
+  "extensions": {
+    "crm": {
+      "cards": [
+        {
+          "file": "extensions/quote_calculator_card.json"
+        }
+      ]
+    }
+  }
+}
