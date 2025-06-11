@@ -22,7 +22,8 @@ export const renderTablePlans = (
     handler,
     plan_handler,
 ) => {
-    if (planIds.length === 0) {
+    const validPlanIds = planIds.filter(id => id != "temp")
+    if (validPlanIds.length === 0) {
         return (
             <Text format={{ fontStyle: "italic" }}>
                 No {productType.label} products added yet.
@@ -31,7 +32,7 @@ export const renderTablePlans = (
     }
 
 
-    return planIds.map((planId) => {
+    return validPlanIds.map((planId) => {
         const selectedPlanValues = selectedValues[planId]
         if (Object.keys(selectedPlanValues).length == 0) return null;
         // console.log(`Rendering Table Plan for "${productType.label}"`, {productType, selectedValues, selectedPlanValues})
@@ -41,7 +42,7 @@ export const renderTablePlans = (
         const frequencyLabel = ` ${selectedPlanValues.frequency_value || ""}`;
         const countHeaderText = `${qtyLabel}: ${countValue}${frequencyLabel}`;
 
-        const excludedIds = new Set([ productType.count_field, productType.payslip_frequency_field, ]);
+        const excludedIds = new Set([ productType.count_field, productType.payslip_frequency_field, "" ]);
         const filteredFields = productType.fields.filter((field) => {
             if (excludedIds.has(field.field)) { return false }
             const cellEntry = selectedPlanValues[field.field];
