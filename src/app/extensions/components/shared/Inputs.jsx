@@ -10,7 +10,7 @@ import {
 
 export const renderToggle = (field, onChange, planId, existingValue) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text>{field.label}</Text>
+        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} >{field.label}</Text>
         <Toggle
             size="md"
             label={field.label}
@@ -28,7 +28,7 @@ export const renderToggle = (field, onChange, planId, existingValue) => {
 
 export const renderDropDown = (field, onChange, planId, existingValue) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text format={{ fontWeight: 'demibold', variant: 'bodytext' }} required>
+        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} required>
             { field.label }
         </Text>
         <Select
@@ -43,7 +43,7 @@ export const renderDropDown = (field, onChange, planId, existingValue) => {
 
 export const renderNumber = (field, onChange, planId, existingValue) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text>{field.label}</Text>
+        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} >{field.label}</Text>
         <StepperInput
             value={existingValue ?? field.value}
             min={0}
@@ -56,7 +56,7 @@ export const renderNumber = (field, onChange, planId, existingValue) => {
 
 export const renderTextInput = (field, onChange, planId, existingValue) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text format={{ fontWeight: 'demibold', variant: 'bodytext' }} required>
+        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} required>
             { field.label }
         </Text>
         <Input

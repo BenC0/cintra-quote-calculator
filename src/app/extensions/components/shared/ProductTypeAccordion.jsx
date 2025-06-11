@@ -19,7 +19,7 @@ export const ProductTypeAccordion = ({
     actions,
 }) => {
     const maxItems = productType.max_items;
-    const canAdd = maxItems < 0 || planIds.length < maxItems;
+    const canAdd = maxItems < 0 || planIds.filter(a => a != "temp").length < maxItems;
 
     return (
         <Accordion title={productType.label} defaultOpen>
@@ -53,10 +53,12 @@ export const ProductTypeAccordion = ({
                                             fields={productType.fields}
                                             quantity={productType.quantityFieldDef}
                                             frequency={productType.frequencyFieldDef}
+                                            planId="temp"
                                             handler={handler}
                                             actions={actions}
                                             onSubmit={(generatedId) => {
-                                                plan_handler.edit(productType.label, generatedId);
+                                                plan_handler.clone(productType.label, generatedId);
+                                                plan_handler.delete(productType.label, generatedId);
                                             }}
                                         />
                                     }

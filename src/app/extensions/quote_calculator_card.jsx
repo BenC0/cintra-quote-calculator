@@ -19,12 +19,12 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Main extension component
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
+    const debug = false;
     const debugPlans = true;
     const debugProductDetails = false;
-    const debugQuote = false;
+    const debugQuote = true;
     const debugPSQ = false;
-
+    
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
     const [currentPage, setCurrentPage] = useState(1);
@@ -234,7 +234,7 @@ const Extension = ({ context, runServerless, actions }) => {
             && productDefs.length > 0
             && Object.keys(valueTables).length
         ) {
-            console.count("Initialising Product Type Accoridons")
+            if (!!debug) console.count("Initialising Product Type Accoridons")
             // console.log({productTypeDefs, productDefs, valueTables})
             setProductTypeAccordions(
                 productTypeDefs.map((productType) => {
@@ -298,7 +298,7 @@ const Extension = ({ context, runServerless, actions }) => {
 
         plansInitialised.current = true
 
-        console.count("Init Plan Setup")
+        if (debug) console.count("Init Plan Setup");
         // console.log({productTypeAccordions})
 
         // Helper to get default field entries based on type
@@ -341,7 +341,7 @@ const Extension = ({ context, runServerless, actions }) => {
     // Add a new plan for a given product type
     const addPlan = (productTypeName, planIdArg = null) => {
         const newId = planIdArg || uuidv4();
-        console.log(`⚡ Plan created -> productType="${productTypeName}", planId="${newId}"`);
+        if (!!debug && !!debugPlans) console.log(`⚡ Plan created -> productType="${productTypeName}", planId="${newId}"`);
         // Dispatch to reducer
         dispatch({
             type: 'ADD_PLAN',
@@ -352,7 +352,7 @@ const Extension = ({ context, runServerless, actions }) => {
 
     // Placeholder for editing an existing plan (not implemented yet)
     const editPlan = (productTypeName, planId) => {
-        console.log({ event: "editPlan Called", productTypeName, planId });
+        if (!!debug && !!debugPlans) console.log({ event: "editPlan Called", productTypeName, planId });
     };
 
     // Clone an existing plan by copying its values
@@ -371,7 +371,7 @@ const Extension = ({ context, runServerless, actions }) => {
                 payload: { planId: newId, fieldKey, value }
             });
         });
-        console.log({ event: "clonePlan -> new plan created", typeName, from: planId, newPlanId: newId });
+        if (!!debug && !!debugPlans) console.log({ event: "clonePlan -> new plan created", typeName, from: planId, newPlanId: newId });
     };
 
     // Delete a plan by removing it via reducer
@@ -380,7 +380,7 @@ const Extension = ({ context, runServerless, actions }) => {
             type: 'REMOVE_PLAN',
             payload: { planId }
         });
-        console.log({ event: "deletePlan -> removed", typeName, planId });
+        if (!!debug && !!debugPlans) console.log({ event: "deletePlan -> removed", typeName, planId });
     };
 
     // Bundle plan handlers for passing into child components
@@ -390,7 +390,7 @@ const Extension = ({ context, runServerless, actions }) => {
 
     const handler = (field, value, planId) => {
         const productType = field.product_type.name;
-        console.log( `✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}` );
+        if (!!debug && !!debugPlans) console.log( `✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}` );
         // If this is a "brand new" planId for that type, dispatch ADD_PLAN
         if (!planIdsByType[productType]?.includes(planId)) {
             addPlan(productType, planId);
@@ -413,7 +413,7 @@ const Extension = ({ context, runServerless, actions }) => {
     // Handle changes to PSQ fields (similar to handler above)
     const [selectedPSQValues, setSelectedPSQValues] = useState({});
     const psqHandler = (field, value, planId) => {
-        console.log(`✏️ PSQ updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}`);
+        if (!!debug && !!debugPSQ) console.log(`✏️ PSQ updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}`);
         setSelectedPSQValues((prev) => {
             const next = { ...prev };
             const productType = field.product_type.name;

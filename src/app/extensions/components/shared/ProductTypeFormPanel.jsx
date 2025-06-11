@@ -37,13 +37,6 @@ export const ProductTypeFormPanel = ({
     }, [externalPlanId]);
     if (!localPlanId) return null;
 
-    // console.log(`Rendering ProductTypeFormPanel for "${name}"`, {initialLookup})
-
-    // const initialLookup = {};
-    // initialValues.forEach(({ field, value }) => {
-    //     initialLookup[field] = value;
-    // });
-
     const grouped_fields = {};
     fields.forEach((field) => {
         const subtype = field.product_sub_type.name;
@@ -160,9 +153,6 @@ export const ProductTypeFormPanel = ({
                         variant="secondary"
                         onClick={() => {
                             actions.closeOverlay(localPlanId);
-                            if (!isEditMode) {
-                                setLocalPlanId(uuidv4());
-                            }
                         }}
                     >
                         Cancel
@@ -172,9 +162,6 @@ export const ProductTypeFormPanel = ({
                         onClick={() => {
                             onSubmit(localPlanId);
                             actions.closeOverlay(localPlanId);
-                            if (!isEditMode) {
-                                setLocalPlanId(uuidv4());
-                            }
                         }}
                     >
                         {isEditMode ? `Save ${name}` : `Add ${name}`}
