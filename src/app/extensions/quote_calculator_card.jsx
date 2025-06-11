@@ -290,11 +290,7 @@ const Extension = ({ context, runServerless, actions }) => {
     }, [standardImplementationDaysDefs, standardImplementationRatesDefs]);
 
     // ------------------------- Initial Plan Setup -------------------------
-
-    // Local state for grouping plan IDs and their selected values
-    const [selectedValuesLocal, setSelectedValues] = useState({});
     const plansInitialised = useRef(false);
-
     useEffect(() => {
         // Don't re-run
         if (plansInitialised.current) return;
@@ -394,36 +390,25 @@ const Extension = ({ context, runServerless, actions }) => {
 
     // ------------------------- Field Change Handlers -------------------------
 
-    // Handle changes to product-type fields
     const handler = (field, value, planId) => {
         const productType = field.product_type.name;
-        console.log(`✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}`);
-
-        // If this plan is brand-new, ensure it's added to state
-        if (!(planIdsByType[productType]?.includes(planId))) {
-            // plan_handler.add(productType, planId);
+        console.log( `✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}` );
+        // If this is a "brand new" planId for that type, dispatch ADD_PLAN
+        if (!planIdsByType[productType]?.includes(planId)) {
+            addPlan(productType, planId);
         }
+        // Dispatch a single UPDATE_SELECTED_VALUE action
+        // If you want to keep your quantity/frequency naming convention,
+        const isQtyOrFreq = field.field === "quantity" || field.field === "frequency";
+        const fieldKey = isQtyOrFreq ? `${field.field}_value` : field.field;
 
-        // Update the selectedValues state for this field
-        setSelectedValues((prev) => {
-            const next = { ...prev };
-            if (!next[productType]) next[productType] = [];
-            let planObj = next[productType].find((p) => p.id === planId);
-            if (!planObj) {
-                planObj = { id: planId, fields: [] };
-                next[productType].push(planObj);
-            }
-            // Handle quantity/frequency vs. other fields uniformly
-            const isQty = field.field === "quantity";
-            const isFrequency = field.field === "frequency";
-            if (isQty || isFrequency) {
-                planObj[`${field.field}_value`] = value;
-            } else {
-                const idx = planObj.fields.findIndex((f) => f.field === field.field);
-                if (idx >= 0) planObj.fields[idx].value = value;
-                else planObj.fields.push({ field: field.field, label: field.label, value });
-            }
-            return next;
+        dispatch({
+            type: "UPDATE_SELECTED_VALUE",
+            payload: {
+                planId,
+                fieldKey,
+                value,
+            },
         });
     };
 
