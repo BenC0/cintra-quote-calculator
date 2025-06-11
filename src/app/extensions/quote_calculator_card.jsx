@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";  // Core React hooks
+import React, { useState, useEffect, useReducer, useRef } from "react";  // Core React hooks
 import { v4 as uuidv4 } from "uuid";  // Utility to generate unique IDs for plans
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
 import { useFetchDefs, useDynamicFetchDefs, getFirstValue } from "./components/shared/utils";  // Data-fetching and helper functions
@@ -25,14 +25,18 @@ const Extension = ({ context, runServerless, actions }) => {
     const debugQuote = false;
     const debugPSQ = false;
 
+    // ------------------------- Rendering -------------------------
+    // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
+    const [currentPage, setCurrentPage] = useState(1);
+
     // Initial state for the quote workflow, managed by useReducer
     const initialState = {
-        plansById: {},          // Map of planId -> plan metadata
-        planIdsByType: {},      // Grouping of plan IDs by product/PSQ type
-        selectedValues: {},     // User-entered values for each plan
-        quoteResult: null,      // Computed quote output
-        loading: false,         // Loading flag for async operations
-        error: null,            // Error state
+        plansById       : {},       // Map of planId -> plan metadata
+        planIdsByType   : {},       // Grouping of plan IDs by product/PSQ type
+        selectedValues  : {},       // User-entered values for each plan
+        quoteResult     : null,     // Computed quote output
+        loading         : false,    // Loading flag for async operations
+        error           : null,     // Error state
     };
     const [state, dispatch] = useReducer(quoteReducer, initialState);
     const { plansById, planIdsByType, selectedValues } = state;  // Destructure for convenience
@@ -225,46 +229,54 @@ const Extension = ({ context, runServerless, actions }) => {
     const [productTypeAccordions, setProductTypeAccordions] = useState([]);
     useEffect(() => {
         // Initialize product-type accordions once definitions and tables are ready
-        setProductTypeAccordions(
-            productTypeDefs.map((productType) => {
-                const output = { ...productType };
-                // Populate frequency field options from dynamic tables
-                if (output.frequencyFieldDef) {
-                    output.frequencyFieldDef.values = valueTables[output.quantity_frequency_values_table] || null;
-                }
-                // Build field definitions including default values per input type
-                output.fields = productDefs
-                    .filter((a) => a.product_type.id === productType.field)
-                    .map((field) => {
-                        let values = null;
-                        let defaultValue = null;
-                        switch (field.input_type) {
-                            case "Toggle":
-                                values = { active: "Yes", inactive: "No" };
-                                defaultValue = false;
-                                break;
-                            case "Number":
-                                values = { min: 0 };
-                                defaultValue = 0;
-                                break;
-                            case "Text":
-                                values = { default: "" };
-                                defaultValue = "";
-                                break;
-                            case "Radio":
-                            case "Dropdown":
-                                values = valueTables[field.input_values_table];
-                                defaultValue = values ? values[0].values : null;
-                                break;
-                            default:
-                                return null;  // Skip any unknown input types
-                        }
-                        return { ...field, values, defaultValue };
-                    })
-                    .filter((f) => f !== null);
-                return output;
-            })
-        );
+        if (
+            productTypeDefs.length > 0
+            && productDefs.length > 0
+            && Object.keys(valueTables).length
+        ) {
+            console.count("Initialising Product Type Accoridons")
+            console.log({productTypeDefs, productDefs, valueTables})
+            setProductTypeAccordions(
+                productTypeDefs.map((productType) => {
+                    const output = { ...productType };
+                    // Populate frequency field options from dynamic tables
+                    if (output.frequencyFieldDef) {
+                        output.frequencyFieldDef.values = valueTables[output.quantity_frequency_values_table] || null;
+                    }
+                    // Build field definitions including default values per input type
+                    output.fields = productDefs
+                        .filter((a) => a.product_type.id === productType.field)
+                        .map((field) => {
+                            let values = null;
+                            let defaultValue = null;
+                            switch (field.input_type) {
+                                case "Toggle":
+                                    values = { active: "Yes", inactive: "No" };
+                                    defaultValue = false;
+                                    break;
+                                case "Number":
+                                    values = { min: 0 };
+                                    defaultValue = 0;
+                                    break;
+                                case "Text":
+                                    values = { default: "" };
+                                    defaultValue = "";
+                                    break;
+                                case "Radio":
+                                case "Dropdown":
+                                    values = valueTables[field.input_values_table];
+                                    defaultValue = values ? values[0].values : null;
+                                    break;
+                                default:
+                                    return null;  // Skip any unknown input types
+                            }
+                            return { ...field, values, defaultValue };
+                        })
+                        .filter((f) => f !== null);
+                    return output;
+                })
+            );
+        }
     }, [productTypeDefs, productDefs, valueTables]);
 
     // Standard implementation definitions state
@@ -280,14 +292,18 @@ const Extension = ({ context, runServerless, actions }) => {
     // ------------------------- Initial Plan Setup -------------------------
 
     // Local state for grouping plan IDs and their selected values
-    const [planIdsByTypeLocal, setPlanIdsByType] = useState({});
     const [selectedValuesLocal, setSelectedValues] = useState({});
+    const plansInitialised = useRef(false);
 
     useEffect(() => {
-        // Compute initial plan IDs and selected values from accordions
-        const allAccords = [...productTypeAccordions, ...psqAccordions];
-        if (allAccords.length === 0) return;
+        // Don't re-run
+        if (plansInitialised.current) return;
+        if (productTypeAccordions.length === 0) return;
 
+        plansInitialised.current = true
+
+        console.count("Init Plan Setup")
+        console.log({productTypeAccordions})
         const initialPlanIds = {};
         const initialSelected = {};
 
@@ -308,17 +324,22 @@ const Extension = ({ context, runServerless, actions }) => {
         });
 
         // Initialize one plan for each accordion of inline or inline-table type
-        allAccords.forEach((pt) => {
+        productTypeAccordions.forEach((pt) => {
             const needsInline = pt.input_display_type === "inline" || pt.input_display_type === "inline-table";
-            const newId = needsInline ? uuidv4() : null;
-            initialPlanIds[pt.label] = needsInline ? [newId] : [];
             if (needsInline) {
-                initialSelected[pt.label] = [{ id: newId, fields: getDefaultFields(pt) }];
+                const planId = addPlan(pt.label);
+                getDefaultFields(pt).forEach((field) => {
+                    dispatch({
+                        type: "UPDATE_SELECTED_VALUE",
+                        payload: {
+                            planId,
+                            fieldKey: field.field,
+                            value: field.defaultValue,
+                        },
+                    });
+                })
             }
         });
-
-        setPlanIdsByType(initialPlanIds);
-        setSelectedValues(initialSelected);
     }, [productTypeAccordions]);
 
     // ------------------------- Plan CRUD Handlers -------------------------
@@ -327,9 +348,10 @@ const Extension = ({ context, runServerless, actions }) => {
     const addPlan = (productTypeName, planIdArg = null) => {
         const newId = planIdArg || uuidv4();
         console.log(`⚡ Plan created -> productType="${productTypeName}", planId="${newId}"`);
-        setPlanIdsByType((prev) => {
-            const existing = prev[productTypeName] || [];
-            return { ...prev, [productTypeName]: [...existing, newId] };
+        // Dispatch to reducer
+        dispatch({
+            type: 'ADD_PLAN',
+            payload: { plan: { id: newId, type: productTypeName } }
         });
         return newId;
     };
@@ -339,32 +361,31 @@ const Extension = ({ context, runServerless, actions }) => {
         console.log({ event: "editPlan Called", productTypeName, planId });
     };
 
-    // Clone an existing plan by copying its fields
+    // Clone an existing plan by copying its values
     const clonePlan = (typeName, planId) => {
         const newId = uuidv4();
-        const original = selectedValuesLocal[typeName]?.find((p) => p.id === planId);
-        const copiedFields = original ? original.fields.map((f) => ({ ...f })) : [];
-        setPlanIdsByType((prev) => ({
-            ...prev,
-            [typeName]: [...(prev[typeName] || []), newId]
-        }));
-        setSelectedValues((prev) => ({
-            ...prev,
-            [typeName]: [...(prev[typeName] || []), { id: newId, fields: copiedFields }]
-        }));
+        const originalValues = selectedValues[planId] || {};
+        // Add new plan
+        dispatch({
+            type: 'ADD_PLAN',
+            payload: { plan: { id: newId, type: typeName } }
+        });
+        // Copy each selected field value
+        Object.entries(originalValues).forEach(([fieldKey, value]) => {
+            dispatch({
+                type: 'UPDATE_SELECTED_VALUE',
+                payload: { planId: newId, fieldKey, value }
+            });
+        });
         console.log({ event: "clonePlan -> new plan created", typeName, from: planId, newPlanId: newId });
     };
 
-    // Delete a plan by removing its ID and values
+    // Delete a plan by removing it via reducer
     const deletePlan = (typeName, planId) => {
-        setPlanIdsByType((prev) => ({
-            ...prev,
-            [typeName]: (prev[typeName] || []).filter((id) => id !== planId)
-        }));
-        setSelectedValues((prev) => ({
-            ...prev,
-            [typeName]: (prev[typeName] || []).filter((p) => p.id !== planId)
-        }));
+        dispatch({
+            type: 'REMOVE_PLAN',
+            payload: { planId }
+        });
         console.log({ event: "deletePlan -> removed", typeName, planId });
     };
 
@@ -379,11 +400,11 @@ const Extension = ({ context, runServerless, actions }) => {
         console.log(`✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}`);
 
         // If this plan is brand-new, ensure it's added to state
-        if (!(planIdsByTypeLocal[productType]?.includes(planId))) {
-            plan_handler.add(productType, planId);
+        if (!(planIdsByType[productType]?.includes(planId))) {
+            // plan_handler.add(productType, planId);
         }
 
-        // Update the selectedValuesLocal state for this field
+        // Update the selectedValues state for this field
         setSelectedValues((prev) => {
             const next = { ...prev };
             if (!next[productType]) next[productType] = [];
@@ -436,10 +457,10 @@ const Extension = ({ context, runServerless, actions }) => {
 
     const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
     useEffect(() => {
-        const needsFee = checkPSQRequirements(selectedValuesLocal);
+        const needsFee = checkPSQRequirements(selectedValues);
         setRequiresPSQFee(needsFee);
-        if (debug && debugPlans) console.log("PSQ Fee Requirement Updated:", needsFee);
-    }, [selectedValuesLocal]);
+        if (debug && debugPSQ) console.log("PSQ Fee Requirement Updated:", needsFee);
+    }, [selectedValues]);
 
     // ------------------------- Quote Calculation -------------------------
 
@@ -447,8 +468,8 @@ const Extension = ({ context, runServerless, actions }) => {
     const [quote, setQuote] = useState({});
     useEffect(() => {
         const result = CalculateQuote(
-            planIdsByTypeLocal,
-            selectedValuesLocal,
+            planIdsByType,
+            selectedValues,
             selectedPSQValues,
             productPriceDefs,
             productTypeDefs,
@@ -459,12 +480,17 @@ const Extension = ({ context, runServerless, actions }) => {
         );
         setQuote(result);
         if (debug && debugQuote) console.log("Quote Calculated: ", result);
-    }, [planIdsByTypeLocal, selectedValuesLocal, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs]);
+    }, [planIdsByType, selectedValues, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs]);
 
 
-    // ------------------------- Rendering -------------------------
-    // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
-    const [currentPage, setCurrentPage] = useState(1);
+    // Debug
+    useEffect(() => {
+        console.warn({
+            plansById,
+            planIdsByType,
+            selectedValues
+        })
+    }, [plansById, planIdsByType, selectedValues ])
 
     return (
         <Flex direction="column" gap="md">
@@ -476,9 +502,9 @@ const Extension = ({ context, runServerless, actions }) => {
                         <React.Fragment key={productType.field}>
                             <ProductTypeAccordion
                                 productType={productType}
-                                planIds={planIdsByTypeLocal[productType.label] || []}
+                                planIds={planIdsByType[productType.label] || []}
                                 actions={actions}
-                                selectedValues={selectedValuesLocal[productType.label]}
+                                selectedValues={selectedValues[productType.label]}
                                 handler={handler}
                                 plan_handler={plan_handler}
                             />
@@ -487,7 +513,7 @@ const Extension = ({ context, runServerless, actions }) => {
                     ))}
 
                     <QuoteSummaryComponent
-                        selectedValues={selectedValuesLocal}
+                        selectedValues={selectedValues}
                         productTypeDefs={productTypeDefs}
                     />
 
@@ -507,7 +533,7 @@ const Extension = ({ context, runServerless, actions }) => {
                         <React.Fragment key={psqType.field}>
                             <ProductTypeAccordion
                                 productType={psqType}
-                                planIds={planIdsByTypeLocal[psqType.label] || []}
+                                planIds={planIdsByType[psqType.label] || []}
                                 actions={actions}
                                 selectedValues={selectedPSQValues[psqType.label] || []}
                                 handler={psqHandler}

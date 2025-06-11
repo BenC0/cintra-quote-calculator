@@ -20,10 +20,6 @@ export const ProductTypeAccordion = ({
 }) => {
     const maxItems = productType.max_items;
     const canAdd = maxItems < 0 || planIds.length < maxItems;
-    const [localNewPlanId, setLocalNewPlanId] = useState(null);
-    useEffect(() => {
-        setLocalNewPlanId(plan_handler.add(productType.label))
-    }, []);
 
     return (
         <Accordion title={productType.label} defaultOpen>
@@ -59,7 +55,6 @@ export const ProductTypeAccordion = ({
                                             frequency={productType.frequencyFieldDef}
                                             handler={handler}
                                             actions={actions}
-                                            externalPlanId={localNewPlanId}
                                             onSubmit={(generatedId) => {
                                                 plan_handler.edit(productType.label, generatedId);
                                             }}
