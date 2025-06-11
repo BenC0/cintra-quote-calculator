@@ -23,7 +23,7 @@ export const ProductTypeFormPanel = ({
     quantity_value = 0,
     frequency_value = null,
     planId: externalPlanId = null,
-    initialValues = [],
+    initialLookup = {},
     quantity = null,
     frequency = null,
 }) => {
@@ -37,10 +37,12 @@ export const ProductTypeFormPanel = ({
     }, [externalPlanId]);
     if (!localPlanId) return null;
 
-    const initialLookup = {};
-    initialValues.forEach(({ field, value }) => {
-        initialLookup[field] = value;
-    });
+    // console.log(`Rendering ProductTypeFormPanel for "${name}"`, {initialLookup})
+
+    // const initialLookup = {};
+    // initialValues.forEach(({ field, value }) => {
+    //     initialLookup[field] = value;
+    // });
 
     const grouped_fields = {};
     fields.forEach((field) => {
@@ -58,10 +60,8 @@ export const ProductTypeFormPanel = ({
     }
 
     if (!!quantity) {
-        // initialLookup["quantity"] = quantity_value
         if (quantity_value > 0) {
             quantity.value = quantity_value
-            console.log(initialLookup["quantity"])
         }
         if (!grouped_fields["details"]) {
             grouped_fields["details"] = []

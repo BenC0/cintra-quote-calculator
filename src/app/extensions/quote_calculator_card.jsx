@@ -235,7 +235,7 @@ const Extension = ({ context, runServerless, actions }) => {
             && Object.keys(valueTables).length
         ) {
             console.count("Initialising Product Type Accoridons")
-            console.log({productTypeDefs, productDefs, valueTables})
+            // console.log({productTypeDefs, productDefs, valueTables})
             setProductTypeAccordions(
                 productTypeDefs.map((productType) => {
                     const output = { ...productType };
@@ -299,9 +299,7 @@ const Extension = ({ context, runServerless, actions }) => {
         plansInitialised.current = true
 
         console.count("Init Plan Setup")
-        console.log({productTypeAccordions})
-        const initialPlanIds = {};
-        const initialSelected = {};
+        // console.log({productTypeAccordions})
 
         // Helper to get default field entries based on type
         const getDefaultFields = (pt) => pt.fields.map((f) => {
@@ -330,7 +328,7 @@ const Extension = ({ context, runServerless, actions }) => {
                         payload: {
                             planId,
                             fieldKey: field.field,
-                            value: field.defaultValue,
+                            value: field.value,
                         },
                     });
                 })
@@ -489,7 +487,7 @@ const Extension = ({ context, runServerless, actions }) => {
                                 productType={productType}
                                 planIds={planIdsByType[productType.label] || []}
                                 actions={actions}
-                                selectedValues={selectedValues[productType.label]}
+                                selectedValues={selectedValues}
                                 handler={handler}
                                 plan_handler={plan_handler}
                             />
