@@ -20,6 +20,7 @@ import { Flex, Tile, Icon, Text } from "@hubspot/ui-extensions";
 const QuoteSummaryComponent = ({
   productTypeDefs = [],
   selectedValues = {},
+  planIdsByType = {},
   supressImplementationFee = true,
 }) => {
   const tiles = generateTiles(productTypeDefs, selectedValues, supressImplementationFee);

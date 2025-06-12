@@ -1,18 +1,26 @@
 export const get_price_band = (selectedPlanValues, field, price_table) => {
+    // console.log({
+    //     event: "Getting Price Band",
+    //     selectedPlanValues,
+    //     field,
+    //     price_table
+    // })
     let output = {
         price: 0,
         monthly_standing_charge: 0
     }
-    let qtyVal = selectedPlanValues.quantity_value ?? 1
-    if (price_table.length > 0) {
-        let price_bands = []
-        if (price_table.some(band => !!band.product_value)) {
-            price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal) && (band.product_value == field.value))
-        } else {
-            price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal))
-        }
-        if (price_bands.length > 0) {
-            output = price_bands[price_bands.length - 1]
+    if (!!field.fieldValue) {
+        let qtyVal = selectedPlanValues.quantity_value ?? 1
+        if (price_table.length > 0) {
+            let price_bands = []
+            if (price_table.some(band => !!band.product_value)) {
+                price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal) && (band.product_value == field.fieldValue))
+            } else {
+                price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal))
+            }
+            if (price_bands.length > 0) {
+                output = price_bands[price_bands.length - 1]
+            }
         }
     }
     return output
@@ -32,6 +40,7 @@ export const CalculateQuote = (
     psqProductDefs,
     RequiresPSQFee,
     StandardImplementationDefs,
+    productDefs,
 ) => {
     const Quote = {
         "Details": {},
@@ -39,16 +48,37 @@ export const CalculateQuote = (
         "Summary": {},
     }
 
+    const conditions = [
+        Object.keys(planIdsByType),
+        Object.keys(StandardImplementationDefs),
+        productTypeDefs,
+        productPriceDefs,
+        selectedValues,
+        productDefs,
+    ]
+    if (conditions.some(a => a.length == 0)) return;
+
+    // console.log({
+    //     event: "Calculating Quote",
+    //     planIdsByType,
+    //     selectedValues,
+    //     selectedPSQValues,
+    //     productPriceDefs,
+    //     productTypeDefs,
+    //     productDefs,
+    //     psqTypeDefs,
+    //     psqProductDefs,
+    //     RequiresPSQFee,
+    //     StandardImplementationDefs,
+    // })
+
     let estimated_monthly_fee = 0
     let estimated_annual_fee = 0
     let estimated_implementation_fee = 0
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0
         let estimated_plan_annual_fee = 0
-        // Not implementation fee
         let relevantProductTypes = productTypeDefs.filter(ptd => ptd.label == planType)
-        // is implementation fee
-        let relevantPsqTypes = psqTypeDefs.filter(ptd => ptd.label == planType)
         if (relevantProductTypes.length > 0) {
             let quantity_field_label = relevantProductTypes[0].quantity_field_label
             let quantity_field_type = relevantProductTypes[0].quantity_field_type
@@ -57,27 +87,36 @@ export const CalculateQuote = (
                 quantity_field_type = quantity_field_type.name
             }
             Quote["Details"][planType] = planIdsByType[planType].map(planId => {
-                let selectedPlanValues = selectedValues[planType]?.filter(plan => plan.id == planId) ?? []
-                if (selectedPlanValues.length > 0) {
-                    selectedPlanValues = selectedPlanValues[0]
-                    selectedPlanValues.quantity_field_label = quantity_field_label
-                    selectedPlanValues.quantity_field_type = quantity_field_type
-                    selectedPlanValues.quantity_frequency_values_table = quantity_frequency_values_table
-                    selectedPlanValues.fields.map(field => {
-                        let output = field
-                        output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
-                        output["price_band"] = get_price_band(selectedPlanValues, field, output["price_table"])
-                        output["price"] = output["price_band"]["price"]
-                        output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
-                        output["estimated_monthly_fee"] = (output["price"] * (selectedPlanValues.quantity_value ?? 0)) + output["monthly_standing_charge"]
-                        output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
-                        return output
-                    })
-                    selectedPlanValues["estimated_monthly_fee"] = selectedPlanValues.fields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)
-                    selectedPlanValues["estimated_annual_fee"] = (selectedPlanValues["estimated_monthly_fee"] * 12)
-                    estimated_plan_monthly_fee += selectedPlanValues["estimated_monthly_fee"]
-                    estimated_plan_annual_fee += selectedPlanValues["estimated_annual_fee"]
-                    return selectedPlanValues
+                if (planId == "temp") return;
+                let selectedPlanValues = selectedValues[planId] ?? {}
+                if (Object.keys(selectedPlanValues).length > 0) {
+                    let selectedPlanQuote = {
+                        quantity_field_label: quantity_field_label,
+                        quantity_field_type: quantity_field_type,
+                        quantity_frequency_values_table: quantity_frequency_values_table,
+                        fields: []
+                    }
+
+                    for (let fieldKey in selectedPlanValues) {
+                        let fieldValue = selectedPlanValues[fieldKey]
+                        let field = productDefs.find(a => a.field == fieldKey)
+                        if (!!fieldValue && !!field) {
+                            let output = field
+                            output["fieldValue"] = fieldValue
+                            output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
+                            output["price_band"] = get_price_band(selectedPlanValues, field, output["price_table"])
+                            output["price"] = output["price_band"]["price"]
+                            output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
+                            output["estimated_monthly_fee"] = (output["price"] * (selectedPlanValues.quantity_value ?? 0)) + output["monthly_standing_charge"]
+                            output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
+                            selectedPlanQuote.fields.push(output)
+                        }
+                    }
+                    selectedPlanQuote["estimated_monthly_fee"] = selectedPlanQuote.fields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)
+                    selectedPlanQuote["estimated_annual_fee"] = (selectedPlanQuote["estimated_monthly_fee"] * 12)
+                    estimated_plan_monthly_fee += selectedPlanQuote["estimated_monthly_fee"]
+                    estimated_plan_annual_fee += selectedPlanQuote["estimated_annual_fee"]
+                    return selectedPlanQuote
                 }
                 return false
             })
@@ -96,29 +135,44 @@ export const CalculateQuote = (
             let ptLabel = productType.label
             let totalImplementationDays = 0
             let totalImplementationFee = 0
-            let relevantSelectedValues = selectedValues[ptLabel]
-
+            let relevantPlans = planIdsByType[ptLabel] || []
+            relevantPlans = relevantPlans.filter(a => a != "temp")
+            let relevantSelectedValues = relevantPlans.map(plan => selectedValues[plan])
             let services = {}
-            if (!!relevantSelectedValues) {
-                total_headcount += relevantSelectedValues.reduce((t, a) => t + a.quantity_value, 0)
-                relevantSelectedValues.forEach(plans => {
-                    plans.fields.forEach(field => {
-                        let val = Number(field.value)
-                        if (isNaN(val)) {
-                            val = 1
-                        }
-                        val = Math.min(val, 1)
-                        if (!!services[field.field]) {
-                            services[field.field]["plans"] += val
-                            services[field.field]["values"].push(field.value)
-                        } else {
-                            services[field.field] = {
-                                "plans": val,
-                                "label": field.label,
-                                "values": [field.value]
+
+            // console.log({
+            //     event: `Calculating Standard Implementation Fee for "${ptLabel}"`,
+            //     productType,
+            //     relevantPlans,
+            //     relevantSelectedValues,
+            //     condition: relevantSelectedValues.length > 0
+            // })
+
+            if (relevantSelectedValues.length > 0) {
+                total_headcount += relevantSelectedValues.reduce((t, a) => t + (a.quantity_value ?? 0), 0)
+                let pd = [...productDefs, productType.quantityFieldDef, productType.frequencyFieldDef]
+                relevantSelectedValues.forEach(plan => {
+                    for (let fieldKey in plan) {
+                        if (!fieldKey.match(/(quantity|frequency)_value$/g)) {
+                            let fieldValue = plan[fieldKey]
+                            let field = pd.find(a => a.field == fieldKey)
+                            let val = Number(fieldValue)
+                            if (isNaN(val)) {
+                                val = 1
+                            }
+                            val = Math.min(val, 1)
+                            if (!!services[fieldKey]) {
+                                services[fieldKey]["plans"] += val
+                                services[fieldKey]["values"].push(fieldValue)
+                            } else {
+                                services[fieldKey] = {
+                                    "plans": val,
+                                    "label": field.label,
+                                    "values": [fieldValue]
+                                }
                             }
                         }
-                    })
+                    }
                 })
             }
 
@@ -127,7 +181,7 @@ export const CalculateQuote = (
                 services[serviceLabel]["Implementation Fee"] = 0
                 services[serviceLabel]["Implementation Days"] = 0
                 if (productType.standard_implementation_calculation_type == "default") {
-                    if (service.plans != 0) {                
+                    if (service.plans != 0) {
                         let mod = service.plans > 1 ? 1.05 : 1
                         let days = 0
                         let daysRef = StandardImplementationDefs["days"].filter(dayRef => {
@@ -153,7 +207,7 @@ export const CalculateQuote = (
                                     && lookupValue == rateRef.product_value
                                     && serviceLabel == rateRef.product_id
                             } else {
-                                return rateRef.minimum_quantity < total_headcount
+                                return rateRef.minimum_quantity < total_headcount && !!!rateRef.product_id
                             }
                         })
                         ratesRef = ratesRef.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
@@ -228,6 +282,7 @@ export const CalculateQuote = (
         "Total Implementation Costs": estimated_implementation_fee,
         "Total Estimated Monthly Costs": estimated_monthly_fee,
         "Total Estimated Annual Costs": estimated_annual_fee,
+        "Total Y1 Charges": estimated_implementation_fee + estimated_annual_fee,
     }
     return Quote
 }

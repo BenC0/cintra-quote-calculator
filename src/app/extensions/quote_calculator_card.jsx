@@ -19,7 +19,7 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Main extension component
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = false;
+    const debug = true;
     const debugPlans = true;
     const debugProductDetails = false;
     const debugQuote = true;
@@ -460,19 +460,22 @@ const Extension = ({ context, runServerless, actions }) => {
             psqProductDefs,
             RequiresPSQFee,
             StandardImplementationDefs,
+            productDefs,
         );
         setQuote(result);
-        if (debug && debugQuote) console.log("Quote Calculated: ", result);
-    }, [planIdsByType, selectedValues, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs]);
+        if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
+    }, [planIdsByType, selectedValues, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs, productDefs]);
 
 
     // Debug
     useEffect(() => {
-        console.warn({
-            plansById,
-            planIdsByType,
-            selectedValues
-        })
+        if (!!debug) {
+            console.warn({
+                plansById,
+                planIdsByType,
+                selectedValues
+            })
+        }
     }, [plansById, planIdsByType, selectedValues ])
 
     return (
@@ -498,6 +501,7 @@ const Extension = ({ context, runServerless, actions }) => {
                     <QuoteSummaryComponent
                         selectedValues={selectedValues}
                         productTypeDefs={productTypeDefs}
+                        planIdsByType={planIdsByType}
                     />
 
                     <Flex justify="end">
