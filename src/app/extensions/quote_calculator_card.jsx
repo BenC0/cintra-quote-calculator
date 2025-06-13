@@ -53,6 +53,7 @@ const Extension = ({ context, runServerless, actions }) => {
             pricing_structure: getFirstValue("pricing_structure", r) ?? null,
             product_type: getFirstValue("product_type", r) ?? null,
             product_sub_type: r?.values?.product_sub_type ?? null,
+            requires_psq: r.values.requires_psq == 1,
         };
     };
 
@@ -440,10 +441,10 @@ const Extension = ({ context, runServerless, actions }) => {
 
     const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
     useEffect(() => {
-        const needsFee = checkPSQRequirements(selectedValues);
+        const needsFee = checkPSQRequirements(selectedValues, productDefs, productTypeAccordions, planIdsByType);
         setRequiresPSQFee(needsFee);
         if (debug && debugPSQ) console.log("PSQ Fee Requirement Updated:", needsFee);
-    }, [selectedValues]);
+    }, [selectedValues, productDefs, productTypeAccordions, planIdsByType]);
 
     // ------------------------- Quote Calculation -------------------------
 
@@ -472,11 +473,11 @@ const Extension = ({ context, runServerless, actions }) => {
     // Debug
     useEffect(() => {
         if (!!debug) {
-            // console.warn({
-            //     plansById,
-            //     planIdsByType,
-            //     selectedValues
-            // })
+            console.log({
+                plansById,
+                planIdsByType,
+                selectedValues
+            })
         }
     }, [plansById, planIdsByType, selectedValues ])
 

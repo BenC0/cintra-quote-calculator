@@ -3,7 +3,7 @@ export const get_price_band = (qtyVal, field, price_table) => {
         price: 0,
         monthly_standing_charge: 0
     }
-    if (field.fieldValue != undefined) {
+    if (!!field.fieldValue) {
         if (price_table.length > 0) {
             let price_bands = []
             if (price_table.some(band => !!band.product_value)) {
@@ -19,8 +19,48 @@ export const get_price_band = (qtyVal, field, price_table) => {
     return output
 }
 
-export const checkPSQRequirements = (selectedValues) => {
+export const checkPSQRequirements = (selectedValues, productDefs, productTypeAccordions, planIdsByType) => {
+    let validPayrolls = planIdsByType["Payroll"]
+    if (!!validPayrolls) {
+        validPayrolls = validPayrolls.filter(a => a != "temp")
+    } else {
+        validPayrolls = []
+    }
+    
+    let total_headcount = 0
+    let services = 0
+    let payrolls = validPayrolls.length
+    let psq_services = 0
+
+    validPayrolls.forEach(payroll => {
+        let selectedPayrollValues = selectedValues[payroll]
+        total_headcount += selectedPayrollValues.quantity_value
+        for (let serviceKey in selectedPayrollValues) {
+            let releventProduct = productDefs.find(p => p.field == serviceKey)
+            if (!!releventProduct) {
+                if (releventProduct.requires_psq) {
+                    psq_services += 1
+                }
+                if (!!selectedPayrollValues[serviceKey]) {
+                    services += 1
+                }
+            }
+        }
+    })
+
+    let multiple_service_quote = services > payrolls
+    let professional_service_quote_flagged = psq_services > 0
+    let min_headcount_for_psq = total_headcount > 200
+
+    // Returning false during development until PSQ Implementation Fees funcitonality
+    // is being developed.
+    console.error(`PSQ Requirement Check: Returns "false" during this stage of development.`)
     return false
+    return (
+        multiple_service_quote
+        || professional_service_quote_flagged
+        || min_headcount_for_psq
+    )
 }
 
 export const CalculateQuote = (
@@ -91,15 +131,11 @@ export const CalculateQuote = (
     const EducationModifier = isEducationClientValue ? 1.1: 1
     const PublicSectorModifier = isPublicSectorClientValue ? 1.15 : 1
 
-    Quote["Details"]["Contact Length"] = ContractLengthField
-
-    console.log({
-        event: "Determining modifiers",
-        SelectedContractLengthDiscount,
-        EducationModifier,
-        PublicSectorModifier,
-    })
-
+    Quote["Details"]["Contract Config"] = {
+        "Contract Length": ContractLengthValue,
+        "Education Client": isEducationClientValue,
+        "PublicSector Client": isPublicSectorClientValue,
+    }
 
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0
@@ -128,14 +164,14 @@ export const CalculateQuote = (
                             payroll_payslips_modifier = selectedFrequencyValue.payslips
                             payroll_payslips_discount = selectedFrequencyValue.discount
                         }
-                        console.log({
-                            event: `Determining payslips modifier: ${planType}`,
-                            selectedPlanValues,
-                            frequency_values_table,
-                            selectedFrequencyValue,
-                            productTypeDefs,
-                            payroll_payslips_modifier
-                        })
+                        // console.log({
+                        //     event: `Determining payslips modifier: ${planType}`,
+                        //     selectedPlanValues,
+                        //     frequency_values_table,
+                        //     selectedFrequencyValue,
+                        //     productTypeDefs,
+                        //     payroll_payslips_modifier
+                        // })
                     }
 
                     let selectedPlanQuote = {
@@ -149,7 +185,11 @@ export const CalculateQuote = (
                         let field = productDefs.find(a => a.field == fieldKey)
                         if (!!fieldValue && !!field) {
                             let output = field
-                            let qty = selectedPlanValues.quantity_value || 1
+                            let qty = selectedPlanValues.quantity_value
+
+                            if (!!!qty || qty < 1) {
+                                qty = 1
+                            }
                             
                             if (typeof fieldValue == "boolean") {
                                 qty = qty * payroll_payslips_modifier
@@ -157,7 +197,7 @@ export const CalculateQuote = (
 
                             output["fieldValue"] = fieldValue
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
-                            output["price_band"] = get_price_band(selectedPlanValues.quantity_value, field, output["price_table"])
+                            output["price_band"] = get_price_band(qty, field, output["price_table"])
                             output["price"] = output["price_band"]["price"]
                             output["adjusted_price"] = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
                             output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
@@ -181,7 +221,7 @@ export const CalculateQuote = (
     }
 
     if (!RequiresPSQFee) {
-        const containsString = arr => arr.some(item => typeof item === 'string');
+        const containsStringOrBool = arr => arr.some(item => typeof item === 'string');
         let productTypeImplementationFees = {}
 
         productTypeDefs.forEach(productType => {
@@ -195,7 +235,18 @@ export const CalculateQuote = (
             let services = {}
 
             if (relevantSelectedValues.length > 0) {
-                total_headcount += relevantSelectedValues.reduce((t, a) => t + (a.quantity_value ?? 0), 0)
+                total_headcount += relevantSelectedValues.reduce((t, a) => {
+                    let q = a.quantity_value
+                    if (!!!q) {
+                        for (let key in a) {
+                            if (!!a[key]) q = 1
+                        }
+                    }
+                    if (!!!q) {
+                        q = 0
+                    }
+                    return t + q
+                }, 0)
                 let pd = [...productDefs, productType.quantityFieldDef, productType.frequencyFieldDef]
                 relevantSelectedValues.forEach(plan => {
                     for (let fieldKey in plan) {
@@ -243,7 +294,7 @@ export const CalculateQuote = (
                         }
                         services[serviceLabel]["Implementation Days"] = days * mod
                         let lookupValue = null
-                        if (containsString(service["values"])) {
+                        if (containsStringOrBool(service["values"])) {
                             lookupValue = service["values"][0]
                         }
                         let ratesRef = StandardImplementationDefs["rates"].filter(rateRef => {
@@ -252,14 +303,17 @@ export const CalculateQuote = (
                                     && !!rateRef.product_value
                                     && lookupValue == rateRef.product_value
                                     && serviceLabel == rateRef.product_id
+                            } else if (!!rateRef.product_id) {
+                                return rateRef.minimum_quantity <= total_headcount
+                                    && serviceLabel == rateRef.product_id
                             } else {
-                                return rateRef.minimum_quantity < total_headcount && !!!rateRef.product_id
+                                return rateRef.minimum_quantity <= total_headcount && !!!rateRef.product_id
                             }
                         })
                         ratesRef = ratesRef.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                         if (ratesRef.length > 0) {
                             ratesRef = ratesRef[ratesRef.length - 1]
-                            if (!!ratesRef.fixed_price) {
+                            if (!!ratesRef.fixed_price && services[serviceLabel]["Implementation Days"] > 0) {
                                 services[serviceLabel]["Implementation Fee"] = ratesRef.price
                             } else {
                                 services[serviceLabel]["Implementation Fee"] = ratesRef.price * services[serviceLabel]["Implementation Days"]
@@ -271,8 +325,12 @@ export const CalculateQuote = (
                     && !!productType.standard_implementation_calculation_product
                 ) {
                     let relevantFees = Quote["Details"][ptLabel]
+                    if (!!relevantFees) {
+                        relevantFees = relevantFees.filter(a => !!a)
+                    }
                     if (!!relevantFees && relevantFees.length > 0) {
                         let fee = 0
+                        console.log({relevantFees})
                         relevantFees.forEach(relevantFee => {
                             let rs = relevantFee.fields.filter(field => ((field.field == productType.standard_implementation_calculation_product) && (field.field == serviceLabel)))
                             if (rs.length > 0) {
