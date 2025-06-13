@@ -1,9 +1,9 @@
 # Bugs
 
 ## General
-1. Quote seems to return slightly different figures when selecting weekly payroll options. I suspect this is related to decimal places / floating point precision.
+1. ~~Bundle Pricing not working - HR Outsourcing~~
 
-2. Bundle Pricing not working - HR Outsourcing
+2. Quote seems to return slightly different figures when selecting weekly payroll options. I suspect this is related to decimal places / floating point precision.
 
 3. Capture Expense Pricing - One Time Fee, value equals 12% of Estimated Monthly Charges, can be toggled on/off.
 

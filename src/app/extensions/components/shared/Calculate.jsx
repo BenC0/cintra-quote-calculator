@@ -165,14 +165,6 @@ export const CalculateQuote = (
                             payroll_payslips_modifier = selectedFrequencyValue.payslips
                             payroll_payslips_discount = selectedFrequencyValue.discount
                         }
-                        // console.log({
-                        //     event: `Determining payslips modifier: ${planType}`,
-                        //     selectedPlanValues,
-                        //     frequency_values_table,
-                        //     selectedFrequencyValue,
-                        //     productTypeDefs,
-                        //     payroll_payslips_modifier
-                        // })
                     }
 
                     let selectedPlanQuote = {
@@ -199,8 +191,25 @@ export const CalculateQuote = (
                             output["fieldValue"] = fieldValue
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
                             output["price_band"] = get_price_band(qty, field, output["price_table"])
-                            output["price"] = output["price_band"]["price"]
+                            let useBundlePrice = false
+
+                            if (!!output["price_band"]["bundle_price"]) {
+                                let bundleAccordion = productTypeAccordions.find(a => a.label == planType)
+                                if (!!bundleAccordion) {
+                                    let bundleRequiredFields = bundleAccordion.fields
+                                    let fieldValues = bundleRequiredFields.map(field => !!selectedPlanValues[field.field])
+                                    useBundlePrice = fieldValues.every(a => !!a)
+                                }
+                            }
+                                
+                            if (useBundlePrice) {
+                                output["price"] = output["price_band"]["bundle_price"]
+                            } else {
+                                output["price"] = output["price_band"]["price"]
+                            }
+                            
                             output["adjusted_price"] = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
+                            
                             output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
                             output["estimated_monthly_fee"] = (output["adjusted_price"] * qty) + output["monthly_standing_charge"]
                             output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
