@@ -51,16 +51,17 @@ export const checkPSQRequirements = (selectedValues, productDefs, productTypeAcc
     let multiple_service_quote = services > payrolls
     let professional_service_quote_flagged = psq_services > 0
     let min_headcount_for_psq = total_headcount > 200
+    const PSQRequired = multiple_service_quote
+        || professional_service_quote_flagged
+        || min_headcount_for_psq
 
     // Returning false during development until PSQ Implementation Fees funcitonality
     // is being developed.
-    console.error(`PSQ Requirement Check: Returns "false" during this stage of development.`)
+    console.error(`PSQ Requirement Check:
+    - Returns "false" during this stage of development.
+    - Actual Value = "${PSQRequired}"`)
     return false
-    return (
-        multiple_service_quote
-        || professional_service_quote_flagged
-        || min_headcount_for_psq
-    )
+    return PSQRequired
 }
 
 export const CalculateQuote = (
