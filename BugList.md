@@ -7,6 +7,10 @@
 4. Quote seems to return slightly different figures when selecting weekly payroll options.
    1. I suspect this is related to decimal places / floating point precision...
 5. PSQ and "Normal" Product Types cannot currently share a label (name) value.
+6. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
+7. Bundle Pricing not working - HR Outsourcing
+8. Capture Expense Pricing - One Time Fee, value equals 12% of Estimated Monthly Charges, can be toggled on/off.
+9. Occasional error with `find()` on initialisation
 
 ## Add Product Type Panel
 1. Qty value does not reset on adding a new plan, this leads to validation errors
