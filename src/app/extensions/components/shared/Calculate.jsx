@@ -1,16 +1,9 @@
-export const get_price_band = (selectedPlanValues, field, price_table) => {
-    // console.log({
-    //     event: "Getting Price Band",
-    //     selectedPlanValues,
-    //     field,
-    //     price_table
-    // })
+export const get_price_band = (qtyVal, field, price_table) => {
     let output = {
         price: 0,
         monthly_standing_charge: 0
     }
-    if (!!field.fieldValue) {
-        let qtyVal = selectedPlanValues.quantity_value ?? 1
+    if (field.fieldValue != undefined) {
         if (price_table.length > 0) {
             let price_bands = []
             if (price_table.some(band => !!band.product_value)) {
@@ -41,12 +34,18 @@ export const CalculateQuote = (
     RequiresPSQFee,
     StandardImplementationDefs,
     productDefs,
+    productTypeAccordions,
 ) => {
     const Quote = {
         "Details": {},
         "Implementation Fees": {},
         "Summary": {},
     }
+
+    const ContractLengthFieldID = "241712266465"
+    const EducationClientFieldID = "241731552473"
+    const PublicSectorClientFieldID = "241712266460"
+    const ContractLengthField = productDefs.find(product => product.field == ContractLengthFieldID)
 
     const conditions = [
         Object.keys(planIdsByType),
@@ -57,6 +56,23 @@ export const CalculateQuote = (
         productDefs,
     ]
     if (conditions.some(a => a.length == 0)) return;
+
+    
+    const QuoteDetails = productTypeAccordions.find(a => a.is_quote_details_type)
+    const quoteDetailsPlanID = planIdsByType[QuoteDetails.label]
+    const quoteDetailsValues = selectedValues[quoteDetailsPlanID]
+    
+    const ContractLengthValue = quoteDetailsValues[ContractLengthFieldID]
+    const ContractLengthValuesRef = QuoteDetails.fields.find(a => a.field == ContractLengthFieldID).values
+    const SelectedContractLengthValues = ContractLengthValuesRef.find(a => a.values.value == ContractLengthValue)
+    const SelectedContractLengthDiscount = !!SelectedContractLengthValues ? SelectedContractLengthValues.values.discount : 1
+
+    const isEducationClientValue = quoteDetailsValues[EducationClientFieldID]
+    const isPublicSectorClientValue = quoteDetailsValues[PublicSectorClientFieldID]
+
+    let estimated_monthly_fee = 0
+    let estimated_annual_fee = 0
+    let estimated_implementation_fee = 0
 
     // console.log({
     //     event: "Calculating Quote",
@@ -72,9 +88,19 @@ export const CalculateQuote = (
     //     StandardImplementationDefs,
     // })
 
-    let estimated_monthly_fee = 0
-    let estimated_annual_fee = 0
-    let estimated_implementation_fee = 0
+    const EducationModifier = isEducationClientValue ? 1.1: 1
+    const PublicSectorModifier = isPublicSectorClientValue ? 1.15 : 1
+
+    Quote["Details"]["Contact Length"] = ContractLengthField
+
+    console.log({
+        event: "Determining modifiers",
+        SelectedContractLengthDiscount,
+        EducationModifier,
+        PublicSectorModifier,
+    })
+
+
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0
         let estimated_plan_annual_fee = 0
@@ -82,18 +108,39 @@ export const CalculateQuote = (
         if (relevantProductTypes.length > 0) {
             let quantity_field_label = relevantProductTypes[0].quantity_field_label
             let quantity_field_type = relevantProductTypes[0].quantity_field_type
-            let quantity_frequency_values_table = relevantProductTypes[0].quantity_frequency_values_table
+            let frequencyFieldDef = relevantProductTypes[0].frequencyFieldDef
+            let frequency_values_table = frequencyFieldDef.values || []
+            frequency_values_table = frequency_values_table.map(freq => freq.values)
+
             if (!!quantity_field_type) {
                 quantity_field_type = quantity_field_type.name
             }
             Quote["Details"][planType] = planIdsByType[planType].map(planId => {
                 if (planId == "temp") return;
                 let selectedPlanValues = selectedValues[planId] ?? {}
+                
                 if (Object.keys(selectedPlanValues).length > 0) {
+                    let payroll_payslips_modifier = 1
+                    let payroll_payslips_discount = 1
+                    if (frequency_values_table.length > 0) {
+                        let selectedFrequencyValue = frequency_values_table.find(a => a.value == selectedPlanValues.frequency_value)
+                        if (!!selectedFrequencyValue) {
+                            payroll_payslips_modifier = selectedFrequencyValue.payslips
+                            payroll_payslips_discount = selectedFrequencyValue.discount
+                        }
+                        console.log({
+                            event: `Determining payslips modifier: ${planType}`,
+                            selectedPlanValues,
+                            frequency_values_table,
+                            selectedFrequencyValue,
+                            productTypeDefs,
+                            payroll_payslips_modifier
+                        })
+                    }
+
                     let selectedPlanQuote = {
                         quantity_field_label: quantity_field_label,
                         quantity_field_type: quantity_field_type,
-                        quantity_frequency_values_table: quantity_frequency_values_table,
                         fields: []
                     }
 
@@ -102,12 +149,19 @@ export const CalculateQuote = (
                         let field = productDefs.find(a => a.field == fieldKey)
                         if (!!fieldValue && !!field) {
                             let output = field
+                            let qty = selectedPlanValues.quantity_value || 1
+                            
+                            if (typeof fieldValue == "boolean") {
+                                qty = qty * payroll_payslips_modifier
+                            }
+
                             output["fieldValue"] = fieldValue
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
-                            output["price_band"] = get_price_band(selectedPlanValues, field, output["price_table"])
+                            output["price_band"] = get_price_band(selectedPlanValues.quantity_value, field, output["price_table"])
                             output["price"] = output["price_band"]["price"]
+                            output["adjusted_price"] = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
                             output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
-                            output["estimated_monthly_fee"] = (output["price"] * (selectedPlanValues.quantity_value ?? 0)) + output["monthly_standing_charge"]
+                            output["estimated_monthly_fee"] = (output["adjusted_price"] * qty) + output["monthly_standing_charge"]
                             output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
                             selectedPlanQuote.fields.push(output)
                         }
@@ -139,14 +193,6 @@ export const CalculateQuote = (
             relevantPlans = relevantPlans.filter(a => a != "temp")
             let relevantSelectedValues = relevantPlans.map(plan => selectedValues[plan])
             let services = {}
-
-            // console.log({
-            //     event: `Calculating Standard Implementation Fee for "${ptLabel}"`,
-            //     productType,
-            //     relevantPlans,
-            //     relevantSelectedValues,
-            //     condition: relevantSelectedValues.length > 0
-            // })
 
             if (relevantSelectedValues.length > 0) {
                 total_headcount += relevantSelectedValues.reduce((t, a) => t + (a.quantity_value ?? 0), 0)

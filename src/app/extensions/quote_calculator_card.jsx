@@ -20,7 +20,7 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = true;
-    const debugPlans = true;
+    const debugPlans = false;
     const debugProductDetails = false;
     const debugQuote = true;
     const debugPSQ = false;
@@ -113,6 +113,7 @@ const Extension = ({ context, runServerless, actions }) => {
                 quantity_field_type: r.values.quantity_field_type,
                 quantity_field_label: r.values.quantity_field_label,
                 input_display_type: r.values.input_display_type.name,
+                is_quote_details_type: !!r.values.is_quote_details_type && r.values.is_quote_details_type == 1,
                 quantity_frequency_values_table: r.values.quantity_frequency_values_table,
                 use_quantity_as_implementation_headcount: !!r.values.use_quantity_as_implementation_headcount,
                 standard_implementation_calculation_type: r.values.standard_implementation_calculation_type?.name ?? "default",
@@ -265,7 +266,7 @@ const Extension = ({ context, runServerless, actions }) => {
                                 case "Radio":
                                 case "Dropdown":
                                     values = valueTables[field.input_values_table];
-                                    defaultValue = values ? values[0].values : null;
+                                    defaultValue = values ? values[0].value : null;
                                     break;
                                 default:
                                     return null;  // Skip any unknown input types
@@ -298,8 +299,7 @@ const Extension = ({ context, runServerless, actions }) => {
 
         plansInitialised.current = true
 
-        if (debug) console.count("Init Plan Setup");
-        // console.log({productTypeAccordions})
+        if (debug) console.count("Initial Plan Setup");
 
         // Helper to get default field entries based on type
         const getDefaultFields = (pt) => pt.fields.map((f) => {
@@ -310,8 +310,8 @@ const Extension = ({ context, runServerless, actions }) => {
                 case "Text": defaultValue = ""; break;
                 case "Radio":
                 case "Dropdown":
-                    const vals = valueTables[f.input_values_table];
-                    defaultValue = vals ? vals[0].values : null;
+                    // const vals = valueTables[f.input_values_table];
+                    // defaultValue = vals ? vals[0].values : null;
                     break;
             }
             return { field: f.field, label: f.label, value: defaultValue };
@@ -461,20 +461,22 @@ const Extension = ({ context, runServerless, actions }) => {
             RequiresPSQFee,
             StandardImplementationDefs,
             productDefs,
+            productTypeAccordions,
         );
         setQuote(result);
         if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
-    }, [planIdsByType, selectedValues, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs, productDefs]);
+        
+    }, [planIdsByType, selectedValues, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions]);
 
 
     // Debug
     useEffect(() => {
         if (!!debug) {
-            console.warn({
-                plansById,
-                planIdsByType,
-                selectedValues
-            })
+            // console.warn({
+            //     plansById,
+            //     planIdsByType,
+            //     selectedValues
+            // })
         }
     }, [plansById, planIdsByType, selectedValues ])
 
