@@ -481,6 +481,14 @@ const Extension = ({ context, runServerless, actions }) => {
         }
     }, [plansById, planIdsByType, selectedValues ])
 
+    const progressToImplementation = () => {
+        if (RequiresPSQFee) {
+            setCurrentPage(2)
+        } else {
+            setCurrentPage(3)
+        }
+    }
+
     return (
         <Flex direction="column" gap="md">
             {/* Page 1: Select products and quantities */}
@@ -508,7 +516,7 @@ const Extension = ({ context, runServerless, actions }) => {
                     />
 
                     <Flex justify="end">
-                        <Button onClick={() => setCurrentPage(2)}>
+                        <Button onClick={() => progressToImplementation()}>
                             Calculate Implementation Fees
                         </Button>
                     </Flex>
@@ -551,9 +559,11 @@ const Extension = ({ context, runServerless, actions }) => {
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
                             Review Schedule
                         </Button>
-                        <Button variant="secondary" onClick={() => setCurrentPage(2)}>
-                            Review Implementation Fee
-                        </Button>
+                        {RequiresPSQFee && (
+                            <Button variant="secondary" onClick={() => setCurrentPage(2)}>
+                                Review Implementation Fee
+                            </Button>
+                        )}
                         <Button variant="primary" onClick={() => {/* finalize logic */}}>
                             Finish
                         </Button>
