@@ -143,19 +143,19 @@ export const QuoteSheet = ({
                         ))}
                     </Flex>
                 </Accordion>)
-                console.log({
-                    event: "Processed Summary Accordion",
-                    accordionDetails,
-                })
+                // console.log({
+                //     event: "Processed Summary Accordion",
+                //     accordionDetails,
+                // })
             }
         })
 
-        console.log({
-            quote,
-            productTypeAccordions,
-            selectedValues,
-            planIdsByType,
-        })
+        // console.log({
+        //     quote,
+        //     productTypeAccordions,
+        //     selectedValues,
+        //     planIdsByType,
+        // })
     }
 
     return Output

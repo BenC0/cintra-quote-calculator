@@ -23,9 +23,9 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = true;
-    const debugPlans = false;
-    const debugQuote = false;
-    const debugPSQ = false;
+    const debugPlans = true;
+    const debugQuote = true;
+    const debugPSQ = true;
     const debugPage = 1;
     
     // ------------------------- Rendering -------------------------
@@ -456,19 +456,16 @@ const Extension = ({ context, runServerless, actions }) => {
     // Recalculate quote whenever inputs change
     const [quote, setQuote] = useState({});
     useEffect(() => {
-        const result = CalculateQuote(
-            planIdsByType,
-            selectedValues,
-            selectedPSQValues,
-            productPriceDefs,
-            productTypeDefs,
-            psqTypeDefs,
-            psqProductDefs,
-            RequiresPSQFee,
-            StandardImplementationDefs,
-            productDefs,
-            productTypeAccordions,
-        );
+        const result = CalculateQuote({
+            planIdsByType: planIdsByType,
+            selectedValues: selectedValues,
+            productPriceDefs: productPriceDefs,
+            productTypeDefs: productTypeDefs,
+            RequiresPSQFee: RequiresPSQFee,
+            StandardImplementationDefs: StandardImplementationDefs,
+            productDefs: productDefs,
+            productTypeAccordions: productTypeAccordions,
+        });
         setQuote(result);
         if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
         

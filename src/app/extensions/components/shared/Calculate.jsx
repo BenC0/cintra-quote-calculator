@@ -57,26 +57,23 @@ export const checkPSQRequirements = (selectedValues, productDefs, productTypeAcc
 
     // Returning false during development until PSQ Implementation Fees funcitonality
     // is being developed.
-    console.error(`PSQ Requirement Check:
-    - Returns "false" during this stage of development.
-    - Actual Value = "${PSQRequired}"`)
-    return false
+    // console.error(`PSQ Requirement Check:
+    // - Returns "false" during this stage of development.
+    // - Actual Value = "${PSQRequired}"`)
+    // return false
     return PSQRequired
 }
 
-export const CalculateQuote = (
-    planIdsByType,
-    selectedValues,
-    selectedPSQValues,
-    productPriceDefs,
-    productTypeDefs,
-    psqTypeDefs,
-    psqProductDefs,
-    RequiresPSQFee,
-    StandardImplementationDefs,
-    productDefs,
-    productTypeAccordions,
-) => {
+export const CalculateQuote = ({
+    planIdsByType = {},
+    selectedValues = {},
+    productPriceDefs = [],
+    productTypeDefs = [],
+    RequiresPSQFee = false,
+    StandardImplementationDefs = {},
+    productDefs = [],
+    productTypeAccordions = [],
+}) => {
     const Quote = {
         "Details": {},
         "Implementation Fees": {},
@@ -91,9 +88,9 @@ export const CalculateQuote = (
     const conditions = [
         Object.keys(planIdsByType),
         Object.keys(StandardImplementationDefs),
+        Object.keys(selectedValues),
         productTypeDefs,
         productPriceDefs,
-        selectedValues,
         productDefs,
         productTypeAccordions,
     ]
