@@ -23,9 +23,9 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = true;
-    const debugPlans = true;
+    const debugPlans = false;
     const debugQuote = true;
-    const debugPSQ = true;
+    const debugPSQ = false;
     const debugPage = 1;
     
     // ------------------------- Rendering -------------------------
@@ -416,32 +416,6 @@ const Extension = ({ context, runServerless, actions }) => {
         });
     };
 
-    // Handle changes to PSQ fields (similar to handler above)
-    const [selectedPSQValues, setSelectedPSQValues] = useState({});
-    const psqHandler = (field, value, planId) => {
-        if (!!debug && !!debugPSQ) console.log(`✏️ PSQ updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}`);
-        setSelectedPSQValues((prev) => {
-            const next = { ...prev };
-            const productType = field.product_type.name;
-            if (!next[productType]) next[productType] = [];
-            let planObj = next[productType].find((p) => p.id === planId);
-            if (!planObj) {
-                planObj = { id: planId, fields: [] };
-                next[productType].push(planObj);
-            }
-            const isQty = field.field === "quantity";
-            const isFrequency = field.field === "frequency";
-            if (isQty || isFrequency) {
-                planObj[`${field.field}_value`] = value;
-            } else {
-                const idx = planObj.fields.findIndex((f) => f.field === field.field);
-                if (idx >= 0) planObj.fields[idx].value = value;
-                else planObj.fields.push({ field: field.field, label: field.label, value });
-            }
-            return next;
-        });
-    };
-
     // ------------------------- PSQ Fee Requirement -------------------------
 
     const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
@@ -465,11 +439,12 @@ const Extension = ({ context, runServerless, actions }) => {
             StandardImplementationDefs: StandardImplementationDefs,
             productDefs: productDefs,
             productTypeAccordions: productTypeAccordions,
+            psqAccordions: psqAccordions
         });
         setQuote(result);
         if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
         
-    }, [planIdsByType, selectedValues, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions]);
+    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions]);
 
     const progressToImplementation = () => {
         if (RequiresPSQFee) {
@@ -478,6 +453,7 @@ const Extension = ({ context, runServerless, actions }) => {
             setCurrentPage(3)
         }
     }
+
     useEffect(() => {
         if (debug) {
             console.log({
@@ -534,8 +510,8 @@ const Extension = ({ context, runServerless, actions }) => {
                                 productType={psqType}
                                 planIds={planIdsByType[psqType.label] || []}
                                 actions={actions}
-                                selectedValues={selectedPSQValues[psqType.label] || []}
-                                handler={psqHandler}
+                                selectedValues={selectedValues[psqType.label] || []}
+                                handler={handler}
                                 plan_handler={plan_handler}
                             />
                             <Divider />

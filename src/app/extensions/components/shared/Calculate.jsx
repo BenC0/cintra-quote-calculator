@@ -73,6 +73,7 @@ export const CalculateQuote = ({
     StandardImplementationDefs = {},
     productDefs = [],
     productTypeAccordions = [],
+    psqAccordions= []
 }) => {
     const Quote = {
         "Details": {},
@@ -365,8 +366,11 @@ export const CalculateQuote = ({
         })
 
         Quote["Implementation Fees"] = productTypeImplementationFees
-    }
-    // if (RequiresPSQFee && relevantPsqTypes.length > 0) {
+    } else if (RequiresPSQFee) {
+        console.log({
+            event: "Calculating PSQ Fees",
+            psqAccordions,
+        }) 
     //     Quote["Implementation Fees"][planType] = planIdsByType[planType].map(planId => {
     //         if (!!selectedPSQValues[planType]) {
     //             let selectedImplementationValues = selectedPSQValues[planType].filter(plan => plan.id == planId)
@@ -389,7 +393,9 @@ export const CalculateQuote = ({
     //         }
     //         return false
     //     }).pop()
-    // } 
+    }
+
+    Quote["Implementation Fees"]["Implementation Type"] = !!RequiresPSQFee ? "PSQ" : "Standard" 
     Quote["Summary"]["Total Implementation Costs"] = estimated_implementation_fee
     Quote["Summary"]["Total Estimated Monthly Costs"] = estimated_monthly_fee
     Quote["Summary"]["Total Estimated Annual Costs"] = estimated_annual_fee

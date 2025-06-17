@@ -62,7 +62,7 @@ export const debugSelectedValues = {
         "243440416969": true
     },
     "168da249-2c25-436b-9168-e188e8fe817b": {
-        "241706082523": true,
+        "241706082523": "source",
         "frequency_value": "monthly",
         "quantity_value": 75,
         "241706082533": true
@@ -77,7 +77,7 @@ export const debugSelectedValues = {
         "quantity_value": 125
     },
     "58b276bb-5c6f-4b4b-9c6d-bffbc843606f": {
-        "241706082523": true,
+        "241706082523": "source",
         "frequency_value": "weekly",
         "quantity_value": 50,
         "241706082533": true
