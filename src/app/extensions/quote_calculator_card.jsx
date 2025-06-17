@@ -6,6 +6,9 @@ import { Divider, Button, hubspot, Flex, Heading } from "@hubspot/ui-extensions"
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
 import { quoteReducer } from "./components/shared/quoteReducer";  // Reducer for state management
+import { QuoteSheet } from "./components/summary/QuoteSheet";
+
+import { debugPlanIdsByType, debugPlansById, debugSelectedValues } from "./components/debug/debugValues"
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, runServerlessFunction, actions }) => (
@@ -21,19 +24,19 @@ const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = true;
     const debugPlans = false;
-    const debugProductDetails = false;
-    const debugQuote = true;
+    const debugQuote = false;
     const debugPSQ = false;
+    const debugPage = 1;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(debug ? debugPage : 1);
 
     // Initial state for the quote workflow, managed by useReducer
     const initialState = {
-        plansById       : {},       // Map of planId -> plan metadata
-        planIdsByType   : {},       // Grouping of plan IDs by product/PSQ type
-        selectedValues  : {},       // User-entered values for each plan
+        plansById       : debug ? debugPlansById : {},       // Map of planId -> plan metadata
+        planIdsByType   : debug ? debugPlanIdsByType : {},       // Grouping of plan IDs by product/PSQ type
+        selectedValues  : debug ? debugSelectedValues : {},       // User-entered values for each plan
         quoteResult     : null,     // Computed quote output
         loading         : false,    // Loading flag for async operations
         error           : null,     // Error state
@@ -114,6 +117,7 @@ const Extension = ({ context, runServerless, actions }) => {
                 quantity_field_type: r.values.quantity_field_type,
                 quantity_field_label: r.values.quantity_field_label,
                 input_display_type: r.values.input_display_type.name,
+                is_payroll_product_type: !!r.values.is_payroll_product_type && r.values.is_payroll_product_type == 1,
                 is_quote_details_type: !!r.values.is_quote_details_type && r.values.is_quote_details_type == 1,
                 quantity_frequency_values_table: r.values.quantity_frequency_values_table,
                 use_quantity_as_implementation_headcount: !!r.values.use_quantity_as_implementation_headcount,
@@ -297,6 +301,7 @@ const Extension = ({ context, runServerless, actions }) => {
         // Don't re-run
         if (plansInitialised.current) return;
         if (productTypeAccordions.length === 0) return;
+        if (debug) return;
 
         plansInitialised.current = true
 
@@ -469,18 +474,6 @@ const Extension = ({ context, runServerless, actions }) => {
         
     }, [planIdsByType, selectedValues, selectedPSQValues, productPriceDefs, productTypeDefs, psqTypeDefs, psqProductDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions]);
 
-
-    // Debug
-    useEffect(() => {
-        if (!!debug) {
-            console.log({
-                plansById,
-                planIdsByType,
-                selectedValues
-            })
-        }
-    }, [plansById, planIdsByType, selectedValues ])
-
     const progressToImplementation = () => {
         if (RequiresPSQFee) {
             setCurrentPage(2)
@@ -488,6 +481,16 @@ const Extension = ({ context, runServerless, actions }) => {
             setCurrentPage(3)
         }
     }
+    useEffect(() => {
+        if (debug) {
+            console.log({
+                event: "Debug Log",
+                plansById,
+                planIdsByType,
+                selectedValues,
+            });
+        }
+    }, [plansById, planIdsByType, selectedValues]);
 
     return (
         <Flex direction="column" gap="md">
@@ -510,9 +513,10 @@ const Extension = ({ context, runServerless, actions }) => {
                     ))}
 
                     <QuoteSummaryComponent
+                        quote={quote}
                         selectedValues={selectedValues}
-                        productTypeDefs={productTypeDefs}
                         planIdsByType={planIdsByType}
+                        productTypeAccordions={productTypeAccordions}
                     />
 
                     <Flex justify="end">
@@ -555,6 +559,21 @@ const Extension = ({ context, runServerless, actions }) => {
             {currentPage === 3 && (
                 <>
                     <Heading>Quote Sheet</Heading>
+
+                    <QuoteSummaryComponent
+                        quote={quote}
+                        selectedValues={selectedValues}
+                        planIdsByType={planIdsByType}
+                        productTypeAccordions={productTypeAccordions}
+                    />
+
+                    <QuoteSheet
+                        quote={quote}
+                        selectedValues={selectedValues}
+                        planIdsByType={planIdsByType}
+                        productTypeAccordions={productTypeAccordions}
+                    />
+
                     <Flex justify="end" gap="small">
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
                             Review Schedule

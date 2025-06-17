@@ -95,17 +95,20 @@ export const CalculateQuote = (
         productPriceDefs,
         selectedValues,
         productDefs,
+        productTypeAccordions,
     ]
     if (conditions.some(a => a.length == 0)) return;
-
     
+    const PayrollDetails = productTypeAccordions.find(a => a.is_payroll_product_type)
+    const payrollDetailsPlanIDs = planIdsByType[PayrollDetails.label]
+
     const QuoteDetails = productTypeAccordions.find(a => a.is_quote_details_type)
     const quoteDetailsPlanID = planIdsByType[QuoteDetails.label]
     const quoteDetailsValues = selectedValues[quoteDetailsPlanID]
     
     const ContractLengthValue = quoteDetailsValues[ContractLengthFieldID]
     const ContractLengthValuesRef = QuoteDetails.fields.find(a => a.field == ContractLengthFieldID).values
-    const SelectedContractLengthValues = ContractLengthValuesRef.find(a => a.values.value == ContractLengthValue)
+    const SelectedContractLengthValues = ContractLengthValuesRef?.find(a => a.values.value == ContractLengthValue) ?? null
     const SelectedContractLengthDiscount = !!SelectedContractLengthValues ? SelectedContractLengthValues.values.discount : 1
 
     const isEducationClientValue = quoteDetailsValues[EducationClientFieldID]
@@ -115,28 +118,14 @@ export const CalculateQuote = (
     let estimated_annual_fee = 0
     let estimated_implementation_fee = 0
 
-    // console.log({
-    //     event: "Calculating Quote",
-    //     planIdsByType,
-    //     selectedValues,
-    //     selectedPSQValues,
-    //     productPriceDefs,
-    //     productTypeDefs,
-    //     productDefs,
-    //     psqTypeDefs,
-    //     psqProductDefs,
-    //     RequiresPSQFee,
-    //     StandardImplementationDefs,
-    // })
-
     const EducationModifier = isEducationClientValue ? 1.1: 1
     const PublicSectorModifier = isPublicSectorClientValue ? 1.15 : 1
 
-    Quote["Details"]["Contract Config"] = {
-        "Contract Length": ContractLengthValue,
-        "Education Client": isEducationClientValue,
-        "PublicSector Client": isPublicSectorClientValue,
-    }
+    Quote["Summary"]["ContractLength"] = ContractLengthValue
+    Quote["Summary"]["EducationClient"] = isEducationClientValue
+    Quote["Summary"]["PublicSectorClient"] = isPublicSectorClientValue
+    Quote["Summary"]["PayrollHeadcount"] = 0
+
 
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0
@@ -168,6 +157,7 @@ export const CalculateQuote = (
                     }
 
                     let selectedPlanQuote = {
+                        planId,
                         quantity_field_label: quantity_field_label,
                         quantity_field_type: quantity_field_type,
                         fields: []
@@ -178,6 +168,7 @@ export const CalculateQuote = (
                         let field = productDefs.find(a => a.field == fieldKey)
                         if (!!fieldValue && !!field) {
                             let output = field
+                            output["discount"] = 0
                             let qty = selectedPlanValues.quantity_value
 
                             if (!!!qty || qty < 1) {
@@ -209,9 +200,17 @@ export const CalculateQuote = (
                             }
                             
                             output["adjusted_price"] = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
+
+                            output["qty"] = qty
+                            output["payroll_payslips_discount"] = payroll_payslips_discount
+                            output["EducationModifier"] = EducationModifier
+                            output["PublicSectorModifier"] = PublicSectorModifier
+                            output["SelectedContractLengthDiscount"] = SelectedContractLengthDiscount
                             
                             output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
                             output["estimated_monthly_fee"] = (output["adjusted_price"] * qty) + output["monthly_standing_charge"]
+                            // TODO: How best to display monthly standing charge?
+                            // output["adjusted_price"] += output["monthly_standing_charge"]
                             output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
                             selectedPlanQuote.fields.push(output)
                         }
@@ -340,7 +339,6 @@ export const CalculateQuote = (
                     }
                     if (!!relevantFees && relevantFees.length > 0) {
                         let fee = 0
-                        console.log({relevantFees})
                         relevantFees.forEach(relevantFee => {
                             let rs = relevantFee.fields.filter(field => ((field.field == productType.standard_implementation_calculation_product) && (field.field == serviceLabel)))
                             if (rs.length > 0) {
@@ -360,6 +358,10 @@ export const CalculateQuote = (
                 services,
                 totalImplementationFee,
                 totalImplementationDays,
+            }
+
+            if (ptLabel == PayrollDetails.label) {
+                Quote["Summary"]["PayrollHeadcount"] += total_headcount
             }
 
             estimated_implementation_fee += totalImplementationFee
@@ -391,12 +393,10 @@ export const CalculateQuote = (
     //         return false
     //     }).pop()
     // } 
-
-    Quote["Summary"] = {
-        "Total Implementation Costs": estimated_implementation_fee,
-        "Total Estimated Monthly Costs": estimated_monthly_fee,
-        "Total Estimated Annual Costs": estimated_annual_fee,
-        "Total Y1 Charges": estimated_implementation_fee + estimated_annual_fee,
-    }
+    Quote["Summary"]["Total Implementation Costs"] = estimated_implementation_fee
+    Quote["Summary"]["Total Estimated Monthly Costs"] = estimated_monthly_fee
+    Quote["Summary"]["Total Estimated Annual Costs"] = estimated_annual_fee
+    Quote["Summary"]["Total Y1 Charges"] = estimated_implementation_fee + estimated_annual_fee
+    
     return Quote
 }
