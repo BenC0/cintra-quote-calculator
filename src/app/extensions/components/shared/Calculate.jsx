@@ -75,6 +75,7 @@ export const CalculateQuote = ({
     productTypeAccordions = [],
     psqAccordions= [],
     psqImpHours = [],
+    psqImpConfig = []
 }) => {
     const Quote = {
         "Details": {},
@@ -381,43 +382,55 @@ export const CalculateQuote = ({
         }
 
         let validPayrolls = validPlanIdsByType["Payroll"]
+        let validCintraHR = validPlanIdsByType["CintraHR"] || []
+        validCintraHR = validCintraHR.pop()
+        let cintraHRValue = !!validCintraHR ? selectedValues[validCintraHR] : {quantity_value: 0}
 
         let psqConfig = {}
-
+        psqConfig["Headcount"] = Quote["Summary"]["PayrollHeadcount"]
+        psqConfig["Payrolls"] = validPayrolls.length
         psqConfig["Cintra Payroll Product"] = null
+
+        psqImpConfig.forEach(c => {
+            psqConfig[c.id] = null
+            let productValue = c.product_value
+            let productReferences = c.product_references
+
+            productReferences.forEach(fieldKey => {
+                for (let planKey in selectedValues) {
+                    if (!!!psqConfig[c.id]) {
+                        if (!!productValue) {
+                            psqConfig[c.id] = !!selectedValues[planKey][fieldKey] && selectedValues[planKey][fieldKey] === productValue
+                        } else {
+                            psqConfig[c.id] = !!selectedValues[planKey][fieldKey]
+                        }
+                    }
+                }
+            })
+        })
+
+        // Value used in product hours selection for all PSQ Payroll Tasks
+        // // Value used in product hours calculation for most PSQ Tasks, but not all
         psqConfig["Sector"] = {
             public: !!quoteDetailsValues["241712266460"],
             education: !!quoteDetailsValues["241731552473"],
         }
-        psqConfig["Payrolls"] = validPayrolls.length
-        psqConfig["Headcount"] = Quote["Summary"]["PayrollHeadcount"]
-        psqConfig["Holidays & Absence"] = false
-        psqConfig["Timesheets"] = false
-        psqConfig["CintraHR"] = false
-        psqConfig["Cintra Groups"] = validPlanIdsByType["Groups"].length > 0
-        psqConfig["Payrolled Benefits"] = false
-        psqConfig["Payrolled Car Benefits"] = false
-        psqConfig["HR Outsourced Admin"] = validPlanIdsByType["HR Outsourcing"].length > 0
-        psqConfig["Cloud Training packages"] = null
-        psqConfig["Capture Expenses"] = validPlanIdsByType["Capture Expense"].length > 0
-        psqConfig["Standard Interface"] = quoteDetailsValues["241709571284"] == "standard"
-        psqConfig["Custom Interface"] = quoteDetailsValues["241709571284"] == "custom"
         
-        validPayrolls.forEach(payroll => {
-            let selectedPayrollValues = selectedValues[payroll]
-            if (selectedPayrollValues["241706082523"] == "source" || psqConfig["Cintra Payroll Product"] == "source") {
-                psqConfig["Cintra Payroll Product"] = "source"
-            } else {
-                psqConfig["Cintra Payroll Product"] = selectedPayrollValues["241706082523"]
-            }
-            if (!!selectedPayrollValues["241709571262"]) psqConfig["Holidays & Absence"] = true
-            if (!!selectedPayrollValues["241712266445"]) psqConfig["Timesheets"] = true
-            if (!!selectedPayrollValues["241709571268"]) psqConfig["CintraHR"] = true
-            if (!!selectedPayrollValues["241706082532"]) psqConfig["Payrolled Benefits"] = true
-            if (!!selectedPayrollValues["241709571264"]) psqConfig["Payrolled Car Benefits"] = true
-        })
+        // validPayrolls.forEach(payroll => {
+        //     let selectedPayrollValues = selectedValues[payroll]
+        //     if (selectedPayrollValues["241706082523"] == "source" || psqConfig["Cintra Payroll Product"] == "source") {
+        //         psqConfig["Cintra Payroll Product"] = "source"
+        //     } else {
+        //         psqConfig["Cintra Payroll Product"] = selectedPayrollValues["241706082523"]
+        //     }
+        // })
         
         Quote["Implementation Fees"]["PSQ Config"] = psqConfig
+        console.log({
+            psqImpConfig,
+            psqConfig,
+            selectedValues,
+        })
 
 
         psqAccordions.forEach(psqAccord => {

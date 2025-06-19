@@ -168,6 +168,13 @@ const Extension = ({ context, runServerless, actions }) => {
     // Fetch raw PSQ implementation resources and products
     const rawImpResources = useFetchDefs("cintra_calculator_psq_implementation_resources");
     const rawImpProducts  = useFetchDefs("cintra_calculator_psq_implementation_products");
+    const psqImpConfig  = useFetchDefs("cintra_calculator_psq_implementation_config", r => ({
+        id: r.id,
+        name: r.values.name,
+        product_value: r.values.product_value,
+        product_references: r.values.product_reference?.map(a => a.id) ?? [],
+    }));
+    
     const psqImpHours  = useFetchDefs("cintra_calculator_psq_implementation_hours", r => ({
         id: r.id,
         name: r.values.name,
@@ -450,6 +457,7 @@ const Extension = ({ context, runServerless, actions }) => {
             productTypeAccordions: productTypeAccordions,
             psqAccordions: psqAccordions,
             psqImpHours: psqImpHours,
+            psqImpConfig: psqImpConfig,
         });
         setQuote(result);
         if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
