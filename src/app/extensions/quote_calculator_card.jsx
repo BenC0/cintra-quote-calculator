@@ -26,11 +26,11 @@ const Extension = ({ context, runServerless, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const debugPage = 1;
+    const debugPage = 2;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
-    const [currentPage, setCurrentPage] = useState(debug ? debugPage : 1);
+    const [currentPage, setCurrentPage] = useState(!!debug && !!debugPage ? debugPage : 1);
 
     // Initial state for the quote workflow, managed by useReducer
     const initialState = {
@@ -168,6 +168,14 @@ const Extension = ({ context, runServerless, actions }) => {
     // Fetch raw PSQ implementation resources and products
     const rawImpResources = useFetchDefs("cintra_calculator_psq_implementation_resources");
     const rawImpProducts  = useFetchDefs("cintra_calculator_psq_implementation_products");
+    const psqImpHours  = useFetchDefs("cintra_calculator_psq_implementation_hours", r => ({
+        id: r.id,
+        name: r.values.name,
+        hours: r.values.hours,
+        product_value: r.values.product_value,
+        psq_product_id: r.values.psq_product_id.map(a => a.id),
+        minimum_quantity: r.values.minimum_quantity,
+    }));
 
     // Build a lookup dictionary for PSQ resources (rates)
     const impResourceDict = React.useMemo(() => {
@@ -178,7 +186,7 @@ const Extension = ({ context, runServerless, actions }) => {
                 field: r.id,
                 label: r.values.name,
                 day_rate: dayRate,
-                hourly_rate: dayRate / 7,
+                hourly_rate: (dayRate / 7) * .7,
             };
         });
         return d;
@@ -192,6 +200,7 @@ const Extension = ({ context, runServerless, actions }) => {
                 field: r.id,
                 label: r.values.name,
                 product_type: getFirstValue("product_type", r),
+                product_reference: getFirstValue("product_reference", r),
                 resource: impResourceDict[firstResourceId] || null,
             };
         });
@@ -439,7 +448,8 @@ const Extension = ({ context, runServerless, actions }) => {
             StandardImplementationDefs: StandardImplementationDefs,
             productDefs: productDefs,
             productTypeAccordions: productTypeAccordions,
-            psqAccordions: psqAccordions
+            psqAccordions: psqAccordions,
+            psqImpHours: psqImpHours,
         });
         setQuote(result);
         if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);

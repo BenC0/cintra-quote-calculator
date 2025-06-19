@@ -18,3 +18,8 @@
 
 ## Custom Products
 1. WTF am I doing with these?
+
+## PSQ
+1. Cintra Cloud Training
+   1. What dictates this? Provided spreadsheet has fixed values.
+2. CintraHR Implementation - Fixed Price (Non-issue)

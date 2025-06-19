@@ -73,7 +73,8 @@ export const CalculateQuote = ({
     StandardImplementationDefs = {},
     productDefs = [],
     productTypeAccordions = [],
-    psqAccordions= []
+    psqAccordions= [],
+    psqImpHours = [],
 }) => {
     const Quote = {
         "Details": {},
@@ -142,6 +143,10 @@ export const CalculateQuote = ({
             Quote["Details"][planType] = planIdsByType[planType].map(planId => {
                 if (planId == "temp") return;
                 let selectedPlanValues = selectedValues[planId] ?? {}
+
+                if (planType == PayrollDetails.label) {
+                    Quote["Summary"]["PayrollHeadcount"] += selectedPlanValues.quantity_value
+                }
                 
                 if (Object.keys(selectedPlanValues).length > 0) {
                     let payroll_payslips_modifier = 1
@@ -223,7 +228,6 @@ export const CalculateQuote = ({
             })
             estimated_monthly_fee += estimated_plan_monthly_fee
             estimated_annual_fee += estimated_plan_annual_fee
-            
         }
     }
 
@@ -358,10 +362,6 @@ export const CalculateQuote = ({
                 totalImplementationDays,
             }
 
-            if (ptLabel == PayrollDetails.label) {
-                Quote["Summary"]["PayrollHeadcount"] += total_headcount
-            }
-
             estimated_implementation_fee += totalImplementationFee
         })
 
@@ -370,7 +370,93 @@ export const CalculateQuote = ({
         console.log({
             event: "Calculating PSQ Fees",
             psqAccordions,
-        }) 
+            selectedValues,
+            psqImpHours,
+            quoteDetails: Quote["Details"],
+        })
+
+        let validPlanIdsByType = {}
+        for (let key in planIdsByType) {
+            validPlanIdsByType[key] = planIdsByType[key].filter(a => a != "temp")
+        }
+
+        let validPayrolls = validPlanIdsByType["Payroll"]
+
+        let psqConfig = {}
+
+        psqConfig["Cintra Payroll Product"] = null
+        psqConfig["Sector"] = {
+            public: !!quoteDetailsValues["241712266460"],
+            education: !!quoteDetailsValues["241731552473"],
+        }
+        psqConfig["Payrolls"] = validPayrolls.length
+        psqConfig["Headcount"] = Quote["Summary"]["PayrollHeadcount"]
+        psqConfig["Holidays & Absence"] = false
+        psqConfig["Timesheets"] = false
+        psqConfig["CintraHR"] = false
+        psqConfig["Cintra Groups"] = validPlanIdsByType["Groups"].length > 0
+        psqConfig["Payrolled Benefits"] = false
+        psqConfig["Payrolled Car Benefits"] = false
+        psqConfig["HR Outsourced Admin"] = validPlanIdsByType["HR Outsourcing"].length > 0
+        psqConfig["Cloud Training packages"] = null
+        psqConfig["Capture Expenses"] = validPlanIdsByType["Capture Expense"].length > 0
+        psqConfig["Standard Interface"] = quoteDetailsValues["241709571284"] == "standard"
+        psqConfig["Custom Interface"] = quoteDetailsValues["241709571284"] == "custom"
+        
+        validPayrolls.forEach(payroll => {
+            let selectedPayrollValues = selectedValues[payroll]
+            if (selectedPayrollValues["241706082523"] == "source" || psqConfig["Cintra Payroll Product"] == "source") {
+                psqConfig["Cintra Payroll Product"] = "source"
+            } else {
+                psqConfig["Cintra Payroll Product"] = selectedPayrollValues["241706082523"]
+            }
+            if (!!selectedPayrollValues["241709571262"]) psqConfig["Holidays & Absence"] = true
+            if (!!selectedPayrollValues["241712266445"]) psqConfig["Timesheets"] = true
+            if (!!selectedPayrollValues["241709571268"]) psqConfig["CintraHR"] = true
+            if (!!selectedPayrollValues["241706082532"]) psqConfig["Payrolled Benefits"] = true
+            if (!!selectedPayrollValues["241709571264"]) psqConfig["Payrolled Car Benefits"] = true
+        })
+        
+        Quote["Implementation Fees"]["PSQ Config"] = psqConfig
+
+
+        psqAccordions.forEach(psqAccord => {
+            Quote["Implementation Fees"][psqAccord.field] = {
+                title: psqAccord.label,
+                fields: psqAccord.fields.map(field => {
+                    let associatedPlans = []
+                    let associatedValues = []
+                    let associatedBands = []
+                    if (!!field.product_reference) {
+                        for (let planKey in selectedValues) {
+                            let planFields = selectedValues[planKey]
+                            if (!!planFields[field.product_reference.id]) {
+                                associatedPlans.push(planKey)
+                                associatedValues.push(planFields[field.product_reference.id])
+                                associatedBands.push(psqImpHours.filter(h => {
+                                    if (!!h.product_value) {
+                                        return h.minimum_quantity <= psqConfig["Headcount"] 
+                                            && h.psq_product_id.indexOf(field.field) > -1
+                                            && h.product_value == planFields[field.product_reference.id]
+                                    } else {
+                                        return h.minimum_quantity <= psqConfig["Headcount"] 
+                                            && h.psq_product_id.indexOf(field.field) > -1
+                                    }
+                                }).pop())
+                            }
+                        }
+                    }
+
+                    return {
+                        ...field,
+                        associatedPlans,
+                        associatedValues,
+                        plans: associatedPlans.length,
+                        associatedBands,
+                    }
+                }),
+            }
+        })
     //     Quote["Implementation Fees"][planType] = planIdsByType[planType].map(planId => {
     //         if (!!selectedPSQValues[planType]) {
     //             let selectedImplementationValues = selectedPSQValues[planType].filter(plan => plan.id == planId)
