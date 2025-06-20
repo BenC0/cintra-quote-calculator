@@ -9,6 +9,7 @@ import { quoteReducer } from "./components/shared/quoteReducer";  // Reducer for
 import { QuoteSheet } from "./components/summary/QuoteSheet";
 
 import { debugPlanIdsByType, debugPlansById, debugSelectedValues } from "./components/debug/debugValues"
+import { PSQTables } from "./components/shared/PSQTables";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, runServerlessFunction, actions }) => (
@@ -207,8 +208,8 @@ const Extension = ({ context, runServerless, actions }) => {
                 field: r.id,
                 label: r.values.name,
                 product_type: getFirstValue("product_type", r),
-                product_reference: getFirstValue("product_reference", r),
                 resource: impResourceDict[firstResourceId] || null,
+                psq_config_reference: r.values.psq_config_reference.map(a => a.id),
             };
         });
     }, [rawImpProducts, impResourceDict]);
@@ -522,19 +523,10 @@ const Extension = ({ context, runServerless, actions }) => {
             {currentPage === 2 && (
                 <>
                     <Heading>PSQ Details</Heading>
-                    {psqAccordions.map((psqType) => (
-                        <React.Fragment key={psqType.field}>
-                            <ProductTypeAccordion
-                                productType={psqType}
-                                planIds={planIdsByType[psqType.label] || []}
-                                actions={actions}
-                                selectedValues={selectedValues[psqType.label] || []}
-                                handler={handler}
-                                plan_handler={plan_handler}
-                            />
-                            <Divider />
-                        </React.Fragment>
-                    ))}
+                    <PSQTables
+                        quote = {quote}
+                        psqAccordions = {psqAccordions}
+                    />
                     <Flex justify="end" gap="small">
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
                             Review Schedule

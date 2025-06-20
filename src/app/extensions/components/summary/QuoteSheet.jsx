@@ -12,7 +12,7 @@ import {
     TableRow,
 } from "@hubspot/ui-extensions"
 import { renderTableSummaries } from "../shared/renderTableSummaries"
-import { toTitleCase } from "../shared/utils"
+import { formatPrice, toTitleCase } from "../shared/utils"
 
 export const QuoteSheet = ({
     quote = {},
@@ -119,9 +119,9 @@ export const QuoteSheet = ({
                                         <TableRow>
                                             <TableCell>{row.name}</TableCell>
                                             <TableCell align="center">{row.quantity}</TableCell>
-                                            <TableCell align="center">£{Math.round(row.unitPrice * 100) / 100}</TableCell>
+                                            <TableCell align="center">£{formatPrice(row.unitPrice)}</TableCell>
                                             <TableCell align="center">{row.discount}%</TableCell>
-                                            <TableCell align="right">£{Math.round(row.estimatedMonthlyFee * 100) / 100}</TableCell>
+                                            <TableCell align="right">£{formatPrice(row.estimatedMonthlyFee)}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>

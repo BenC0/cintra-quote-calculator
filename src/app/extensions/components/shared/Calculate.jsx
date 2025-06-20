@@ -399,17 +399,22 @@ export const CalculateQuote = ({
             productReferences.forEach(fieldKey => {
                 for (let planKey in selectedValues) {
                     if (!!!psqConfig[c.id]) {
+                        let condition = false
                         if (!!productValue) {
-                            psqConfig[c.id] = !!selectedValues[planKey][fieldKey] && selectedValues[planKey][fieldKey] === productValue
+                            condition = !!selectedValues[planKey][fieldKey] && selectedValues[planKey][fieldKey] === productValue
                         } else {
-                            psqConfig[c.id] = !!selectedValues[planKey][fieldKey]
+                            condition = !!selectedValues[planKey][fieldKey]
+                        }
+                        if (condition) {
+                            psqConfig[c.id] = selectedValues[planKey][fieldKey]
+                        } else {
+                            psqConfig[c.id] = false
                         }
                     }
                 }
             })
         })
 
-        // Value used in product hours selection for all PSQ Payroll Tasks
         // // Value used in product hours calculation for most PSQ Tasks, but not all
         psqConfig["Sector"] = {
             public: !!quoteDetailsValues["241712266460"],
@@ -426,72 +431,47 @@ export const CalculateQuote = ({
         // })
         
         Quote["Implementation Fees"]["PSQ Config"] = psqConfig
-        console.log({
-            psqImpConfig,
-            psqConfig,
-            selectedValues,
-        })
-
 
         psqAccordions.forEach(psqAccord => {
             Quote["Implementation Fees"][psqAccord.field] = {
                 title: psqAccord.label,
                 fields: psqAccord.fields.map(field => {
-                    let associatedPlans = []
-                    let associatedValues = []
-                    let associatedBands = []
-                    if (!!field.product_reference) {
-                        for (let planKey in selectedValues) {
-                            let planFields = selectedValues[planKey]
-                            if (!!planFields[field.product_reference.id]) {
-                                associatedPlans.push(planKey)
-                                associatedValues.push(planFields[field.product_reference.id])
-                                associatedBands.push(psqImpHours.filter(h => {
-                                    if (!!h.product_value) {
-                                        return h.minimum_quantity <= psqConfig["Headcount"] 
-                                            && h.psq_product_id.indexOf(field.field) > -1
-                                            && h.product_value == planFields[field.product_reference.id]
-                                    } else {
-                                        return h.minimum_quantity <= psqConfig["Headcount"] 
-                                            && h.psq_product_id.indexOf(field.field) > -1
-                                    }
-                                }).pop())
+                    let hoursBand = {hours: 0}
+                    let psqFee = 0
+                    let associatedConfigValue = null 
+                    field.psq_config_reference.forEach(configField => {
+                        if (!!psqConfig[configField]) {
+                            associatedConfigValue = psqConfig[configField]
+                        }
+                    })
+                    if (!!associatedConfigValue) {
+                        hoursBand = psqImpHours.filter(h => {
+                            if (!!h.product_value) {
+                                return h.minimum_quantity <= psqConfig["Headcount"] 
+                                    && h.psq_product_id.indexOf(field.field) > -1
+                                    && h.product_value == associatedConfigValue
+                            } else {
+                                return h.minimum_quantity <= psqConfig["Headcount"] 
+                                    && h.psq_product_id.indexOf(field.field) > -1
                             }
+                        })
+                        if (hoursBand.length > 0) {
+                            hoursBand = hoursBand.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
+                            hoursBand = hoursBand.pop()
+                            psqFee = hoursBand.hours * (field.resource.hourly_rate || 0)
                         }
                     }
-
+                    
+                    estimated_implementation_fee += psqFee
                     return {
                         ...field,
-                        associatedPlans,
-                        associatedValues,
-                        plans: associatedPlans.length,
-                        associatedBands,
+                        associatedConfigValue,
+                        hoursBand,
+                        psqFee,
                     }
                 }),
             }
         })
-    //     Quote["Implementation Fees"][planType] = planIdsByType[planType].map(planId => {
-    //         if (!!selectedPSQValues[planType]) {
-    //             let selectedImplementationValues = selectedPSQValues[planType].filter(plan => plan.id == planId)
-    //             if (selectedImplementationValues.length > 0) {
-    //                 selectedImplementationValues = selectedImplementationValues[0]
-    //                 selectedImplementationValues.fields = selectedImplementationValues.fields.map(field => {
-    //                     let output = field
-    //                     output["resource"] = psqProductDefs
-    //                         .filter(p => p.field == output.field)
-    //                         .map(field => field.resource)
-    //                         .pop()
-    //                     output["day_rate"] = output["resource"]?.day_rate ?? 0
-    //                     output["hourly_rate"] = output["resource"]?.hourly_rate ?? 0
-    //                     output["estimated_implementation_fee"] = output["hourly_rate"] * output["value"]
-    //                     estimated_implementation_fee += output["estimated_implementation_fee"]
-    //                     return output
-    //                 })
-    //                 return selectedImplementationValues
-    //             }
-    //         }
-    //         return false
-    //     }).pop()
     }
 
     Quote["Implementation Fees"]["Implementation Type"] = !!RequiresPSQFee ? "PSQ" : "Standard" 
