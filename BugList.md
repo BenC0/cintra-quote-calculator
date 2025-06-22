@@ -13,6 +13,9 @@
 
 ## User Interface Bugs
 1. Add Product Type Panel - Qty value does not reset on adding a new plan, this leads to validation errors
+2. Quote Sheet missing Implementation Summary
+3. PSQ Page missing Quote Summaries
+4. Quote summary sucks
 
 ## Questions for Shuck 
 1. How best to handle discount with standing charge?
