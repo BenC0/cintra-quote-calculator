@@ -77,6 +77,7 @@ export const CalculateQuote = ({
     psqImpHours = [],
     psqImpConfig = [],
     PSQImplementationCustomHours = {},
+    quoteDiscountValues = {},
 }) => {
     const Quote = {
         "Details": {},
@@ -99,6 +100,8 @@ export const CalculateQuote = ({
         productTypeAccordions,
     ]
     if (conditions.some(a => a.length == 0)) return;
+    
+    console.error("Discount Value not being stored and used.")
     
     const PayrollDetails = productTypeAccordions.find(a => a.is_payroll_product_type)
     const payrollDetailsPlanIDs = planIdsByType[PayrollDetails.label]
@@ -173,7 +176,9 @@ export const CalculateQuote = ({
                         let field = productDefs.find(a => a.field == fieldKey)
                         if (!!fieldValue && !!field) {
                             let output = field
+                            let discount = quoteDiscountValues[field.field]
                             output["discount"] = 0
+                            if (!!discount) output["discount"] = discount
                             let qty = selectedPlanValues.quantity_value
 
                             if (!!!qty || qty < 1) {
@@ -213,7 +218,11 @@ export const CalculateQuote = ({
                             output["SelectedContractLengthDiscount"] = SelectedContractLengthDiscount
                             
                             output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
-                            output["estimated_monthly_fee"] = (output["adjusted_price"] * qty) + output["monthly_standing_charge"]
+                            output["estimated_monthly_fee"] = ((output["adjusted_price"] * qty) + output["monthly_standing_charge"])
+
+                            if (output["discount"] > 0) {
+                                output["estimated_monthly_fee"] -= output["estimated_monthly_fee"] * (output["discount"] / 100)
+                            }
                             // TODO: How best to display monthly standing charge?
                             // output["adjusted_price"] += output["monthly_standing_charge"]
                             output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)

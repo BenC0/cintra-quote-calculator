@@ -21,6 +21,7 @@ export const QuoteSheet = ({
     productTypeAccordions = {},
     selectedValues = {},
     planIdsByType = {},
+    QuoteDiscountValueHandler = {},
 }) => {
     const conditions = [
         Object.keys(quote).length > 0,
@@ -91,12 +92,7 @@ export const QuoteSheet = ({
                                 } else {
                                     planDetails["addonProductMonthlyFee"] += productQuoteReference.estimated_monthly_fee
                                 }
-                                // console.warn({
-                                //     qty,
-                                //     productValue,
-                                //     productReference,
-                                //     productQuoteReference,
-                                // })
+
                                 planDetails["rows"].push({
                                     field: productReference.field,
                                     name: productReference.label,
@@ -145,11 +141,10 @@ export const QuoteSheet = ({
                                             {/* <TableCell align="right">{row.discount}%</TableCell> */}
                                             <TableCell align="right">
                                                 {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
-                                                    console.log("bah"),
                                                     renderField(row, (field, e, planId) => {
                                                         discountHandler(row.field, e, "add")
-                                                    }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true)
-                                                ) : row.discount || 0}
+                                                    }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
+                                                ) : `${row.discount}%` || `0%`}
                                             </TableCell>
                                             <TableCell align="right">{(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.estimatedMonthlyFee) || 0.00}</>}</TableCell>
                                             <TableCell>
@@ -158,8 +153,7 @@ export const QuoteSheet = ({
                                                         <Button
                                                             variant="primary"
                                                             onClick={_ => {
-                                                                console.error("Discount Value not being stored and used.")
-                                                                // PSQHandler(row.field, discountEditing[row.field])
+                                                                QuoteDiscountValueHandler(row.field, discountEditing[row.field])
                                                                 discountHandler(row.field, null, "remove")
                                                             }}
                                                         >
@@ -193,14 +187,14 @@ export const QuoteSheet = ({
                                     {accordion.coreProductMonthlyFee > 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={4}>Estimated Core Product Charges</TableCell>
-                                            <TableCell align="right">£{Math.round(accordion.coreProductMonthlyFee * 100) / 100}</TableCell>
+                                            <TableCell align="right">£{formatPrice(accordion.coreProductMonthlyFee)}</TableCell>
                                             <TableCell></TableCell>
                                         </TableRow>
                                     ) : <></>}
                                     {accordion.addonProductMonthlyFee > 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={4}>Estimated Addon Product Charges</TableCell>
-                                            <TableCell align="right">£{Math.round(accordion.addonProductMonthlyFee * 100) / 100}</TableCell>
+                                            <TableCell align="right">£{formatPrice(accordion.addonProductMonthlyFee)}</TableCell>
                                             <TableCell></TableCell>
                                         </TableRow>
                                     ) : <></>}

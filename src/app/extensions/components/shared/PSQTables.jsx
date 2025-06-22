@@ -75,7 +75,6 @@ export const PSQTables = ({
                                     </TableCell>
                                     <TableCell align="center">£{formatPrice(task.resource.hourly_rate) || 0.00}</TableCell>
                                     <TableCell align="center">
-                                        
                                         {(!!tasksEditing[task.field] || tasksEditing[task.field] === 0) ? ("--"): <>£{formatPrice(task.psqFee) || 0.00}</>}
                                     </TableCell>
                                     <TableCell>

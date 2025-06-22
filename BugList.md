@@ -8,7 +8,6 @@
 4. Capture Expense Pricing - One Time Fee, value equals 12% of Estimated Monthly Charges, can be toggled on/off.
 5. PSQ and "Normal" Product Types cannot currently share a label (name) value.
 6. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
-7. Discount Values not being stored/used.
 
 ## Add Product Type Panel
 1. Qty value does not reset on adding a new plan, this leads to validation errors

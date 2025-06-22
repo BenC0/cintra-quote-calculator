@@ -47,20 +47,32 @@ export const renderDropDown = (field, onChange, planId, existingValue, supressLa
     </Flex>
 }
 
-export const renderNumber = (field, onChange, planId, existingValue, supressLabel = false) => {
+export const renderNumber = (field, onChange, planId, existingValue, supressLabel = false, max_value = null) => {
+    console.log(field)
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
         {!!!supressLabel ? (
             <Text format={{ fontWeight: 'normal', variant: 'bodytext' }}>
                 { field.label }
             </Text>
         ) : <></>}
-        <StepperInput
-            value={existingValue ?? field.value}
-            min={0}
-            id={`${planId}__${field.field}`}
-            name={`${planId}__${field.field}`}
-            onChange={e => onChange(field, e, planId)}
-        />
+        {!!max_value ? (
+            <StepperInput
+                value={existingValue ?? field.value}
+                min={0}
+                max={max_value}
+                id={`${planId}__${field.field}`}
+                name={`${planId}__${field.field}`}
+                onChange={e => onChange(field, e, planId)}
+            />
+        ) : (
+            <StepperInput
+                value={existingValue ?? field.value}
+                min={0}
+                id={`${planId}__${field.field}`}
+                name={`${planId}__${field.field}`}
+                onChange={e => onChange(field, e, planId)}
+            />
+        )}
     </Flex>
 }
 
@@ -82,12 +94,12 @@ export const renderTextInput = (field, onChange, planId, existingValue, supressL
     </Flex>
 }
 
-export const renderField = (field, handler, planId, existingValue, supressLabel = false) => {
+export const renderField = (field, handler, planId, existingValue, supressLabel = false, max_value = null) => {
     switch (field.input_type) {
         case "Toggle":
             return renderToggle(field, handler, planId, existingValue, supressLabel)
         case "Number":
-            return renderNumber(field, handler, planId, existingValue, supressLabel)
+            return renderNumber(field, handler, planId, existingValue, supressLabel, max_value)
         case "Radio":
             break;
         case "Dropdown":

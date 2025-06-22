@@ -367,6 +367,14 @@ const Extension = ({ context, runServerless, actions }) => {
         }))
     }
 
+    const [quoteDiscountValues, setquoteDiscountValues] = useState({});
+    const QuoteDiscountValueHandler = (fieldID, value) => {
+        setquoteDiscountValues(prev => ({
+            ...prev,
+            [fieldID]: value
+        }))
+    }
+
     // ------------------------- Plan CRUD Handlers -------------------------
 
     // Add a new plan for a given product type
@@ -468,11 +476,12 @@ const Extension = ({ context, runServerless, actions }) => {
             psqImpHours: psqImpHours,
             psqImpConfig: psqImpConfig,
             PSQImplementationCustomHours: PSQImplementationCustomHours,
+            quoteDiscountValues: quoteDiscountValues,
         });
         setQuote(result);
         if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
         
-    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours]);
+    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues]);
 
     const progressToImplementation = () => {
         if (RequiresPSQFee) {
@@ -489,9 +498,10 @@ const Extension = ({ context, runServerless, actions }) => {
                 plansById,
                 planIdsByType,
                 selectedValues,
+                quoteDiscountValues,
             });
         }
-    }, [plansById, planIdsByType, selectedValues]);
+    }, [plansById, planIdsByType, selectedValues, quoteDiscountValues]);
 
     return (
         <Flex direction="column" gap="md">
@@ -566,6 +576,8 @@ const Extension = ({ context, runServerless, actions }) => {
                         selectedValues={selectedValues}
                         planIdsByType={planIdsByType}
                         productTypeAccordions={productTypeAccordions}
+                        quoteDiscountValues={quoteDiscountValues}
+                        QuoteDiscountValueHandler={QuoteDiscountValueHandler}
                     />
 
                     <Flex justify="end" gap="small">
