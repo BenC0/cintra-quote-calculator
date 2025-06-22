@@ -24,7 +24,7 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = true;
-    const debugPlans = false;
+    const debugPlans = true;
     const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 1;
@@ -493,7 +493,7 @@ const Extension = ({ context, runServerless, actions }) => {
 
     useEffect(() => {
         if (debug) {
-            console.log({
+            console.warn({
                 event: "Debug Log",
                 plansById,
                 planIdsByType,

@@ -53,23 +53,19 @@ export const ProductTypeFormPanel = ({
     }
 
     if (!!quantity) {
-        if (quantity_value > 0) {
-            quantity.value = quantity_value
-        }
+        quantity.value =  initialLookup["quantity_value"]
         if (!grouped_fields["details"]) {
             grouped_fields["details"] = []
         }
         grouped_fields["details"] = [quantity, ...grouped_fields["details"]]
     }
 
-    // console.log({
-    //     event: "Rendering ProductTypeFormPanel",
-    //     localPlanId,
-    //     "frequency_valueParm": frequency_value,
-    //     "frequency_valueObj": frequency.value,
-    //     "quantity_valueParm": quantity_value,
-    //     "quantity_valueObj": quantity.value,
-    // })
+    console.log({
+        event: "Rendering ProductTypeFormPanel",
+        localPlanId,
+        initialLookup,
+        grouped_fields,
+    })
 
     const arrayHas = arr => Array.isArray(arr) && arr.length > 0
 

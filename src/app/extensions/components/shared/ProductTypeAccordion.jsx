@@ -15,11 +15,39 @@ export const ProductTypeAccordion = ({
     planIds = [],
     handler,
     plan_handler,
-    selectedValues = [],
+    selectedValues = {},
     actions,
 }) => {
     const maxItems = productType.max_items;
-    const canAdd = maxItems < 0 || planIds.filter(a => a != "temp").length < maxItems;
+    const validPlanIds = planIds.filter(a => a != "temp")
+    const hasTempId = planIds.filter(a => a == "temp").length > 0
+    const tempPlanValues = selectedValues["temp"]
+    const canAdd = maxItems < 0 || validPlanIds < maxItems;
+    let defaultValues = {
+        quantity_value: 0,
+        frequency_value: "weekly",
+    }
+    productType.fields.forEach(field => {
+        if (hasTempId && !!tempPlanValues[field.field]) {
+            defaultValues[field.field] = tempPlanValues[field.field]
+        } else {
+            defaultValues[field.field] = field.defaultValue
+        }
+    })
+
+    if (hasTempId) {
+        if (!!tempPlanValues.quantity_value) defaultValues["quantity_value"] = tempPlanValues.quantity_value
+        if (!!tempPlanValues.frequency_value) defaultValues["frequency_value"] = tempPlanValues.frequency_value
+    }
+    
+    console.log({
+        event: "Rendering ProductTypeAccordion",
+        productType: productType.label,
+        hasTempId,
+        defaultValues,
+        // productTypeObject: productType,
+        // selectedValues,
+    })
 
     return (
         <Accordion title={productType.label} defaultOpen>
@@ -56,6 +84,7 @@ export const ProductTypeAccordion = ({
                                             frequency={productType.frequencyFieldDef}
                                             planId="temp"
                                             handler={handler}
+                                            initialLookup={defaultValues}
                                             actions={actions}
                                             onSubmit={(generatedId) => {
                                                 plan_handler.clone(productType.label, generatedId);
