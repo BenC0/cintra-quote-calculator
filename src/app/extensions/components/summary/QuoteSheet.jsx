@@ -29,6 +29,7 @@ export const QuoteSheet = ({
     const Output = []
     const [discountEditing, setDiscountEditing] = useState({})
     const discountHandler = (id, value, action="add") => {
+        console.log({event: "discountHandler called", id, value, action})
         if (action == "add") {
             setDiscountEditing(prev => ({
                 ...prev,
@@ -97,10 +98,12 @@ export const QuoteSheet = ({
                                 //     productQuoteReference,
                                 // })
                                 planDetails["rows"].push({
+                                    field: productReference.field,
                                     name: productReference.label,
                                     pricingStructure: productReference.pricing_structure.name,
                                     unitPrice: productQuoteReference.adjusted_price,
                                     quantity: qty,
+                                    input_type: "Number",
                                     discount: productQuoteReference.discount,
                                     estimatedMonthlyFee: productQuoteReference.estimated_monthly_fee,
                                 })
@@ -142,12 +145,13 @@ export const QuoteSheet = ({
                                             {/* <TableCell align="right">{row.discount}%</TableCell> */}
                                             <TableCell align="right">
                                                 {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                    console.log("bah"),
                                                     renderField(row, (field, e, planId) => {
                                                         discountHandler(row.field, e, "add")
                                                     }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true)
                                                 ) : row.discount || 0}
                                             </TableCell>
-                                            <TableCell align="right">£{formatPrice(row.estimatedMonthlyFee)}</TableCell>
+                                            <TableCell align="right">{(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.estimatedMonthlyFee) || 0.00}</>}</TableCell>
                                             <TableCell>
                                                 {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
                                                     <Flex direction="column" align="stretch" gap="sm">
@@ -174,6 +178,7 @@ export const QuoteSheet = ({
                                                     <Button
                                                         variant="transparent"
                                                         onClick={_ => {
+                                                            console.log({row})
                                                             discountHandler(row.field, true, "add")
                                                         }}
                                                     >
