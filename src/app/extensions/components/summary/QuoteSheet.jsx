@@ -172,7 +172,6 @@ export const QuoteSheet = ({
                                                     <Button
                                                         variant="transparent"
                                                         onClick={_ => {
-                                                            console.log({row})
                                                             discountHandler(row.field, true, "add")
                                                         }}
                                                     >

@@ -101,8 +101,6 @@ export const CalculateQuote = ({
     ]
     if (conditions.some(a => a.length == 0)) return;
     
-    console.error("Discount Value not being stored and used.")
-    
     const PayrollDetails = productTypeAccordions.find(a => a.is_payroll_product_type)
     const payrollDetailsPlanIDs = planIdsByType[PayrollDetails.label]
 

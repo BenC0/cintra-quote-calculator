@@ -48,7 +48,6 @@ export const renderDropDown = (field, onChange, planId, existingValue, supressLa
 }
 
 export const renderNumber = (field, onChange, planId, existingValue, supressLabel = false, max_value = null) => {
-    console.log(field)
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
         {!!!supressLabel ? (
             <Text format={{ fontWeight: 'normal', variant: 'bodytext' }}>
