@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Flex,
     Button,
@@ -12,12 +12,14 @@ import {
     TableCell,
     Accordion,
 } from "@hubspot/ui-extensions";
-import { ProductTypeFormPanel } from "./ProductTypeFormPanel";
 import { formatPrice } from "./utils";
+import { renderField } from "./Inputs";
 
 export const PSQTables = ({
     quote = {},
-    psqAccordions = []
+    psqAccordions = [],
+    PSQImplementationCustomHours = {},
+    PSQHandler = _ => null
 }) => {
     if (
         !!!quote
@@ -26,9 +28,23 @@ export const PSQTables = ({
     ) return null;
 
     const implementationTypeKeys = Object.keys(quote["Implementation Fees"]).filter(a => !!a.match(/^[0-9]*$/g))
+    const [tasksEditing, setTasksEditing] = useState({})
+    const taskHandler = (id, value, action="add") => {
+        if (action == "add") {
+            setTasksEditing(prev => ({
+                ...prev,
+                [id]: value
+            }));
+        } else if (action == "remove") {
+            setTasksEditing(prev => ({
+                ...prev,
+                [id]: null
+            }));
+        }
+    }
     
     let tables = []
-
+    console.log("Rendeding PSQ Accordions")
     psqAccordions.forEach(psqAccord => {
         let tasks = quote["Implementation Fees"][psqAccord.field]["fields"]
         tables.push(
@@ -50,13 +66,49 @@ export const PSQTables = ({
                                 <TableRow key={task.field}>
                                     <TableCell>{task.label || 0}</TableCell>
                                     <TableCell>{task.resource.label || 0}</TableCell>
-                                    <TableCell align="center">{task.hoursBand.hours || 0}</TableCell>
+                                    <TableCell align="center">
+                                        {(!!tasksEditing[task.field] || tasksEditing[task.field] === 0) ? (
+                                            renderField(task, (field, e, planId) => {
+                                                taskHandler(task.field, e, "add")
+                                            }, "PSQ", (!!tasksEditing[task.field] || tasksEditing[task.field] === 0) && typeof tasksEditing[task.field] == "number" ? tasksEditing[task.field] : task.hoursBand.hours, true)
+                                        ) : task.hoursBand.hours || 0}
+                                    </TableCell>
                                     <TableCell align="center">£{formatPrice(task.resource.hourly_rate) || 0.00}</TableCell>
-                                    <TableCell align="center">£{formatPrice(task.psqFee) || 0.00}</TableCell>
+                                    <TableCell align="center">
+                                        
+                                        {(!!tasksEditing[task.field] || tasksEditing[task.field] === 0) ? ("--"): <>£{formatPrice(task.psqFee) || 0.00}</>}
+                                    </TableCell>
                                     <TableCell>
-                                        <Button variant="transparent" >
-                                            <Icon name="edit"/> Edit
-                                        </Button>
+                                        {(!!tasksEditing[task.field] || tasksEditing[task.field] === 0) ? (
+                                            <Flex direction="column" align="stretch" gap="sm">
+                                                <Button
+                                                    variant="primary"
+                                                    onClick={_ => {
+                                                        PSQHandler(task.field, tasksEditing[task.field])
+                                                        taskHandler(task.field, null, "remove")
+                                                    }}
+                                                >
+                                                    <> <Icon name="success"/> Save </>
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    onClick={_ => {
+                                                        taskHandler(task.field, null, "remove")
+                                                    }}
+                                                >
+                                                    <> <Icon name="delete"/> Cancel </>
+                                                </Button>
+                                            </Flex>                                            
+                                        ) : (
+                                            <Button
+                                                variant="transparent"
+                                                onClick={_ => {
+                                                    taskHandler(task.field, true, "add")
+                                                }}
+                                            >
+                                                <> <Icon name="edit"/> Edit </>
+                                            </Button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             );
@@ -72,6 +124,7 @@ export const PSQTables = ({
         quote,
         psqAccordions,
         implementationTypeKeys,
+        tasksEditing,
     })
 
     return <>

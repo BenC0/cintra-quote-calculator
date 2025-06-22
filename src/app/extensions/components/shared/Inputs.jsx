@@ -8,9 +8,13 @@ import {
     Input,
 } from "@hubspot/ui-extensions";
 
-export const renderToggle = (field, onChange, planId, existingValue) => {
+export const renderToggle = (field, onChange, planId, existingValue, supressLabel = false) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} >{field.label}</Text>
+        {!!!supressLabel ? (
+            <Text format={{ fontWeight: 'normal', variant: 'bodytext' }}>
+                { field.label }
+            </Text>
+        ) : <></>}
         <Toggle
             size="md"
             label={field.label}
@@ -26,11 +30,13 @@ export const renderToggle = (field, onChange, planId, existingValue) => {
     </Flex>
 }
 
-export const renderDropDown = (field, onChange, planId, existingValue) => {
+export const renderDropDown = (field, onChange, planId, existingValue, supressLabel = false) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} required>
-            { field.label }
-        </Text>
+        {!!!supressLabel ? (
+            <Text format={{ fontWeight: 'normal', variant: 'bodytext' }}>
+                { field.label }
+            </Text>
+        ) : <></>}
         <Select
             options={field.values?.map(field => field.values).sort((a, b) => a.value - b.value) || []}
             value={existingValue ?? field.value}
@@ -41,9 +47,13 @@ export const renderDropDown = (field, onChange, planId, existingValue) => {
     </Flex>
 }
 
-export const renderNumber = (field, onChange, planId, existingValue) => {
+export const renderNumber = (field, onChange, planId, existingValue, supressLabel = false) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} >{field.label}</Text>
+        {!!!supressLabel ? (
+            <Text format={{ fontWeight: 'normal', variant: 'bodytext' }}>
+                { field.label }
+            </Text>
+        ) : <></>}
         <StepperInput
             value={existingValue ?? field.value}
             min={0}
@@ -54,11 +64,13 @@ export const renderNumber = (field, onChange, planId, existingValue) => {
     </Flex>
 }
 
-export const renderTextInput = (field, onChange, planId, existingValue) => {
+export const renderTextInput = (field, onChange, planId, existingValue, supressLabel = false) => {
     return <Flex key={`${planId}::${field.field}`} justify="between" align="center">
-        <Text format={{ fontWeight: 'normal', variant: 'bodytext' }} required>
-            { field.label }
-        </Text>
+        {!!!supressLabel ? (
+            <Text format={{ fontWeight: 'normal', variant: 'bodytext' }}>
+                { field.label }
+            </Text>
+        ) : <></>}
         <Input
             value={existingValue ?? field.value}
             id={`${planId}__${field.field}`}
@@ -70,18 +82,18 @@ export const renderTextInput = (field, onChange, planId, existingValue) => {
     </Flex>
 }
 
-export const renderField = (field, handler, planId, existingValue) => {
+export const renderField = (field, handler, planId, existingValue, supressLabel = false) => {
     switch (field.input_type) {
         case "Toggle":
-            return renderToggle(field, handler, planId, existingValue)
+            return renderToggle(field, handler, planId, existingValue, supressLabel)
         case "Number":
-            return renderNumber(field, handler, planId, existingValue)
+            return renderNumber(field, handler, planId, existingValue, supressLabel)
         case "Radio":
             break;
         case "Dropdown":
-            return renderDropDown(field, handler, planId, existingValue)
+            return renderDropDown(field, handler, planId, existingValue, supressLabel)
         case "Text":
-            return renderTextInput(field, handler, planId, existingValue)
+            return renderTextInput(field, handler, planId, existingValue, supressLabel)
         default:
             return null;
     }

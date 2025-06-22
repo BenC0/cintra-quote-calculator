@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
     Accordion,
     Flex,
@@ -13,6 +14,7 @@ import {
 } from "@hubspot/ui-extensions"
 import { renderTableSummaries } from "../shared/renderTableSummaries"
 import { formatPrice, toTitleCase } from "../shared/utils"
+import { renderField } from "../shared/Inputs";
 
 export const QuoteSheet = ({
     quote = {},
@@ -25,6 +27,20 @@ export const QuoteSheet = ({
     ]
 
     const Output = []
+    const [discountEditing, setDiscountEditing] = useState({})
+    const discountHandler = (id, value, action="add") => {
+        if (action == "add") {
+            setDiscountEditing(prev => ({
+                ...prev,
+                [id]: value
+            }));
+        } else if (action == "remove") {
+            setDiscountEditing(prev => ({
+                ...prev,
+                [id]: null
+            }));
+        }
+    }
 
     if (conditions.every(a => !!a)) {
 
@@ -105,23 +121,66 @@ export const QuoteSheet = ({
                                         <TableHeader></TableHeader>
                                         <TableHeader></TableHeader>
                                         <TableHeader></TableHeader>
-                                        <TableHeader>
-                                            <Flex gap="sm" justify="end">
-                                                <Button variant="transparent" >
-                                                    <Icon name="edit"/> Edit
-                                                </Button>
-                                            </Flex>
-                                        </TableHeader>
+                                        <TableHeader></TableHeader>
+                                        <TableHeader></TableHeader>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHeader align="left">Product Name</TableHeader>
+                                        <TableHeader align="right">Quantity</TableHeader>
+                                        <TableHeader align="right">Unit Price</TableHeader>
+                                        <TableHeader align="right">Discount</TableHeader>
+                                        <TableHeader align="right">Estimated Monthly Fee</TableHeader>
+                                        <TableHeader align="center"></TableHeader>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {accordion.rows.map(row => (
                                         <TableRow>
                                             <TableCell>{row.name}</TableCell>
-                                            <TableCell align="center">{row.quantity}</TableCell>
-                                            <TableCell align="center">£{formatPrice(row.unitPrice)}</TableCell>
-                                            <TableCell align="center">{row.discount}%</TableCell>
+                                            <TableCell align="right">{row.quantity}</TableCell>
+                                            <TableCell align="right">£{formatPrice(row.unitPrice)}</TableCell>
+                                            {/* <TableCell align="right">{row.discount}%</TableCell> */}
+                                            <TableCell align="right">
+                                                {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                    renderField(row, (field, e, planId) => {
+                                                        discountHandler(row.field, e, "add")
+                                                    }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true)
+                                                ) : row.discount || 0}
+                                            </TableCell>
                                             <TableCell align="right">£{formatPrice(row.estimatedMonthlyFee)}</TableCell>
+                                            <TableCell>
+                                                {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                    <Flex direction="column" align="stretch" gap="sm">
+                                                        <Button
+                                                            variant="primary"
+                                                            onClick={_ => {
+                                                                console.error("Discount Value not being stored and used.")
+                                                                // PSQHandler(row.field, discountEditing[row.field])
+                                                                discountHandler(row.field, null, "remove")
+                                                            }}
+                                                        >
+                                                            <> <Icon name="success"/> Save </>
+                                                        </Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={_ => {
+                                                                discountHandler(row.field, null, "remove")
+                                                            }}
+                                                        >
+                                                            <> <Icon name="delete"/> Cancel </>
+                                                        </Button>
+                                                    </Flex>                                            
+                                                ) : (
+                                                    <Button
+                                                        variant="transparent"
+                                                        onClick={_ => {
+                                                            discountHandler(row.field, true, "add")
+                                                        }}
+                                                    >
+                                                        <> <Icon name="edit"/> Edit </>
+                                                    </Button>
+                                                )}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -130,12 +189,14 @@ export const QuoteSheet = ({
                                         <TableRow>
                                             <TableCell colSpan={4}>Estimated Core Product Charges</TableCell>
                                             <TableCell align="right">£{Math.round(accordion.coreProductMonthlyFee * 100) / 100}</TableCell>
+                                            <TableCell></TableCell>
                                         </TableRow>
                                     ) : <></>}
                                     {accordion.addonProductMonthlyFee > 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={4}>Estimated Addon Product Charges</TableCell>
                                             <TableCell align="right">£{Math.round(accordion.addonProductMonthlyFee * 100) / 100}</TableCell>
+                                            <TableCell></TableCell>
                                         </TableRow>
                                     ) : <></>}
                                 </TableFooter>

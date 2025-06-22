@@ -75,7 +75,8 @@ export const CalculateQuote = ({
     productTypeAccordions = [],
     psqAccordions= [],
     psqImpHours = [],
-    psqImpConfig = []
+    psqImpConfig = [],
+    PSQImplementationCustomHours = {},
 }) => {
     const Quote = {
         "Details": {},
@@ -386,7 +387,9 @@ export const CalculateQuote = ({
         validCintraHR = validCintraHR.pop()
         let cintraHRValue = !!validCintraHR ? selectedValues[validCintraHR] : {quantity_value: 0}
 
-        let psqConfig = {}
+        let psqConfig = {
+            CustomHours: PSQImplementationCustomHours,
+        }
         psqConfig["Headcount"] = Quote["Summary"]["PayrollHeadcount"]
         psqConfig["Payrolls"] = validPayrolls.length
         psqConfig["Cintra Payroll Product"] = null
@@ -458,9 +461,23 @@ export const CalculateQuote = ({
                         if (hoursBand.length > 0) {
                             hoursBand = hoursBand.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                             hoursBand = hoursBand.pop()
-                            psqFee = hoursBand.hours * (field.resource.hourly_rate || 0)
                         }
                     }
+                    if (!!psqConfig["CustomHours"][field.field] || psqConfig["CustomHours"][field.field] === 0) {
+                        hoursBand = {
+                            hours: psqConfig["CustomHours"][field.field]
+                        }
+                    }
+                    
+                    if (!!hoursBand.hours && !isNaN(hoursBand.hours)) {
+                        psqFee = hoursBand.hours * (field.resource.hourly_rate || 0)
+                    }
+
+                    if (isNaN(psqFee)) console.error({
+                        event: "PSQ Fee is NaN",
+                        hours: hoursBand.hours,
+                        hourly_rate: (field.resource.hourly_rate || 0),
+                    })
                     
                     estimated_implementation_fee += psqFee
                     return {

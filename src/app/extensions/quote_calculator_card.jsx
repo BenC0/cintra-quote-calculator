@@ -27,7 +27,7 @@ const Extension = ({ context, runServerless, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const debugPage = 2;
+    const debugPage = 3;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -359,6 +359,14 @@ const Extension = ({ context, runServerless, actions }) => {
         });
     }, [productTypeAccordions]);
 
+    const [PSQImplementationCustomHours, setPSQImplementationCustomHours] = useState({});
+    const PSQHandler = (fieldID, value) => {
+        setPSQImplementationCustomHours(prev => ({
+            ...prev,
+            [fieldID]: value
+        }))
+    }
+
     // ------------------------- Plan CRUD Handlers -------------------------
 
     // Add a new plan for a given product type
@@ -459,11 +467,12 @@ const Extension = ({ context, runServerless, actions }) => {
             psqAccordions: psqAccordions,
             psqImpHours: psqImpHours,
             psqImpConfig: psqImpConfig,
+            PSQImplementationCustomHours: PSQImplementationCustomHours,
         });
         setQuote(result);
         if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
         
-    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions]);
+    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours]);
 
     const progressToImplementation = () => {
         if (RequiresPSQFee) {
@@ -526,6 +535,8 @@ const Extension = ({ context, runServerless, actions }) => {
                     <PSQTables
                         quote = {quote}
                         psqAccordions = {psqAccordions}
+                        PSQImplementationCustomHours = {PSQImplementationCustomHours}
+                        PSQHandler = {PSQHandler}
                     />
                     <Flex justify="end" gap="small">
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
