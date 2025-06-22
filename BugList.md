@@ -12,10 +12,10 @@
 4. Value differences due to formulas and rounding errors - can we get a non-forumala based list of exact values?
 
 ## User Interface Bugs
-2. Quote Sheet missing Implementation Summary
-3. PSQ Page missing Quote Summaries
-4. Quote summary sucks
-5. Editing pre-existing plan has no Staging, it's live editing.
+1. Quote Sheet missing Implementation Summary
+2. PSQ Page missing Quote Summaries
+3. Quote summary sucks
+4. Editing pre-existing plan has no Staging, it's live editing.
 
 ## Questions for Shuck 
 1. How best to handle discount with standing charge?
