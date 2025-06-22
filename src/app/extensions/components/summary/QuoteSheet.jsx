@@ -6,6 +6,7 @@ import {
     TableBody,
     TableCell,
     TableFooter,
+    Text,
     Button,
     Icon,
     TableHead,
@@ -102,6 +103,8 @@ export const QuoteSheet = ({
                                     input_type: "Number",
                                     discount: productQuoteReference.discount,
                                     estimatedMonthlyFee: productQuoteReference.estimated_monthly_fee,
+                                    monthlyStandingCharge: productQuoteReference["monthly_standing_charge"],
+                                    containsMonthlyStandingCharge: !!productQuoteReference["monthly_standing_charge"] && productQuoteReference["monthly_standing_charge"] > 0,
                                 })
                             }
                         }
@@ -146,7 +149,10 @@ export const QuoteSheet = ({
                                                     }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
                                                 ) : `${row.discount}%` || `0%`}
                                             </TableCell>
-                                            <TableCell align="right">{(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.estimatedMonthlyFee) || 0.00}</>}</TableCell>
+                                            <TableCell align="right">
+                                                {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.estimatedMonthlyFee) || 0.00}</>}
+                                                {!!row.containsMonthlyStandingCharge && (<Text>(Includes Monthly Standing Charge | £{formatPrice(row.monthlyStandingCharge)})</Text>)}
+                                            </TableCell>
                                             <TableCell>
                                                 {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
                                                     <Flex direction="column" align="stretch" gap="sm">

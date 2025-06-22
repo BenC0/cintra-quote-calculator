@@ -216,6 +216,7 @@ export const CalculateQuote = ({
                             output["SelectedContractLengthDiscount"] = SelectedContractLengthDiscount
                             
                             output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
+
                             output["estimated_monthly_fee"] = ((output["adjusted_price"] * qty) + output["monthly_standing_charge"])
 
                             if (output["discount"] > 0) {
