@@ -23,7 +23,7 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Main extension component
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = false;
+    const debug = true;
     const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;

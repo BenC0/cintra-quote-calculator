@@ -16,10 +16,7 @@ export const renderInlinePlan = (productType, handler, planId, selectedValues) =
             const fieldPre = selectedPlanValues[field.field]
             let v = false
             if (!!fieldPre) {
-                v = fieldPre.value
-            }
-            if (typeof v == "object") {
-                v = v.value
+                v = fieldPre
             }
             return (
                 <React.Fragment key={`${planId}::${field.field}`}>
