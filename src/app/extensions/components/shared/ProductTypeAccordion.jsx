@@ -52,6 +52,7 @@ export const ProductTypeAccordion = ({
                                             productTypeId={productType.field}
                                             fields={productType.fields}
                                             quantity={productType.quantityFieldDef}
+                                            quantity_value={0}
                                             frequency={productType.frequencyFieldDef}
                                             planId="temp"
                                             handler={handler}

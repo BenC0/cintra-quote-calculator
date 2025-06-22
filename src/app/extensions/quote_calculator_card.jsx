@@ -23,11 +23,11 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Main extension component
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
+    const debug = false;
     const debugPlans = false;
-    const debugQuote = true;
+    const debugQuote = false;
     const debugPSQ = false;
-    const debugPage = 3;
+    const debugPage = 1;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
