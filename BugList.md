@@ -3,7 +3,7 @@
 ## User Interface Bugs
 ### High Priority
 ### Low Priority
-1. Editing pre-existing plan has no Stagi ng, it's live editing.
+1. Editing pre-existing plan has no Staging, it's live editing.
 2. Groups are shown incorrectly on Quote Sheet when no items added.
 3. Custom Products aren't tested/used/accounted for.
 4. Quote Sheet Summary Tables are inconsistently aligned due to mixed use of Accordions. 
