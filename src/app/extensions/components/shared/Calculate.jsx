@@ -271,7 +271,7 @@ export const CalculateQuote = ({
                 let pd = [...productDefs, productType.quantityFieldDef, productType.frequencyFieldDef]
                 relevantSelectedValues.forEach(plan => {
                     for (let fieldKey in plan) {
-                        if (!fieldKey.match(/(quantity|frequency)_value$/g)) {
+                        if ( !fieldKey.match(/(quantity|frequency)_value$/g) && !!plan[fieldKey]) {
                             let fieldValue = plan[fieldKey]
                             let field = pd.find(a => a.field == fieldKey)
                             let val = Number(fieldValue)
@@ -298,6 +298,11 @@ export const CalculateQuote = ({
                 let service = services[serviceLabel]
                 services[serviceLabel]["Implementation Fee"] = 0
                 services[serviceLabel]["Implementation Days"] = 0
+                services[serviceLabel]["field"] = `implementation_${serviceLabel}`
+                services[serviceLabel]["discount"] = 0
+                let qdv = quoteDiscountValues[services[serviceLabel]["field"]]
+                if (!!qdv) services[serviceLabel]["discount"] = qdv
+
                 if (productType.standard_implementation_calculation_type == "default") {
                     if (service.plans != 0) {
                         let mod = service.plans > 1 ? 1.05 : 1
@@ -361,18 +366,24 @@ export const CalculateQuote = ({
                         services[serviceLabel]["Implementation Days"] = 1
                     }
                 }
+
+                if (services[serviceLabel]["discount"] > 0) {
+                    services[serviceLabel]["Implementation Fee"] -= services[serviceLabel]["Implementation Fee"] * (services[serviceLabel]["discount"] / 100)
+                }
+
                 totalImplementationDays += services[serviceLabel]["Implementation Days"]
                 totalImplementationFee += services[serviceLabel]["Implementation Fee"]
             }
 
-            productTypeImplementationFees[ptLabel] = {
-                total_headcount,
-                services,
-                totalImplementationFee,
-                totalImplementationDays,
+            if (Object.keys(services).length > 0 && totalImplementationDays > 0) {
+                productTypeImplementationFees[ptLabel] = {
+                    total_headcount,
+                    services,
+                    totalImplementationFee,
+                    totalImplementationDays,
+                }
+                estimated_implementation_fee += totalImplementationFee
             }
-
-            estimated_implementation_fee += totalImplementationFee
         })
 
         Quote["Implementation Fees"] = productTypeImplementationFees

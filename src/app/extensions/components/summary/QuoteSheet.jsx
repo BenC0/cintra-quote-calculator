@@ -287,20 +287,60 @@ export const QuoteSheet = ({
                 </Flex>
             </Accordion>)
         } else {
-            console.log({impFees})
             let stdRows = []
             for (let key in impFees) {
                 let fee = impFees[key]
-                // console.log({key, fee})
-                if (fee.totalImplementationDays > 0) {
+                for (let serviceKey in fee.services) {
+                    let service = fee.services[serviceKey]
+                    service["input_type"] = "Number"
                     stdRows.push(<TableRow>
-                        <TableCell>{key}</TableCell>
-                        <TableCell>{formatInt(fee.totalImplementationDays)}</TableCell>
-                        <TableCell>£{formatPrice(fee.totalImplementationFee / fee.totalImplementationDays)}</TableCell>
-                        <TableCell>{formatInt(fee.discount ?? 0)}%</TableCell>
-                        <TableCell>£{formatPrice(fee.totalImplementationFee)}</TableCell>
-                        <TableCell></TableCell>
+                        <TableCell>{service.label}</TableCell>
+                        <TableCell>{formatInt(service["Implementation Days"])}</TableCell>
+                        <TableCell>£{formatPrice(service["Implementation Fee"] / service["Implementation Days"])}</TableCell>
+                        <TableCell align="right">
+                            {(!!discountEditing[service.field] || discountEditing[service.field] === 0) ? (
+                                renderField(service, (field, e, planId) => {
+                                    discountHandler(service.field, e, "add")
+                                }, "PSQ", (!!discountEditing[service.field] || discountEditing[service.field] === 0) && typeof discountEditing[service.field] == "number" ? discountEditing[service.field] : service.discount, true, 100)
+                            ) : `${service.discount}%` || `0%`}
+                        </TableCell>
+                        <TableCell align="right">
+                            {(!!discountEditing[service.field] || discountEditing[service.field] === 0) ? ("--"): <>£{formatPrice(service["Implementation Fee"]) || 0.00}</>}
+                        </TableCell>
+                        <TableCell>
+                            {(!!discountEditing[service.field] || discountEditing[service.field] === 0) ? (
+                                <Flex direction="column" align="stretch" gap="sm">
+                                    <Button
+                                        variant="primary"
+                                        onClick={_ => {
+                                            QuoteDiscountValueHandler(service.field, discountEditing[service.field])
+                                            discountHandler(service.field, null, "remove")
+                                        }}
+                                    >
+                                        <> <Icon name="success"/> Save </>
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={_ => {
+                                            discountHandler(service.field, null, "remove")
+                                        }}
+                                    >
+                                        <> <Icon name="delete"/> Cancel </>
+                                    </Button>
+                                </Flex>                                            
+                            ) : (
+                                <Button
+                                    variant="transparent"
+                                    onClick={_ => {
+                                        discountHandler(service.field, true, "add")
+                                    }}
+                                >
+                                    <> <Icon name="edit"/> Edit </>
+                                </Button>
+                            )}
+                        </TableCell>
                     </TableRow>)
+
                 }
             }
             Output.push( <Accordion title={"Standard Implementation Fees"} defaultOpen>
@@ -318,8 +358,8 @@ export const QuoteSheet = ({
                         </TableHead>
                         <TableHead>
                             <TableRow>
-                                <TableHeader>Implementation Fees</TableHeader>
-                                <TableHeader>Days</TableHeader>
+                                <TableHeader>Implementation Product</TableHeader>
+                                <TableHeader>Units</TableHeader>
                                 <TableHeader>Unit Price</TableHeader>
                                 <TableHeader>Discount</TableHeader>
                                 <TableHeader>Total Fee</TableHeader>
