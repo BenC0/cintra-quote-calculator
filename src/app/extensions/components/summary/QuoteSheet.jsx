@@ -221,12 +221,15 @@ export const QuoteSheet = ({
                 if (!!key.match(/^[0-9]*$/g)) psqPlans.push(impFees[key])
             }
             psqPlans.forEach(plan => {
+                console.log(plan)
                 psqTables.push(<Table>
                     <TableHead>
                         <TableRow>
-                            <TableHeader>{plan.title}</TableHeader>
-                            <TableHeader></TableHeader>
-                            <TableHeader></TableHeader>
+                            <TableHeader>{plan.title} - Implementation Product</TableHeader>
+                            <TableHeader>Units</TableHeader>
+                            <TableHeader>Unit Price</TableHeader>
+                            <TableHeader>Discount</TableHeader>
+                            <TableHeader>Total Fee</TableHeader>
                             <TableHeader></TableHeader>
                         </TableRow>
                     </TableHead>
@@ -235,6 +238,8 @@ export const QuoteSheet = ({
                             ((row.discount + row.psqFee)> 0) ? (
                                 <TableRow>
                                     <TableCell>{row.label}</TableCell>
+                                    <TableCell>{formatInt(row.hoursBand.hours)}</TableCell>
+                                    <TableCell>£{formatPrice(row.resource.hourly_rate)}</TableCell>
                                     <TableCell align="right">
                                         {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
                                             renderField(row, (field, e, planId) => {
@@ -348,16 +353,6 @@ export const QuoteSheet = ({
             Output.push( <Accordion title={"Standard Implementation Fees"} defaultOpen>
                 <Flex direction="column" gap="sm">
                     <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableHeader>Standard Implementation Fees</TableHeader>
-                                <TableHeader></TableHeader>
-                                <TableHeader></TableHeader>
-                                <TableHeader></TableHeader>
-                                <TableHeader></TableHeader>
-                                <TableHeader></TableHeader>
-                            </TableRow>
-                        </TableHead>
                         <TableHead>
                             <TableRow>
                                 <TableHeader>Implementation Product</TableHeader>
