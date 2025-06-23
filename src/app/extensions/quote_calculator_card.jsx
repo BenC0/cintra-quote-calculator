@@ -23,11 +23,11 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Main extension component
 const Extension = ({ context, runServerless, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = false;
-    const debugPlans = true;
+    const debug = true;
+    const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
-    const debugPage = 1;
+    const debugPage = 2;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -542,12 +542,28 @@ const Extension = ({ context, runServerless, actions }) => {
             {currentPage === 2 && (
                 <>
                     <Heading>PSQ Details</Heading>
+
+                    <QuoteSummaryComponent
+                        quote={quote}
+                        selectedValues={selectedValues}
+                        planIdsByType={planIdsByType}
+                        productTypeAccordions={productTypeAccordions}
+                    />
+                    
                     <PSQTables
                         quote = {quote}
                         psqAccordions = {psqAccordions}
                         PSQImplementationCustomHours = {PSQImplementationCustomHours}
                         PSQHandler = {PSQHandler}
                     />
+
+                    <QuoteSummaryComponent
+                        quote={quote}
+                        selectedValues={selectedValues}
+                        planIdsByType={planIdsByType}
+                        productTypeAccordions={productTypeAccordions}
+                    />
+
                     <Flex justify="end" gap="small">
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
                             Review Schedule

@@ -44,7 +44,6 @@ export const PSQTables = ({
     }
     
     let tables = []
-    console.log("Rendeding PSQ Accordions")
     psqAccordions.forEach(psqAccord => {
         let tasks = quote["Implementation Fees"][psqAccord.field]["fields"]
         tables.push(
@@ -116,14 +115,6 @@ export const PSQTables = ({
                 </Table>
             </Accordion>
         )
-    })
-
-    console.log({
-        event: "Rendering PSQ Tables",
-        quote,
-        psqAccordions,
-        implementationTypeKeys,
-        tasksEditing,
     })
 
     return <>

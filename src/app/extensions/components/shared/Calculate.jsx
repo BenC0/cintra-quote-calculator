@@ -377,13 +377,6 @@ export const CalculateQuote = ({
 
         Quote["Implementation Fees"] = productTypeImplementationFees
     } else if (RequiresPSQFee) {
-        console.log({
-            event: "Calculating PSQ Fees",
-            psqAccordions,
-            selectedValues,
-            psqImpHours,
-            quoteDetails: Quote["Details"],
-        })
 
         let validPlanIdsByType = {}
         for (let key in planIdsByType) {

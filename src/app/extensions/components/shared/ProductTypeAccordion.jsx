@@ -39,15 +39,6 @@ export const ProductTypeAccordion = ({
         if (!!tempPlanValues.quantity_value) defaultValues["quantity_value"] = tempPlanValues.quantity_value
         if (!!tempPlanValues.frequency_value) defaultValues["frequency_value"] = tempPlanValues.frequency_value
     }
-    
-    console.log({
-        event: "Rendering ProductTypeAccordion",
-        productType: productType.label,
-        hasTempId,
-        defaultValues,
-        // productTypeObject: productType,
-        // selectedValues,
-    })
 
     return (
         <Accordion title={productType.label} defaultOpen>
