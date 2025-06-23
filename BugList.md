@@ -19,8 +19,7 @@
 
 ## PSQ Bugs
 ### High Priority
-1. Convert to using fixed hour rate instead of calculating based on day rate
-2. PSQ CintraHR - Fixed Price
-3. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values.
+1. PSQ CintraHR - Fixed Price
+2. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values.
 ### Low Priority
-1. Sector - What if private and public?
+1. Sector - Handle private and public?

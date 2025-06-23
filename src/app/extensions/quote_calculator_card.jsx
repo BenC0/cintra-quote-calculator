@@ -189,12 +189,11 @@ const Extension = ({ context, runServerless, actions }) => {
     const impResourceDict = React.useMemo(() => {
         const d = {};
         rawImpResources.forEach((r) => {
-            const dayRate = Number(r.values.day_rate) || 0;
+            const hourlyRate = Number(r.values.hourly_rate) || 0;
             d[r.id] = {
                 field: r.id,
                 label: r.values.name,
-                day_rate: dayRate,
-                hourly_rate: (dayRate / 7) * .7,
+                hourly_rate: hourlyRate,
             };
         });
         return d;
