@@ -38,7 +38,7 @@ export const checkPSQRequirements = (selectedValues, productDefs, productTypeAcc
         for (let serviceKey in selectedPayrollValues) {
             let releventProduct = productDefs.find(p => p.field == serviceKey)
             if (!!releventProduct) {
-                if (releventProduct.requires_psq) {
+                if (releventProduct.requires_psq && !!selectedPayrollValues[serviceKey]) {
                     psq_services += 1
                 }
                 if (!!selectedPayrollValues[serviceKey]) {

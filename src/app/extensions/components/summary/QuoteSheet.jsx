@@ -14,7 +14,7 @@ import {
     TableRow,
 } from "@hubspot/ui-extensions"
 import { renderTableSummaries } from "../shared/renderTableSummaries"
-import { formatPrice, toTitleCase } from "../shared/utils"
+import { formatInt, formatPrice, toTitleCase } from "../shared/utils"
 import { renderField } from "../shared/Inputs";
 
 export const QuoteSheet = ({
@@ -284,6 +284,52 @@ export const QuoteSheet = ({
             Output.push( <Accordion title={"Professional Service Quote"} defaultOpen>
                 <Flex direction="column" gap="sm">
                     {psqTables}
+                </Flex>
+            </Accordion>)
+        } else {
+            console.log({impFees})
+            let stdRows = []
+            for (let key in impFees) {
+                let fee = impFees[key]
+                // console.log({key, fee})
+                if (fee.totalImplementationDays > 0) {
+                    stdRows.push(<TableRow>
+                        <TableCell>{key}</TableCell>
+                        <TableCell>{formatInt(fee.totalImplementationDays)}</TableCell>
+                        <TableCell>£{formatPrice(fee.totalImplementationFee / fee.totalImplementationDays)}</TableCell>
+                        <TableCell>{formatInt(fee.discount ?? 0)}</TableCell>
+                        <TableCell>£{formatPrice(fee.totalImplementationFee)}</TableCell>
+                        <TableCell></TableCell>
+                    </TableRow>)
+                }
+            }
+            Output.push( <Accordion title={"Standard Implementation Fees"} defaultOpen>
+                <Flex direction="column" gap="sm">
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableHeader>Standard Implementation Fees</TableHeader>
+                                <TableHeader></TableHeader>
+                                <TableHeader></TableHeader>
+                                <TableHeader></TableHeader>
+                                <TableHeader></TableHeader>
+                                <TableHeader></TableHeader>
+                            </TableRow>
+                        </TableHead>
+                        <TableHead>
+                            <TableRow>
+                                <TableHeader>Implementation Fees</TableHeader>
+                                <TableHeader>Days</TableHeader>
+                                <TableHeader>Unit Price</TableHeader>
+                                <TableHeader>Discount</TableHeader>
+                                <TableHeader>Total Fee</TableHeader>
+                                <TableHeader></TableHeader>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {stdRows}
+                        </TableBody>
+                    </Table>
                 </Flex>
             </Accordion>)
         }
