@@ -525,7 +525,6 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        type={"inline"}
                         productTypeAccordions={productTypeAccordions}
                     />
 
@@ -544,7 +543,6 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        type={"table"}
                         productTypeAccordions={productTypeAccordions}
                         suppressImplementationFee = {false}
                     />
@@ -558,7 +556,6 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        type={"inline"}
                         productTypeAccordions={productTypeAccordions}
                         suppressImplementationFee = {false}
                     />
@@ -580,7 +577,6 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        type={"inline-table"}
                         productTypeAccordions={productTypeAccordions}
                         suppressImplementationFee = {false}
                         suppressQuoteFees = {false}
@@ -597,7 +593,6 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        type={"inline-table"}
                         productTypeAccordions={productTypeAccordions}
                         suppressImplementationFee = {false}
                         suppressQuoteFees = {false}

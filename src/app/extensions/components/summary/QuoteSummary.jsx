@@ -20,7 +20,6 @@ import { formatPrice, formatInt, reshapeArray } from "../shared/utils";
 */
 const QuoteSummaryComponent = ({
     quote = {},
-    type = "inline",
     productTypeAccordions = [],
     suppressImplementationFee = true,
     suppressQuoteFees = true,
@@ -60,21 +59,23 @@ const QuoteSummaryComponent = ({
     }
 
     for (let productType in quote["Details"]) {
-        let count = 0
-        let type = "count"
-        quote["Details"][productType].forEach(plan => {
-            let confirmedPlanValidity = !!plan && !!plan.fields && plan.fields.length > 0
-            if (confirmedPlanValidity) count += 1
-        })
-        let valid = !!count
-        
-        let accordion = productTypeAccordions.find(a => a.label == productType)
-        if (!!accordion) {
-            if (accordion.max_items == 1) {
-                type = "boolean"
+        if (productType !== "Quote Details") {
+            let count = 0
+            let type = "count"
+            quote["Details"][productType].forEach(plan => {
+                let confirmedPlanValidity = !!plan && !!plan.fields && plan.fields.length > 0
+                if (confirmedPlanValidity) count += 1
+            })
+            let valid = !!count
+            
+            let accordion = productTypeAccordions.find(a => a.label == productType)
+            if (!!accordion) {
+                if (accordion.max_items == 1) {
+                    type = "boolean"
+                }
             }
+            keyDetails[productType] = { label: productType, count, type, valid }
         }
-        keyDetails[productType] = { label: productType, count, type, valid }
     }
 
     let costTableRows = []
