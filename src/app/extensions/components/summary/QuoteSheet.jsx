@@ -107,106 +107,108 @@ export const QuoteSheet = ({
                                 })
                             }
                         }
-                        accordionDetails["plans"].push(planDetails)
+                        if (planDetails.rows.length > 0) accordionDetails["plans"].push(planDetails)
                     })
                 }
 
                 // Accordion details collected, time to generate.
-                Output.push( <Accordion title={accordionDetails.title} defaultOpen>
-                    <Flex direction="column" gap="sm">
-                        {accordionDetails["plans"].map(accordion => (
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableHeader>{accordion.heading}</TableHeader>
-                                        <TableHeader></TableHeader>
-                                        <TableHeader></TableHeader>
-                                        <TableHeader></TableHeader>
-                                        <TableHeader></TableHeader>
-                                        <TableHeader></TableHeader>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableHeader align="left">Product Name</TableHeader>
-                                        <TableHeader align="right">Quantity</TableHeader>
-                                        <TableHeader align="right">Unit Price</TableHeader>
-                                        <TableHeader align="right">Discount</TableHeader>
-                                        <TableHeader align="right">Estimated Monthly Fee</TableHeader>
-                                        <TableHeader align="center"></TableHeader>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {accordion.rows.map(row => (
+                if (accordionDetails["plans"].length > 0) {
+                    Output.push( <Accordion title={accordionDetails.title} defaultOpen>
+                        <Flex direction="column" gap="sm">
+                            {accordionDetails["plans"].map(accordion => (
+                                <Table>
+                                    <TableHead>
                                         <TableRow>
-                                            <TableCell>{row.name}</TableCell>
-                                            <TableCell align="right">{row.quantity}</TableCell>
-                                            <TableCell align="right">£{formatPrice(row.unitPrice)}</TableCell>
-                                            {/* <TableCell align="right">{row.discount}%</TableCell> */}
-                                            <TableCell align="right">
-                                                {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
-                                                    renderField(row, (field, e, planId) => {
-                                                        discountHandler(row.field, e, "add")
-                                                    }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
-                                                ) : `${row.discount}%` || `0%`}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.estimatedMonthlyFee) || 0.00}</>}
-                                                {!!row.containsMonthlyStandingCharge && (<Text>(Includes Monthly Standing Charge | £{formatPrice(row.monthlyStandingCharge)})</Text>)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
-                                                    <Flex direction="column" align="stretch" gap="sm">
+                                            <TableHeader>{accordion.heading}</TableHeader>
+                                            <TableHeader></TableHeader>
+                                            <TableHeader></TableHeader>
+                                            <TableHeader></TableHeader>
+                                            <TableHeader></TableHeader>
+                                            <TableHeader></TableHeader>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableHeader align="left">Product Name</TableHeader>
+                                            <TableHeader align="right">Quantity</TableHeader>
+                                            <TableHeader align="right">Unit Price</TableHeader>
+                                            <TableHeader align="right">Discount</TableHeader>
+                                            <TableHeader align="right">Estimated Monthly Fee</TableHeader>
+                                            <TableHeader align="center"></TableHeader>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {accordion.rows.map(row => (
+                                            <TableRow>
+                                                <TableCell>{row.name}</TableCell>
+                                                <TableCell align="right">{row.quantity}</TableCell>
+                                                <TableCell align="right">£{formatPrice(row.unitPrice)}</TableCell>
+                                                {/* <TableCell align="right">{row.discount}%</TableCell> */}
+                                                <TableCell align="right">
+                                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                        renderField(row, (field, e, planId) => {
+                                                            discountHandler(row.field, e, "add")
+                                                        }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
+                                                    ) : `${row.discount}%` || `0%`}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.estimatedMonthlyFee) || 0.00}</>}
+                                                    {!!row.containsMonthlyStandingCharge && (<Text>(Includes Monthly Standing Charge | £{formatPrice(row.monthlyStandingCharge)})</Text>)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                        <Flex direction="column" align="stretch" gap="sm">
+                                                            <Button
+                                                                variant="primary"
+                                                                onClick={_ => {
+                                                                    QuoteDiscountValueHandler(row.field, discountEditing[row.field])
+                                                                    discountHandler(row.field, null, "remove")
+                                                                }}
+                                                            >
+                                                                <> <Icon name="success"/> Save </>
+                                                            </Button>
+                                                            <Button
+                                                                variant="destructive"
+                                                                onClick={_ => {
+                                                                    discountHandler(row.field, null, "remove")
+                                                                }}
+                                                            >
+                                                                <> <Icon name="delete"/> Cancel </>
+                                                            </Button>
+                                                        </Flex>                                            
+                                                    ) : (
                                                         <Button
-                                                            variant="primary"
+                                                            variant="transparent"
                                                             onClick={_ => {
-                                                                QuoteDiscountValueHandler(row.field, discountEditing[row.field])
-                                                                discountHandler(row.field, null, "remove")
+                                                                discountHandler(row.field, true, "add")
                                                             }}
                                                         >
-                                                            <> <Icon name="success"/> Save </>
+                                                            <> <Icon name="edit"/> Edit </>
                                                         </Button>
-                                                        <Button
-                                                            variant="destructive"
-                                                            onClick={_ => {
-                                                                discountHandler(row.field, null, "remove")
-                                                            }}
-                                                        >
-                                                            <> <Icon name="delete"/> Cancel </>
-                                                        </Button>
-                                                    </Flex>                                            
-                                                ) : (
-                                                    <Button
-                                                        variant="transparent"
-                                                        onClick={_ => {
-                                                            discountHandler(row.field, true, "add")
-                                                        }}
-                                                    >
-                                                        <> <Icon name="edit"/> Edit </>
-                                                    </Button>
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                                <TableFooter>
-                                    {accordion.coreProductMonthlyFee > 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={4}>Estimated Core Product Charges</TableCell>
-                                            <TableCell align="right">£{formatPrice(accordion.coreProductMonthlyFee)}</TableCell>
-                                            <TableCell></TableCell>
-                                        </TableRow>
-                                    ) : <></>}
-                                    {accordion.addonProductMonthlyFee > 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={4}>Estimated Addon Product Charges</TableCell>
-                                            <TableCell align="right">£{formatPrice(accordion.addonProductMonthlyFee)}</TableCell>
-                                            <TableCell></TableCell>
-                                        </TableRow>
-                                    ) : <></>}
-                                </TableFooter>
-                            </Table>
-                        ))}
-                    </Flex>
-                </Accordion>)
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                    <TableFooter>
+                                        {accordion.coreProductMonthlyFee > 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={4}>Estimated Core Product Charges</TableCell>
+                                                <TableCell align="right">£{formatPrice(accordion.coreProductMonthlyFee)}</TableCell>
+                                                <TableCell></TableCell>
+                                            </TableRow>
+                                        ) : <></>}
+                                        {accordion.addonProductMonthlyFee > 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={4}>Estimated Addon Product Charges</TableCell>
+                                                <TableCell align="right">£{formatPrice(accordion.addonProductMonthlyFee)}</TableCell>
+                                                <TableCell></TableCell>
+                                            </TableRow>
+                                        ) : <></>}
+                                    </TableFooter>
+                                </Table>
+                            ))}
+                        </Flex>
+                    </Accordion>)
+                }
             }
         })
 
