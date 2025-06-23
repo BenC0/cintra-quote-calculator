@@ -3,7 +3,9 @@
 ## User Interface Bugs
 1. Standard Implementation Fee breaks Quote Sheet
 2. Editing pre-existing plan has no Staging, it's live editing.
-3. Clone no longer works
+3. Implementation Fee in Quote Sheet is misaligned
+4. Quote Sheet Summary Tables are inconsistently aligned due to mixed use of Accordions. 
+5. Clone no longer works
 
 ## Calculation Bugs
 1. Qty value used for calcing quote is wrong, uses total headcount across all plans in payroll, producing weird values.
