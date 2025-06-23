@@ -112,7 +112,6 @@ export const QuoteSheet = ({
                     })
                 }
 
-
                 // Accordion details collected, time to generate.
                 Output.push( <Accordion title={accordionDetails.title} defaultOpen>
                     <Flex direction="column" gap="sm">
@@ -211,6 +210,84 @@ export const QuoteSheet = ({
                 </Accordion>)
             }
         })
+
+        let impFees = quote["Implementation Fees"]
+        let impFeeType = impFees["Implementation Type"]
+        if (impFeeType == "PSQ") {
+            let psqPlans = []
+            let psqTables = []
+            for (let key in impFees) {
+                if (!!key.match(/^[0-9]*$/g)) psqPlans.push(impFees[key])
+            }
+            psqPlans.forEach(plan => {
+                psqTables.push(<Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeader>{plan.title}</TableHeader>
+                            <TableHeader></TableHeader>
+                            <TableHeader></TableHeader>
+                            <TableHeader></TableHeader>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {plan.fields.map(row => (
+                            // console.log({row}),
+                            <TableRow>
+                                <TableCell>{row.label}</TableCell>
+                                <TableCell align="right">
+                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                        renderField(row, (field, e, planId) => {
+                                            discountHandler(row.field, e, "add")
+                                        }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
+                                    ) : `${row.discount || 0}%` || `0%`}
+                                </TableCell>
+                                <TableCell align="right">
+                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.psqFee) || 0.00}</>}
+                                </TableCell>
+                                <TableCell>
+                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                        <Flex direction="column" align="stretch" gap="sm">
+                                            <Button
+                                                variant="primary"
+                                                onClick={_ => {
+                                                    QuoteDiscountValueHandler(row.field, discountEditing[row.field])
+                                                    discountHandler(row.field, null, "remove")
+                                                }}
+                                            >
+                                                <> <Icon name="success"/> Save </>
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                onClick={_ => {
+                                                    discountHandler(row.field, null, "remove")
+                                                }}
+                                            >
+                                                <> <Icon name="delete"/> Cancel </>
+                                            </Button>
+                                        </Flex>                                            
+                                    ) : (
+                                        <Button
+                                            variant="transparent"
+                                            onClick={_ => {
+                                                discountHandler(row.field, true, "add")
+                                            }}
+                                        >
+                                            <> <Icon name="edit"/> Edit </>
+                                        </Button>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>)
+            })
+            Output.push( <Accordion title={"Professional Service Quote"} defaultOpen>
+                <Flex direction="column" gap="sm">
+                    {psqTables}
+                </Flex>
+            </Accordion>)
+        }
+
     }
 
     return Output

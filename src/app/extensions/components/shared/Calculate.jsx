@@ -442,6 +442,8 @@ export const CalculateQuote = ({
                 fields: psqAccord.fields.map(field => {
                     let hoursBand = {hours: 0}
                     let psqFee = 0
+                    let discount = 0
+                    if (!!quoteDiscountValues[field.field]) discount = quoteDiscountValues[field.field]
                     let associatedConfigValue = null 
                     field.psq_config_reference.forEach(configField => {
                         if (!!psqConfig[configField]) {
@@ -474,6 +476,10 @@ export const CalculateQuote = ({
                         psqFee = hoursBand.hours * (field.resource.hourly_rate || 0)
                     }
 
+                    if (discount > 0) {
+                        psqFee -= psqFee * (discount / 100)
+                    }
+
                     if (isNaN(psqFee)) console.error({
                         event: "PSQ Fee is NaN",
                         hours: hoursBand.hours,
@@ -485,6 +491,7 @@ export const CalculateQuote = ({
                         ...field,
                         associatedConfigValue,
                         hoursBand,
+                        discount,
                         psqFee,
                     }
                 }),
