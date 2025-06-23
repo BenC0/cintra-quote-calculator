@@ -221,72 +221,74 @@ export const QuoteSheet = ({
                 if (!!key.match(/^[0-9]*$/g)) psqPlans.push(impFees[key])
             }
             psqPlans.forEach(plan => {
-                console.log(plan)
-                psqTables.push(<Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableHeader>{plan.title} - Implementation Product</TableHeader>
-                            <TableHeader>Units</TableHeader>
-                            <TableHeader>Unit Price</TableHeader>
-                            <TableHeader>Discount</TableHeader>
-                            <TableHeader>Total Fee</TableHeader>
-                            <TableHeader></TableHeader>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {plan.fields.map(row => (
-                            ((row.discount + row.psqFee)> 0) ? (
-                                <TableRow>
-                                    <TableCell>{row.label}</TableCell>
-                                    <TableCell>{formatInt(row.hoursBand.hours)}</TableCell>
-                                    <TableCell>£{formatPrice(row.resource.hourly_rate)}</TableCell>
-                                    <TableCell align="right">
-                                        {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
-                                            renderField(row, (field, e, planId) => {
-                                                discountHandler(row.field, e, "add")
-                                            }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
-                                        ) : `${row.discount || 0}%` || `0%`}
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.psqFee) || 0.00}</>}
-                                    </TableCell>
-                                    <TableCell>
-                                        {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
-                                            <Flex direction="column" align="stretch" gap="sm">
+                let validFields = plan.fields.filter(field => (field.psqFee + field.discount) > 0)
+                if (validFields.length > 0) {
+                    psqTables.push(<Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableHeader>{plan.title} - Implementation Product</TableHeader>
+                                <TableHeader>Units</TableHeader>
+                                <TableHeader>Unit Price</TableHeader>
+                                <TableHeader>Discount</TableHeader>
+                                <TableHeader>Total Fee</TableHeader>
+                                <TableHeader></TableHeader>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {plan.fields.map(row => (
+                                ((row.discount + row.psqFee)> 0) ? (
+                                    <TableRow>
+                                        <TableCell>{row.label}</TableCell>
+                                        <TableCell>{formatInt(row.hoursBand.hours)}</TableCell>
+                                        <TableCell>£{formatPrice(row.resource.hourly_rate)}</TableCell>
+                                        <TableCell align="right">
+                                            {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                renderField(row, (field, e, planId) => {
+                                                    discountHandler(row.field, e, "add")
+                                                }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
+                                            ) : `${row.discount || 0}%` || `0%`}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.psqFee) || 0.00}</>}
+                                        </TableCell>
+                                        <TableCell>
+                                            {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                <Flex direction="column" align="stretch" gap="sm">
+                                                    <Button
+                                                        variant="primary"
+                                                        onClick={_ => {
+                                                            QuoteDiscountValueHandler(row.field, discountEditing[row.field])
+                                                            discountHandler(row.field, null, "remove")
+                                                        }}
+                                                    >
+                                                        <> <Icon name="success"/> Save </>
+                                                    </Button>
+                                                    <Button
+                                                        variant="destructive"
+                                                        onClick={_ => {
+                                                            discountHandler(row.field, null, "remove")
+                                                        }}
+                                                    >
+                                                        <> <Icon name="delete"/> Cancel </>
+                                                    </Button>
+                                                </Flex>                                            
+                                            ) : (
                                                 <Button
-                                                    variant="primary"
+                                                    variant="transparent"
                                                     onClick={_ => {
-                                                        QuoteDiscountValueHandler(row.field, discountEditing[row.field])
-                                                        discountHandler(row.field, null, "remove")
+                                                        discountHandler(row.field, true, "add")
                                                     }}
                                                 >
-                                                    <> <Icon name="success"/> Save </>
+                                                    <> <Icon name="edit"/> Edit </>
                                                 </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    onClick={_ => {
-                                                        discountHandler(row.field, null, "remove")
-                                                    }}
-                                                >
-                                                    <> <Icon name="delete"/> Cancel </>
-                                                </Button>
-                                            </Flex>                                            
-                                        ) : (
-                                            <Button
-                                                variant="transparent"
-                                                onClick={_ => {
-                                                    discountHandler(row.field, true, "add")
-                                                }}
-                                            >
-                                                <> <Icon name="edit"/> Edit </>
-                                            </Button>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            ) : <></>
-                        ))}
-                    </TableBody>
-                </Table>)
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : <></>
+                            ))}
+                        </TableBody>
+                    </Table>)
+                }
             })
             Output.push( <Accordion title={"Professional Service Quote"} defaultOpen>
                 <Flex direction="column" gap="sm">
