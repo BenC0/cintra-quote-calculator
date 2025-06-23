@@ -46,7 +46,6 @@ export const QuoteSheet = ({
     }
 
     if (conditions.every(a => !!a)) {
-
         productTypeAccordions.forEach(productType => {
             if (!productType.is_quote_details_type) {
                 let accordionDetails = {
@@ -55,7 +54,6 @@ export const QuoteSheet = ({
                 }
                 const productTypePlans = planIdsByType[productType.label]
                 const productTypeQuoteReference = quote["Details"][productType.label]
-                console.log({productTypePlans})
                 if (!!!productTypePlans || productTypePlans.length == 0) return null;
                 
                 if (!!productTypePlans && !!productTypeQuoteReference) {
