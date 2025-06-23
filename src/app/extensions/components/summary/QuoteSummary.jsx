@@ -146,15 +146,6 @@ const QuoteSummaryComponent = ({
         )
     }
 
-    console.log({
-        event: "Generating QuoteSummaryComponent",
-        keyDetails,
-        quote,
-        type,
-        suppressImplementationFee,
-        productTypeAccordions,
-    })
-
     return (
         <Flex direction="column" align="stretch" gap="md">
             <Text format={{ fontWeight: "bold", fontSize: "lg" }}>Quote Summary</Text>

@@ -55,6 +55,8 @@ export const QuoteSheet = ({
                 }
                 const productTypePlans = planIdsByType[productType.label]
                 const productTypeQuoteReference = quote["Details"][productType.label]
+                console.log({productTypePlans})
+                if (!!!productTypePlans || productTypePlans.length == 0) return null;
                 
                 if (!!productTypePlans && !!productTypeQuoteReference) {
                     productTypePlans.forEach((plan, idx) => {
@@ -111,6 +113,7 @@ export const QuoteSheet = ({
                         accordionDetails["plans"].push(planDetails)
                     })
                 }
+
 
                 // Accordion details collected, time to generate.
                 Output.push( <Accordion title={accordionDetails.title} defaultOpen>
@@ -208,19 +211,8 @@ export const QuoteSheet = ({
                         ))}
                     </Flex>
                 </Accordion>)
-                // console.log({
-                //     event: "Processed Summary Accordion",
-                //     accordionDetails,
-                // })
             }
         })
-
-        // console.log({
-        //     quote,
-        //     productTypeAccordions,
-        //     selectedValues,
-        //     planIdsByType,
-        // })
     }
 
     return Output
