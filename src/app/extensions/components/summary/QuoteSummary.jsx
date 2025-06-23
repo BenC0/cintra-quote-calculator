@@ -1,5 +1,6 @@
 import React from "react";
-import { Flex, Tile, Icon, Text } from "@hubspot/ui-extensions";
+import { Flex, Tile, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem } from "@hubspot/ui-extensions";
+import { formatPrice, formatInt, reshapeArray } from "../shared/utils";
 
 /**
  * QuoteSummaryComponent dynamically generates tiles based on productTypeDefs and selectedValues.
@@ -19,27 +20,144 @@ import { Flex, Tile, Icon, Text } from "@hubspot/ui-extensions";
 */
 const QuoteSummaryComponent = ({
     quote = {},
-    productTypeAccordions = {},
-    selectedValues = {},
-    planIdsByType = {},
+    type = "inline",
+    productTypeAccordions = [],
+    suppressImplementationFee = true,
+    suppressQuoteFees = true,
 }) => {
-    const tiles = generateTiles(
-        quote,
-        productTypeAccordions,
-        selectedValues,
-        planIdsByType,
-    );
+    const conditions = [
+        Object.keys(quote),
+        productTypeAccordions
+    ].map(cond => cond.length > 0)
+    if (!conditions.every(a => !!a)) return null
 
-    if (tiles.length === 0) {
-        return null;
+    const keyDetails = {
+        "Contract Length": {
+            label: "Contract",
+            count: `${quote["Summary"]["ContractLength"] ?? 0} Months`,
+            type: "count",
+            valid: !!quote["Summary"]["ContractLength"],
+        },
+        "Education Client": {
+            label: "Education Client",
+            count: quote["Summary"]["EducationClient"] ?? 0,
+            type: "boolean",
+            valid: !!quote["Summary"]["EducationClient"],
+        },
+        "PublicSector Client": {
+            label: "Public Sector Client",
+            count: quote["Summary"]["PublicSectorClient"] ?? 0,
+            type: "boolean",
+            valid: !!quote["Summary"]["PublicSectorClient"],
+        },
+        "Payroll Headcount": {
+            label: "Total Employees",
+            count: formatInt(quote["Summary"]["PayrollHeadcount"] ?? 0),
+            type: "count",
+            valid: !!quote["Summary"]["PayrollHeadcount"],
+        },
     }
 
+    for (let productType in quote["Details"]) {
+        let count = 0
+        let type = "count"
+        quote["Details"][productType].forEach(plan => {
+            let confirmedPlanValidity = plan.fields.length > 0
+            if (confirmedPlanValidity) count += 1
+        })
+        let valid = !!count
+        
+        let accordion = productTypeAccordions.find(a => a.label == productType)
+        if (!!accordion) {
+            if (accordion.max_items == 1) {
+                type = "boolean"
+            }
+        }
+        keyDetails[productType] = { label: productType, count, type, valid }
+    }
+
+    if (!suppressImplementationFee) {
+        keyDetails["Total Implementation Costs"] = {
+            label: "Total Implementation Costs",
+            count: `£${formatPrice(quote["Summary"]["Total Implementation Costs"] ?? 0)}`,
+            type: "count",
+            valid: !!quote["Summary"]["Total Implementation Costs"],
+        }
+    }
+
+    if (!suppressQuoteFees) {
+        keyDetails["Total Estimated Annual Costs"] = {
+            label: "Total Estimated Annual Costs",
+            count: `£${formatPrice(quote["Summary"]["Total Estimated Annual Costs"] ?? 0)}`,
+            type: "count",
+            valid: !!quote["Summary"]["Total Estimated Annual Costs"],
+        }
+        keyDetails["Total Estimated Monthly Costs"] = {
+            label: "Total Estimated Monthly Costs",
+            count: `£${formatPrice(quote["Summary"]["Total Estimated Monthly Costs"] ?? 0)}`,
+            type: "count",
+            valid: !!quote["Summary"]["Total Estimated Monthly Costs"],
+        }
+        keyDetails["Total Y1 Costs"] = {
+            label: "Total Y1 Costs",
+            count: `£${formatPrice(quote["Summary"]["Total Y1 Costs"] ?? 0)}`,
+            type: "count",
+            valid: !!quote["Summary"]["Total Y1 Costs"],
+        }
+    }
+
+    let keyDetailsElements = []
+    for (let detailKey in keyDetails) {
+        if (!!keyDetails[detailKey].valid) {
+            let details = keyDetails[detailKey]
+            let measure = <Text format={{ fontWeight: "bold", fontSize: "small" }}>{details.count}</Text>
+            if (details.type === "boolean") measure = <Icon name="success"/>
+            // keyDetailsElements.push(<Flex direction="row" gap="small" wrap>
+            //     {measure}
+            //     <Text format={{fontSize: "small" }}>{details.label}</Text>
+            // </Flex>)
+            keyDetailsElements.push({
+                measure,
+                label: details.label,
+            })
+        }
+    }
+
+    console.log({
+        event: "Generating QuoteSummaryComponent",
+        keyDetails,
+        quote,
+        type,
+        suppressImplementationFee,
+        productTypeAccordions,
+    })
+    
+
+    const detailsPerRow = 5
+    // keyDetailsElements = reshapeArray(keyDetailsElements, detailsPerRow)
+    // keyDetailsElements = keyDetailsElements.map(row => {
+    //     while (row.length < detailsPerRow) row.push("")
+    //     return row
+    // })
+
     return (
-        <Flex direction="column" align="start" gap="md">
+        <Flex direction="column" align="stretch" gap="md">
             <Text format={{ fontWeight: "bold", fontSize: "lg" }}>Quote Summary</Text>
-            <Flex gap="small" wrap>
-                {tiles}
-            </Flex>
+            {/* <Flex gap="small" wrap>
+                {keyDetailsElements}
+            </Flex> */}
+            <DescriptionList direction={"row"}>
+                {keyDetailsElements.map(detail => <DescriptionListItem label={detail.label}>{detail.measure}</DescriptionListItem>)}
+            </DescriptionList>
+            {/* <Flex direction="row" align="start" gap="flush">
+                <Table>
+                    { keyDetailsElements.map( row => (
+                        <TableRow>
+                            {row.map(cell => <TableCell align="center">{cell}</TableCell>)}
+                        </TableRow>
+                    ) ) }
+                </Table>
+            </Flex> */}
         </Flex>
     );
 };

@@ -22,12 +22,13 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 
 // Main extension component
 const Extension = ({ context, runServerless, actions }) => {
+    console.warn({context})
     // Debug flags for console logging various parts of state and logic
     const debug = true;
     const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
-    const debugPage = 2;
+    const debugPage = 1;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -525,8 +526,7 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        selectedValues={selectedValues}
-                        planIdsByType={planIdsByType}
+                        type={"inline"}
                         productTypeAccordions={productTypeAccordions}
                     />
 
@@ -545,11 +545,11 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        selectedValues={selectedValues}
-                        planIdsByType={planIdsByType}
+                        type={"table"}
                         productTypeAccordions={productTypeAccordions}
+                        suppressImplementationFee = {false}
                     />
-                    
+
                     <PSQTables
                         quote = {quote}
                         psqAccordions = {psqAccordions}
@@ -559,11 +559,10 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        selectedValues={selectedValues}
-                        planIdsByType={planIdsByType}
+                        type={"inline"}
                         productTypeAccordions={productTypeAccordions}
+                        suppressImplementationFee = {false}
                     />
-
                     <Flex justify="end" gap="small">
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
                             Review Schedule
@@ -582,9 +581,10 @@ const Extension = ({ context, runServerless, actions }) => {
 
                     <QuoteSummaryComponent
                         quote={quote}
-                        selectedValues={selectedValues}
-                        planIdsByType={planIdsByType}
+                        type={"inline-table"}
                         productTypeAccordions={productTypeAccordions}
+                        suppressImplementationFee = {false}
+                        suppressQuoteFees = {false}
                     />
 
                     <QuoteSheet

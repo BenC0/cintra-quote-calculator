@@ -2,9 +2,8 @@
 
 ## User Interface Bugs
 1. Quote Sheet missing Implementation Summary
-2. PSQ Page missing Quote Summaries
-3. Quote summary sucks
-4. Editing pre-existing plan has no Staging, it's live editing.
+2. Editing pre-existing plan has no Staging, it's live editing.
+3. Clone no longer works
 
 ## Calculation Bugs
 1. Qty value used for calcing quote is wrong, uses total headcount across all plans in payroll, producing weird values.

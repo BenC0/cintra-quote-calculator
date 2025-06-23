@@ -60,13 +60,6 @@ export const ProductTypeFormPanel = ({
         grouped_fields["details"] = [quantity, ...grouped_fields["details"]]
     }
 
-    console.log({
-        event: "Rendering ProductTypeFormPanel",
-        localPlanId,
-        initialLookup,
-        grouped_fields,
-    })
-
     const arrayHas = arr => Array.isArray(arr) && arr.length > 0
 
     const has_details = arrayHas(grouped_fields.details) 
