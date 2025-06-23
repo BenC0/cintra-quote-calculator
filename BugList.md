@@ -12,14 +12,14 @@
 ## Calculation Bugs
 ### High Priority
 1. Capture Expense Pricing - One Time Fee, value equals 12% of Estimated Monthly Charges, can be toggled on/off.
+2. Qty value used for calcing quote is wrong, uses total headcount across all plans in payroll, producing weird values.
+3. Not fully accounting for Cintra Payroll Product in Implementation Fees (Standard, possibly PSQ as well)
 ### Low Priority
-1. Qty value used for calcing quote is wrong, uses total headcount across all plans in payroll, producing weird values.
-2. Quote seems to return slightly different figures when selecting weekly payroll options. I suspect this is related to decimal places / floating point precision.
+1. Quote seems to return slightly different figures when selecting weekly payroll options. I suspect this is related to decimal places / floating point precision.
 
 ## PSQ Bugs
 ### High Priority
-1. PSQ CintraHR - Fixed Price
-2. No accounting for Cintra Payroll Product?
-3. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values.
+1. PSQ CintraHR - Fixed Price, needs integrating
+2. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values, needs integrating
 ### Low Priority
-1. Sector - Handle private and public?
+1. Sector - Needs integrating
