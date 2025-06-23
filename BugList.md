@@ -4,7 +4,7 @@
 ### High Priority
 1. Custom Products aren't tested/used/accounted for. 
 ### Low Priority
-1. Clone no longer works
+1. Clone occasionaly breaks.
 2. Editing pre-existing plan has no Staging, it's live editing.
 3. Preselecting default values for dropdowns not built in.
 4. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
@@ -21,5 +21,5 @@
 ### High Priority
 1. PSQ CintraHR - Fixed Price, needs integrating
 2. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values, needs integrating
+3. Sector - Needs integrating
 ### Low Priority
-1. Sector - Needs integrating
