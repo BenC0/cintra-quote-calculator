@@ -4,10 +4,9 @@
 ### High Priority
 ### Low Priority
 1. Editing pre-existing plan has no Staging, it's live editing.
-2. Custom Products aren't tested/used/accounted for.
-3. Quote Sheet Summary Tables are inconsistently aligned due to mixed use of Accordions. 
-4. Clone no longer works
-5. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
+2. Custom Products aren't tested/used/accounted for. 
+3. Clone no longer works
+4. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
 
 ## Calculation Bugs
 ### High Priority

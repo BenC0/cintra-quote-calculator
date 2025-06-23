@@ -1,5 +1,5 @@
 import React from "react";
-import { Flex, Tile, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem, Tab, TableBody, TableHeader, TableHead, TableFooter } from "@hubspot/ui-extensions";
+import { Flex, Accordion, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem, Tab, TableBody, TableHeader, TableHead, TableFooter, Divider } from "@hubspot/ui-extensions";
 import { formatPrice, formatInt, reshapeArray } from "../shared/utils";
 
 /**
@@ -150,15 +150,16 @@ const QuoteSummaryComponent = ({
     }
 
     return (
-        <Flex direction="column" align="stretch" gap="md">
-            <Text format={{ fontWeight: "bold", fontSize: "lg" }}>Quote Summary</Text>
-            {!!supressKeyDetails ? <></> : (
-                <DescriptionList direction={"row"}>
-                    {keyDetailsElements.map(detail => <DescriptionListItem label={detail.label}>{detail.measure}</DescriptionListItem>)}
-                </DescriptionList>
-            )}
-            {costTable}
-        </Flex>
+        <Accordion title="Quote Summary" defaultOpen>
+            <Flex direction="column" align="stretch" gap="md">
+                {!!supressKeyDetails ? <></> : (
+                    <DescriptionList direction={"row"}>
+                        {keyDetailsElements.map(detail => <DescriptionListItem label={detail.label}>{detail.measure}</DescriptionListItem>)}
+                    </DescriptionList>
+                )}
+                {costTable}
+            </Flex>
+        </Accordion>
     );
 };
 
