@@ -7,6 +7,7 @@
 2. Custom Products aren't tested/used/accounted for. 
 3. Clone no longer works
 4. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
+5. Preselecting default values for dropdowns not built in.
 
 ## Calculation Bugs
 ### High Priority
@@ -18,6 +19,7 @@
 ## PSQ Bugs
 ### High Priority
 1. PSQ CintraHR - Fixed Price
-2. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values.
+2. No accounting for Cintra Payroll Product?
+3. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values.
 ### Low Priority
 1. Sector - Handle private and public?
