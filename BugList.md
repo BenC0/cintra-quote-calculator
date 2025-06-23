@@ -3,13 +3,13 @@
 ## User Interface Bugs
 ### High Priority
 1. Standard Implementation Fee is missing discount functionality
-2. Editing pre-existing plan has no Staging, it's live editing.
-3. Custom Products aren't tested/used/accounted for.
 ### Low Priority
-1. Groups are shown incorrectly on Quote Sheet when no items added.
-2. Quote Sheet Summary Tables are inconsistently aligned due to mixed use of Accordions. 
-3. Clone no longer works
-4. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
+1. Editing pre-existing plan has no Stagi ng, it's live editing.
+2. Groups are shown incorrectly on Quote Sheet when no items added.
+3. Custom Products aren't tested/used/accounted for.
+4. Quote Sheet Summary Tables are inconsistently aligned due to mixed use of Accordions. 
+5. Clone no longer works
+6. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
 
 ## Calculation Bugs
 ### High Priority

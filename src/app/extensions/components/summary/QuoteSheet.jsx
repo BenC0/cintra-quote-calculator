@@ -297,7 +297,7 @@ export const QuoteSheet = ({
                         <TableCell>{key}</TableCell>
                         <TableCell>{formatInt(fee.totalImplementationDays)}</TableCell>
                         <TableCell>£{formatPrice(fee.totalImplementationFee / fee.totalImplementationDays)}</TableCell>
-                        <TableCell>{formatInt(fee.discount ?? 0)}</TableCell>
+                        <TableCell>{formatInt(fee.discount ?? 0)}%</TableCell>
                         <TableCell>£{formatPrice(fee.totalImplementationFee)}</TableCell>
                         <TableCell></TableCell>
                     </TableRow>)
