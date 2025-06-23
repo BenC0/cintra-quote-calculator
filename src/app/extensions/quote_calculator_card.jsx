@@ -28,7 +28,7 @@ const Extension = ({ context, runServerless, actions }) => {
     const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
-    const debugPage = 1;
+    const debugPage = 3;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -594,6 +594,15 @@ const Extension = ({ context, runServerless, actions }) => {
                         productTypeAccordions={productTypeAccordions}
                         quoteDiscountValues={quoteDiscountValues}
                         QuoteDiscountValueHandler={QuoteDiscountValueHandler}
+                    />
+
+                    <QuoteSummaryComponent
+                        quote={quote}
+                        type={"inline-table"}
+                        productTypeAccordions={productTypeAccordions}
+                        suppressImplementationFee = {false}
+                        suppressQuoteFees = {false}
+                        supressKeyDetails = {true}
                     />
 
                     <Flex justify="end" gap="small">

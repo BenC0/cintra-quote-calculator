@@ -1,5 +1,5 @@
 import React from "react";
-import { Flex, Tile, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem } from "@hubspot/ui-extensions";
+import { Flex, Tile, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem, Tab, TableBody, TableHeader, TableHead, TableFooter } from "@hubspot/ui-extensions";
 import { formatPrice, formatInt, reshapeArray } from "../shared/utils";
 
 /**
@@ -24,6 +24,7 @@ const QuoteSummaryComponent = ({
     productTypeAccordions = [],
     suppressImplementationFee = true,
     suppressQuoteFees = true,
+    supressKeyDetails = false,
 }) => {
     const conditions = [
         Object.keys(quote),
@@ -76,33 +77,35 @@ const QuoteSummaryComponent = ({
         keyDetails[productType] = { label: productType, count, type, valid }
     }
 
-    if (!suppressImplementationFee) {
-        keyDetails["Total Implementation Costs"] = {
-            label: "Total Implementation Costs",
-            count: `£${formatPrice(quote["Summary"]["Total Implementation Costs"] ?? 0)}`,
-            type: "count",
-            valid: !!quote["Summary"]["Total Implementation Costs"],
+    let costTableRows = []
+
+    if (!!quote["Summary"]["Total Implementation Costs"]) {
+        if (!suppressImplementationFee) {
+            costTableRows.push(
+                <TableRow>
+                    <TableCell><Text> Total Implementation Costs </Text> </TableCell>
+                    <TableCell align="right"><Text>{`£${formatPrice(quote["Summary"]["Total Implementation Costs"] ?? 0)}`}</Text></TableCell>
+                </TableRow>
+            )
         }
     }
 
     if (!suppressQuoteFees) {
-        keyDetails["Total Estimated Annual Costs"] = {
-            label: "Total Estimated Annual Costs",
-            count: `£${formatPrice(quote["Summary"]["Total Estimated Annual Costs"] ?? 0)}`,
-            type: "count",
-            valid: !!quote["Summary"]["Total Estimated Annual Costs"],
+        if (!!quote["Summary"]["Total Estimated Monthly Costs"]) {
+            costTableRows.push(
+                <TableRow>
+                    <TableCell><Text> Total Estimated Monthly Costs </Text> </TableCell>
+                    <TableCell align="right"><Text>{`£${formatPrice(quote["Summary"]["Total Estimated Monthly Costs"] ?? 0)}`}</Text></TableCell>
+                </TableRow>
+            )
         }
-        keyDetails["Total Estimated Monthly Costs"] = {
-            label: "Total Estimated Monthly Costs",
-            count: `£${formatPrice(quote["Summary"]["Total Estimated Monthly Costs"] ?? 0)}`,
-            type: "count",
-            valid: !!quote["Summary"]["Total Estimated Monthly Costs"],
-        }
-        keyDetails["Total Y1 Costs"] = {
-            label: "Total Y1 Costs",
-            count: `£${formatPrice(quote["Summary"]["Total Y1 Costs"] ?? 0)}`,
-            type: "count",
-            valid: !!quote["Summary"]["Total Y1 Costs"],
+        if (!!quote["Summary"]["Total Estimated Annual Costs"]) {
+            costTableRows.push(
+                <TableRow>
+                    <TableCell><Text> Total Estimated Annual Costs </Text> </TableCell>
+                    <TableCell align="right"><Text>{`£${formatPrice(quote["Summary"]["Total Estimated Annual Costs"] ?? 0)}`}</Text></TableCell>
+                </TableRow>
+            )
         }
     }
 
@@ -119,6 +122,30 @@ const QuoteSummaryComponent = ({
         }
     }
 
+    let costTable = null
+
+    if (costTableRows.length > 0) {
+        costTable = (
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableHeader>Total Overall Costs</TableHeader>
+                        <TableHeader></TableHeader>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {costTableRows}
+                </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell><Text format={{fontWeight: "bold"}}> Total Y1 Charges </Text> </TableCell>
+                        <TableCell align="right"><Text format={{fontWeight: "bold"}}>{`£${formatPrice(quote["Summary"]["Total Y1 Charges"] ?? 0)}`}</Text></TableCell>
+                    </TableRow>
+                </TableFooter>
+            </Table>
+        )
+    }
+
     console.log({
         event: "Generating QuoteSummaryComponent",
         keyDetails,
@@ -131,9 +158,12 @@ const QuoteSummaryComponent = ({
     return (
         <Flex direction="column" align="stretch" gap="md">
             <Text format={{ fontWeight: "bold", fontSize: "lg" }}>Quote Summary</Text>
-            <DescriptionList direction={"row"}>
-                {keyDetailsElements.map(detail => <DescriptionListItem label={detail.label}>{detail.measure}</DescriptionListItem>)}
-            </DescriptionList>
+            {!!supressKeyDetails ? <></> : (
+                <DescriptionList direction={"row"}>
+                    {keyDetailsElements.map(detail => <DescriptionListItem label={detail.label}>{detail.measure}</DescriptionListItem>)}
+                </DescriptionList>
+            )}
+            {costTable}
         </Flex>
     );
 };
