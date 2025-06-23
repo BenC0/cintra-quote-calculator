@@ -112,10 +112,6 @@ const QuoteSummaryComponent = ({
             let details = keyDetails[detailKey]
             let measure = <Text format={{ fontWeight: "bold", fontSize: "small" }}>{details.count}</Text>
             if (details.type === "boolean") measure = <Icon name="success"/>
-            // keyDetailsElements.push(<Flex direction="row" gap="small" wrap>
-            //     {measure}
-            //     <Text format={{fontSize: "small" }}>{details.label}</Text>
-            // </Flex>)
             keyDetailsElements.push({
                 measure,
                 label: details.label,
@@ -131,33 +127,13 @@ const QuoteSummaryComponent = ({
         suppressImplementationFee,
         productTypeAccordions,
     })
-    
-
-    const detailsPerRow = 5
-    // keyDetailsElements = reshapeArray(keyDetailsElements, detailsPerRow)
-    // keyDetailsElements = keyDetailsElements.map(row => {
-    //     while (row.length < detailsPerRow) row.push("")
-    //     return row
-    // })
 
     return (
         <Flex direction="column" align="stretch" gap="md">
             <Text format={{ fontWeight: "bold", fontSize: "lg" }}>Quote Summary</Text>
-            {/* <Flex gap="small" wrap>
-                {keyDetailsElements}
-            </Flex> */}
             <DescriptionList direction={"row"}>
                 {keyDetailsElements.map(detail => <DescriptionListItem label={detail.label}>{detail.measure}</DescriptionListItem>)}
             </DescriptionList>
-            {/* <Flex direction="row" align="start" gap="flush">
-                <Table>
-                    { keyDetailsElements.map( row => (
-                        <TableRow>
-                            {row.map(cell => <TableCell align="center">{cell}</TableCell>)}
-                        </TableRow>
-                    ) ) }
-                </Table>
-            </Flex> */}
         </Flex>
     );
 };
