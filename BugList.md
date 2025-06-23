@@ -1,7 +1,7 @@
 # Bugs
 
 ## User Interface Bugs
-1. Quote Sheet missing Implementation Summary
+1. Standard Implementation Fee breaks Quote Sheet
 2. Editing pre-existing plan has no Staging, it's live editing.
 3. Clone no longer works
 
