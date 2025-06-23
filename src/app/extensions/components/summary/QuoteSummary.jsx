@@ -63,7 +63,7 @@ const QuoteSummaryComponent = ({
         let count = 0
         let type = "count"
         quote["Details"][productType].forEach(plan => {
-            let confirmedPlanValidity = plan.fields.length > 0
+            let confirmedPlanValidity = !!plan && !!plan.fields && plan.fields.length > 0
             if (confirmedPlanValidity) count += 1
         })
         let valid = !!count
