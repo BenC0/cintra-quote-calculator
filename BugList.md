@@ -2,7 +2,7 @@
 
 ## User Interface Bugs
 ### High Priority
-1. Standard Implementation Fee isn't shown on Quote Sheet
+1. Standard Implementation Fee is missing discount functionality
 2. Editing pre-existing plan has no Staging, it's live editing.
 3. Custom Products aren't tested/used/accounted for.
 ### Low Priority
