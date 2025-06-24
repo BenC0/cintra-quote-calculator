@@ -3,6 +3,7 @@
 ## Calculation Bugs
 ### High Priority
 1. Capture Expense Pricing - One Time Fee, value equals 12% of Estimated Monthly Charges, can be toggled on/off.
+2. Capture Expense doesn't round to nearest minimum qty banding, instead it uses exact qty value.
 ### Low Priority
 1. Quote seems to return slightly different figures when selecting weekly payroll options. I suspect this is related to decimal places / floating point precision.
 
