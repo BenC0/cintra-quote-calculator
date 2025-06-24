@@ -163,7 +163,7 @@ export const QuoteSheet = ({
                                                                     discountHandler(row.field, null, "remove")
                                                                 }}
                                                             >
-                                                                <> <Icon name="success"/> Save </>
+                                                                <Icon name="success"/>
                                                             </Button>
                                                             <Button
                                                                 variant="destructive"
@@ -171,7 +171,7 @@ export const QuoteSheet = ({
                                                                     discountHandler(row.field, null, "remove")
                                                                 }}
                                                             >
-                                                                <> <Icon name="delete"/> Cancel </>
+                                                                <Icon name="delete"/>
                                                             </Button>
                                                         </Flex>                                            
                                                     ) : (
@@ -181,7 +181,7 @@ export const QuoteSheet = ({
                                                                 discountHandler(row.field, true, "add")
                                                             }}
                                                         >
-                                                            <> <Icon name="edit"/> Edit </>
+                                                            <Icon name="edit"/>
                                                         </Button>
                                                     )}
                                                 </TableCell>
@@ -261,7 +261,7 @@ export const QuoteSheet = ({
                                                             discountHandler(row.field, null, "remove")
                                                         }}
                                                     >
-                                                        <> <Icon name="success"/> Save </>
+                                                        <Icon name="success"/>
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
@@ -269,7 +269,7 @@ export const QuoteSheet = ({
                                                             discountHandler(row.field, null, "remove")
                                                         }}
                                                     >
-                                                        <> <Icon name="delete"/> Cancel </>
+                                                        <Icon name="delete"/>
                                                     </Button>
                                                 </Flex>                                            
                                             ) : (
@@ -279,7 +279,7 @@ export const QuoteSheet = ({
                                                         discountHandler(row.field, true, "add")
                                                     }}
                                                 >
-                                                    <> <Icon name="edit"/> Edit </>
+                                                    <Icon name="edit"/>
                                                 </Button>
                                             )}
                                         </TableCell>
@@ -326,7 +326,7 @@ export const QuoteSheet = ({
                                             discountHandler(service.field, null, "remove")
                                         }}
                                     >
-                                        <> <Icon name="success"/> Save </>
+                                        <Icon name="success"/>
                                     </Button>
                                     <Button
                                         variant="destructive"
@@ -334,7 +334,7 @@ export const QuoteSheet = ({
                                             discountHandler(service.field, null, "remove")
                                         }}
                                     >
-                                        <> <Icon name="delete"/> Cancel </>
+                                        <Icon name="delete"/>
                                     </Button>
                                 </Flex>                                            
                             ) : (
@@ -344,7 +344,7 @@ export const QuoteSheet = ({
                                         discountHandler(service.field, true, "add")
                                     }}
                                 >
-                                    <> <Icon name="edit"/> Edit </>
+                                    <Icon name="edit"/>
                                 </Button>
                             )}
                         </TableCell>

@@ -86,7 +86,7 @@ export const PSQTables = ({
                                                         taskHandler(task.field, null, "remove")
                                                     }}
                                                 >
-                                                    <> <Icon name="success"/> Save </>
+                                                    <Icon name="success"/>
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
@@ -94,7 +94,7 @@ export const PSQTables = ({
                                                         taskHandler(task.field, null, "remove")
                                                     }}
                                                 >
-                                                    <> <Icon name="delete"/> Cancel </>
+                                                    <Icon name="delete"/>
                                                 </Button>
                                             </Flex>                                            
                                         ) : (
@@ -104,7 +104,7 @@ export const PSQTables = ({
                                                     taskHandler(task.field, true, "add")
                                                 }}
                                             >
-                                                <> <Icon name="edit"/> Edit </>
+                                                <Icon name="edit"/>
                                             </Button>
                                         )}
                                     </TableCell>

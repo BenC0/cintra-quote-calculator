@@ -52,7 +52,7 @@ export const renderTableSummaries = (
                         <TableHeader>
                             <Flex gap="sm" justify="end">
                                 <Button variant="transparent" >
-                                    <Icon name="edit"/> Edit
+                                    <Icon name="edit"/>
                                 </Button>
                             </Flex>
                         </TableHeader>
