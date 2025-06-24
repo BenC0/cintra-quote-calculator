@@ -80,13 +80,13 @@ export const QuoteSheet = ({
                             const productQuoteReference = planQuote.fields.find(a => a.field == productKey)
                             if (!!productReference && !!productQuoteReference && !!productValue) {
                                 const isCoreProduct = productReference.product_sub_type.name == "core"
-                                let qty = productValue
+                                let qty = productQuoteReference.qty
                                 if (!!!qty || qty < 1) {
                                     qty = 1
                                 }
-                                if (typeof productValue != "number") {
-                                    qty = headcount
-                                }
+                                // if (typeof productValue != "number") {
+                                //     qty = headcount
+                                // }
                                 if (isCoreProduct) {
                                     planDetails["coreProductMonthlyFee"] += productQuoteReference.estimated_monthly_fee
                                 } else {

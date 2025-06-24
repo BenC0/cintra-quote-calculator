@@ -185,8 +185,8 @@ export const CalculateQuote = ({
                                 qty = 1
                             }
                             
+                            qty = qty * payroll_payslips_modifier
                             if (typeof fieldValue == "boolean") {
-                                qty = qty * payroll_payslips_modifier
                             }
 
                             output["fieldValue"] = fieldValue
