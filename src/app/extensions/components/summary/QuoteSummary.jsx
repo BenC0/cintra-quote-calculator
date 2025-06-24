@@ -80,7 +80,7 @@ const QuoteSummaryComponent = ({
 
     let costTableRows = []
 
-    if (!!quote["Summary"]["Total Implementation Costs"]) {
+    if (!!quote["Summary"]["Total Implementation Costs"] || quote["Summary"]["Total Implementation Costs"] == 0) {
         if (!suppressImplementationFee) {
             costTableRows.push(
                 <TableRow>
@@ -92,7 +92,7 @@ const QuoteSummaryComponent = ({
     }
 
     if (!suppressQuoteFees) {
-        if (!!quote["Summary"]["Total Estimated Monthly Costs"]) {
+        if (!!quote["Summary"]["Total Estimated Monthly Costs"] || quote["Summary"]["Total Estimated Monthly Costs"] == 0) {
             costTableRows.push(
                 <TableRow>
                     <TableCell><Text> Total Estimated Monthly Costs </Text> </TableCell>
@@ -100,7 +100,7 @@ const QuoteSummaryComponent = ({
                 </TableRow>
             )
         }
-        if (!!quote["Summary"]["Total Estimated Annual Costs"]) {
+        if (!!quote["Summary"]["Total Estimated Annual Costs"] || quote["Summary"]["Total Estimated Annual Costs"] == 0) {
             costTableRows.push(
                 <TableRow>
                     <TableCell><Text> Total Estimated Annual Costs </Text> </TableCell>
