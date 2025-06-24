@@ -2,12 +2,13 @@
 
 ## User Interface Bugs
 ### High Priority
-1. Custom Products aren't tested/used/accounted for. 
 ### Low Priority
+1. Custom Products aren't tested/used/accounted for. 
 1. Clone occasionaly breaks.
 2. Editing pre-existing plan has no Staging, it's live editing.
 3. Preselecting default values for dropdowns not built in.
 4. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
+5. Display imp fee when it's equal to 0
 
 ## Calculation Bugs
 ### High Priority
@@ -19,7 +20,7 @@
 
 ## PSQ Bugs
 ### High Priority
-1. PSQ CintraHR - Fixed Price, needs integrating
-2. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values, needs integrating
-3. Sector - Needs integrating
+1. Sector - Needs integrating
+2. PSQ HR Outsourcing - Fixed Price, needs integrating
 ### Low Priority
+1. PSQ - Cintra Cloud Training - Provided spreadsheet has fixed values, needs integrating

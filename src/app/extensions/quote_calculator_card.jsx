@@ -160,7 +160,7 @@ const Extension = ({ context, runServerless, actions }) => {
             bundle_price: r.values.bundle_price,
             product_value: r.values.product_value,
             minimum_quantity: r.values.minimum_quantity,
-            maximum_quantity: r.values.maximum_quantity,
+            band_price_is_percent: r.values.band_price_is_percent == 1,
             monthly_standing_charge: r.values.monthly_standing_charge,
             product_field: !!getFirstValue("product_id", r) ? getFirstValue("product_id", r).id : null,
         })

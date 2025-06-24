@@ -1,7 +1,8 @@
 export const get_price_band = (qtyVal, field, price_table) => {
     let output = {
         price: 0,
-        monthly_standing_charge: 0
+        monthly_standing_charge: 0,
+        band_price_is_percent: false
     }
     if (!!field.fieldValue) {
         if (price_table.length > 0) {
@@ -12,6 +13,7 @@ export const get_price_band = (qtyVal, field, price_table) => {
                 price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal))
             }
             if (price_bands.length > 0) {
+                price_bands = price_bands.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                 output = price_bands[price_bands.length - 1]
             }
         }
@@ -228,6 +230,28 @@ export const CalculateQuote = ({
                             selectedPlanQuote.fields.push(output)
                         }
                     }
+                    let fieldsWithPctPrice = selectedPlanQuote.fields.filter(field => !!field.price_band.band_price_is_percent)
+                    if (fieldsWithPctPrice.length > 0) {
+                        let nonPctFields = selectedPlanQuote.fields.filter(field => !field.price_band.band_price_is_percent)
+                        let nonPctFieldsEstimatedMonthlyFee = nonPctFields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)
+                        selectedPlanQuote.fields = selectedPlanQuote.fields.map(field => {
+                            let pct = field.price / 100
+                            let estimated_monthly_fee = nonPctFieldsEstimatedMonthlyFee * pct
+                            return {
+                                ...field,
+                                estimated_monthly_fee,
+                                estimated_annual_fee: estimated_monthly_fee * 12
+                            } 
+                        })
+                        // console.log({
+                        //     event: "Evaluating product for % based pricing",
+                        //     nonPctFieldsEstimatedMonthlyFee,
+                        //     allFields: selectedPlanQuote.fields,
+                        //     fieldsWithPctPrice,
+                        //     selectedPlanQuote,
+                        // })
+                    }
+
                     selectedPlanQuote["estimated_monthly_fee"] = selectedPlanQuote.fields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)
                     selectedPlanQuote["estimated_annual_fee"] = (selectedPlanQuote["estimated_monthly_fee"] * 12)
                     estimated_plan_monthly_fee += selectedPlanQuote["estimated_monthly_fee"]
