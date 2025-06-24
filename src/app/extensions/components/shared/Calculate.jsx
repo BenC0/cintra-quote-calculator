@@ -191,7 +191,7 @@ export const CalculateQuote = ({
 
                             output["fieldValue"] = fieldValue
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
-                            output["price_band"] = get_price_band(qty, field, output["price_table"])
+                            output["price_band"] = get_price_band(selectedPlanValues.quantity_value, field, output["price_table"])
                             let useBundlePrice = false
 
                             if (!!output["price_band"]["bundle_price"]) {
