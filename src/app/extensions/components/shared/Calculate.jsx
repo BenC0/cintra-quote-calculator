@@ -329,11 +329,18 @@ export const CalculateQuote = ({
 
                 if (productType.standard_implementation_calculation_type == "default") {
                     if (service.plans != 0) {
+                        let lookupValue = service["values"][0]
                         let mod = service.plans > 1 ? 1.05 : 1
                         let days = 0
                         let daysRef = StandardImplementationDefs["days"].filter(dayRef => {
-                            return (dayRef.product_id == serviceLabel)
-                                && (dayRef.minimum_quantity <= total_headcount)
+                            if (!!dayRef.product_value) {
+                                return (dayRef.product_id == serviceLabel)
+                                    && (dayRef.minimum_quantity <= total_headcount)
+                                    && (lookupValue == dayRef.product_value)
+                            } else {
+                                return (dayRef.product_id == serviceLabel)
+                                    && (dayRef.minimum_quantity <= total_headcount)
+                            }
                         })
                         daysRef = daysRef.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                         if (daysRef.length > 0) {
@@ -343,23 +350,29 @@ export const CalculateQuote = ({
                             }
                         }
                         services[serviceLabel]["Implementation Days"] = days * mod
-                        let lookupValue = null
-                        if (containsStringOrBool(service["values"])) {
-                            lookupValue = service["values"][0]
-                        }
                         let ratesRef = StandardImplementationDefs["rates"].filter(rateRef => {
-                            if (!!lookupValue) {
-                                return !!rateRef.product_id
-                                    && !!rateRef.product_value
-                                    && lookupValue == rateRef.product_value
-                                    && serviceLabel == rateRef.product_id
-                            } else if (!!rateRef.product_id) {
-                                return rateRef.minimum_quantity <= total_headcount
-                                    && serviceLabel == rateRef.product_id
+                            // 1. Does the rate have a product ID and does it match the serviceLabel?
+                            if (!!rateRef.product_id && rateRef.product_id === serviceLabel) {
+                                // 2. Does the rate have a product value?
+                                if (!!rateRef.product_value) {
+                                    return rateRef.minimum_quantity <= total_headcount
+                                        && serviceLabel == rateRef.product_id
+                                        && lookupValue == rateRef.product_value
+                                } else {
+                                    return rateRef.minimum_quantity <= total_headcount
+                                        && serviceLabel == rateRef.product_id
+                                }
                             } else {
-                                return rateRef.minimum_quantity <= total_headcount && !!!rateRef.product_id
+                                return rateRef.minimum_quantity <= total_headcount
+                                    && !!!rateRef.product_id
                             }
                         })
+                        const ratesRefContainsIDRef = ratesRef.some(ref => !!ref.product_id)
+                        if (ratesRefContainsIDRef) {
+                            ratesRef = ratesRef.filter(rateRef => {
+                                return !!rateRef.product_value
+                            })
+                        }
                         ratesRef = ratesRef.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                         if (ratesRef.length > 0) {
                             ratesRef = ratesRef[ratesRef.length - 1]

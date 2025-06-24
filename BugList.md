@@ -14,7 +14,6 @@
 ### High Priority
 1. Capture Expense Pricing - One Time Fee, value equals 12% of Estimated Monthly Charges, can be toggled on/off.
 2. Qty value used for calcing quote is wrong, uses total headcount across all plans in payroll, producing weird values.
-3. Not fully accounting for Cintra Payroll Product in Implementation Fees (Standard, possibly PSQ as well)
 ### Low Priority
 1. Quote seems to return slightly different figures when selecting weekly payroll options. I suspect this is related to decimal places / floating point precision.
 
