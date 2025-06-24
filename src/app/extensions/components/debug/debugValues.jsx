@@ -38,7 +38,7 @@ export const debugSelectedValues = {
     "d2cc68d2-bc30-43d8-9ee4-e39f89fa9379": {
         "241709571284": "standard",
         "241712266460": false,
-        "241712266465": 48,
+        "241712266465": 12,
         "241731552473": false
     },
     "a4663a74-b92b-4722-b38a-cfee43e00bae": {
