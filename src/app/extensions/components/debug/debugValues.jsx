@@ -50,7 +50,7 @@ export const debugSelectedValues = {
     },
     "58b276bb-5c6f-4b4b-9c6d-bffbc843606f": {
         "241706082523": "source",
-        "frequency_value": "monthly",
+        "frequency_value": "weekly",
         "quantity_value": 100,
         "241706082533": false,
         "241709571262": false
