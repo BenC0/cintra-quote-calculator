@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";  // Core React hooks
-import { v4 as uuidv4 } from "uuid";  // Utility to generate unique IDs for plans
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { useFetchDefs, useDynamicFetchDefs, getFirstValue } from "./components/shared/utils";  // Data-fetching and helper functions
+import { useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID } from "./components/shared/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
@@ -379,7 +378,7 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
 
     // Add a new plan for a given product type
     const addPlan = (productTypeName, planIdArg = null) => {
-        const newId = planIdArg || uuidv4();
+        const newId = planIdArg || generateID();
         if (!!debug && !!debugPlans) console.log(`⚡ Plan created -> productType="${productTypeName}", planId="${newId}"`);
         // Dispatch to reducer
         dispatch({
@@ -396,7 +395,7 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
 
     // Clone an existing plan by copying its values
     const clonePlan = (typeName, planId) => {
-        const newId = uuidv4();
+        const newId = generateID();
         const originalValues = selectedValues[planId] || {};
         // Add new plan
         dispatch({

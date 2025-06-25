@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { hubspot } from "@hubspot/ui-extensions";
 
+export const generateID = _ => Math.random().toString(16).slice(2)
+
 export const useFetchDefs = (tableName, transformation = e => e, sort_key = null) => {
     const [defs, setDefs] = useState([]);
 

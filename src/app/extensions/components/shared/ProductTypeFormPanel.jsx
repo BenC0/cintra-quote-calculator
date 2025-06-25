@@ -11,7 +11,7 @@ import {
     Divider,
 } from "@hubspot/ui-extensions";
 import { renderField } from "./Inputs";
-import { v4 as uuidv4 } from "uuid";
+import { generateID } from "./utils";
 
 export const ProductTypeFormPanel = ({
     name = "",
@@ -32,7 +32,7 @@ export const ProductTypeFormPanel = ({
         if (externalPlanId) {
             setLocalPlanId(externalPlanId);
         } else {
-            setLocalPlanId(uuidv4());
+            setLocalPlanId(generateID());
         }
     }, [externalPlanId]);
     if (!localPlanId) return null;
