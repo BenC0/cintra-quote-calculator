@@ -1,7 +1,7 @@
 {
-  "name": "hubspot-example-extension",
+  "name": "quote_calculator_card",
   "version": "0.1.0",
-  "author": "HubSpot",
+  "author": "Fluidity",
   "license": "MIT",
   "dependencies": {
     "@hubspot/ui-extensions": "latest",
