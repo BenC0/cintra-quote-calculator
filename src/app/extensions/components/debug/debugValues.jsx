@@ -41,7 +41,7 @@ export const debugSelectedValues = {
     },
     "74d2d5ebeb44d": {
         "247649449171": "business",
-        "quantity_value": 150,
+        "quantity_value": 120,
         "247649449172": false,
         "247649449174": false,
         "247649449176": true
@@ -50,7 +50,7 @@ export const debugSelectedValues = {
         "247649449178": false
     },
     "9c54b5135a2a": {
-        "quantity_value": 50,
+        "quantity_value": 120,
         "frequency_value": "monthly",
         "247649449156": "saas",
         "247649449159": true

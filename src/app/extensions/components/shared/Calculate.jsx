@@ -194,6 +194,10 @@ export const CalculateQuote = ({
 
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
                             output["price_band"] = get_price_band(qty, fieldValue, output["price_table"])
+                            if (field.pricing_structure.name == "Minimum Active Users") {
+                                qty = output["price_band"]["minimum_quantity"]
+                            }
+
                             let useBundlePrice = false
 
                             if (!!output["price_band"]["bundle_price"]) {
@@ -235,14 +239,7 @@ export const CalculateQuote = ({
                     let fieldsWithPctPrice = selectedPlanQuote.fields.filter(field => !!field.price_band.band_price_is_percent)
                     if (fieldsWithPctPrice.length > 0) {
                         let nonPctFields = selectedPlanQuote.fields.filter(field => !field.price_band.band_price_is_percent)
-                        let nonPctFieldsEstimatedMonthlyFee = nonPctFields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)
-                        console.warn({
-                            event: "Percent Field(s) Found",
-                            fieldsWithPctPrice,
-                            nonPctFields,
-                            nonPctFieldsEstimatedMonthlyFee
-                        })
-                        
+                        let nonPctFieldsEstimatedMonthlyFee = nonPctFields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)                        
                         selectedPlanQuote.fields = selectedPlanQuote.fields.map(field => {
                             let matchingField = fieldsWithPctPrice.find(pctField => field.field == pctField.field)
                             if (!!matchingField) {
@@ -250,6 +247,7 @@ export const CalculateQuote = ({
                                 let estimated_monthly_fee = nonPctFieldsEstimatedMonthlyFee * pct
                                 return {
                                     ...field,
+                                    adjusted_price: estimated_monthly_fee / field.qty,
                                     estimated_monthly_fee,
                                     estimated_annual_fee: estimated_monthly_fee * 12
                                 } 
