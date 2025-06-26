@@ -87,10 +87,6 @@ export const CalculateQuote = ({
         "Summary": {},
     }
 
-    const findCorrectField = (IDs, values) => {
-        return IDs.filter(a => !!values[a] || values[a] == 0)[0]
-    }
-
     const conditions = [
         Object.keys(planIdsByType),
         Object.keys(StandardImplementationDefs),
@@ -109,9 +105,14 @@ export const CalculateQuote = ({
     const quoteDetailsPlanID = planIdsByType[QuoteDetails.label]
     const quoteDetailsValues = selectedValues[quoteDetailsPlanID]
 
-    const ContractLengthFieldID = findCorrectField(["241712266465", "247649449167"], quoteDetailsValues)
-    const EducationClientFieldID = findCorrectField(["241731552473", "247649449166"], quoteDetailsValues)
-    const PublicSectorClientFieldID = findCorrectField(["241712266460", "247649449165"], quoteDetailsValues)
+    const ContractLengthField = productDefs.find(product => !!product.is_contract_length_field)
+    const EducationClientField = productDefs.find(product => !!product.is_education_client_field)
+    const PublicSectorClientField = productDefs.find(product => !!product.is_public_sector_client_field)
+    
+    const ContractLengthFieldID = ContractLengthField.field
+    const EducationClientFieldID = EducationClientField.field
+    const PublicSectorClientFieldID = PublicSectorClientField.field
+
     if ([
         ContractLengthFieldID,
         EducationClientFieldID,
@@ -119,7 +120,6 @@ export const CalculateQuote = ({
     ].some(a => !!!a)) {
         return Quote
     }
-    const ContractLengthField = productDefs.find(product => product.field == ContractLengthFieldID)
     
     const ContractLengthValue = quoteDetailsValues[ContractLengthFieldID]
     const ContractLengthValuesRef = QuoteDetails.fields.find(a => a.field == ContractLengthFieldID).values
@@ -197,12 +197,10 @@ export const CalculateQuote = ({
                             }
                             
                             qty = qty * payroll_payslips_modifier
-                            if (typeof fieldValue == "boolean") {
-                            }
 
                             output["fieldValue"] = fieldValue
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
-                            output["price_band"] = get_price_band(selectedPlanValues.quantity_value, field, output["price_table"])
+                            output["price_band"] = get_price_band((selectedPlanValues.quantity_value || 1), field, output["price_table"])
                             let useBundlePrice = false
 
                             if (!!output["price_band"]["bundle_price"]) {
@@ -480,8 +478,8 @@ export const CalculateQuote = ({
 
         // // Value used in product hours calculation for most PSQ Tasks, but not all
         psqConfig["Sector"] = {
-            public: !!quoteDetailsValues["241712266460"],
-            education: !!quoteDetailsValues["241731552473"],
+            public: !!quoteDetailsValues[PublicSectorClientFieldID],
+            education: !!quoteDetailsValues[EducationClientFieldID],
         }
         
         // validPayrolls.forEach(payroll => {

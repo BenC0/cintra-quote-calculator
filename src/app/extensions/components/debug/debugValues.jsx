@@ -1,58 +1,53 @@
 export const debugPlanIdsByType = {
     "Quote Details": [
-        "d2cc68d2-bc30-43d8-9ee4-e39f89fa9379"
+        "c4b48bdbe2502"
     ],
     "Groups": [
-        "a4663a74-b92b-4722-b38a-cfee43e00bae"
+        "34651b07abe588"
     ],
     "Payroll": [
-        "58b276bb-5c6f-4b4b-9c6d-bffbc843606f"
-    ],
-    "CintraHR": [
-        "6008b3bf-0b03-473a-91ef-105aab5620c7"
-    ],
-    "HR Outsourcing": [],
-    "Capture Expense": []
+        "9c54b5135a2a",
+        "f83ea592778928"
+    ]
 }
 
 export const debugPlansById = {
-    "d2cc68d2-bc30-43d8-9ee4-e39f89fa9379": {
-        "id": "d2cc68d2-bc30-43d8-9ee4-e39f89fa9379",
+    "c4b48bdbe2502": {
+        "id": "c4b48bdbe2502",
         "type": "Quote Details"
     },
-    "a4663a74-b92b-4722-b38a-cfee43e00bae": {
-        "id": "a4663a74-b92b-4722-b38a-cfee43e00bae",
+    "34651b07abe588": {
+        "id": "34651b07abe588",
         "type": "Groups"
     },
-    "6008b3bf-0b03-473a-91ef-105aab5620c7": {
-        "id": "6008b3bf-0b03-473a-91ef-105aab5620c7",
-        "type": "CintraHR"
+    "9c54b5135a2a": {
+        "id": "9c54b5135a2a",
+        "type": "Payroll"
     },
-    "58b276bb-5c6f-4b4b-9c6d-bffbc843606f": {
-        "id": "58b276bb-5c6f-4b4b-9c6d-bffbc843606f",
+    "f83ea592778928": {
+        "id": "f83ea592778928",
         "type": "Payroll"
     }
 }
 
 export const debugSelectedValues = {
-    "d2cc68d2-bc30-43d8-9ee4-e39f89fa9379": {
-        "241709571284": "standard",
-        "241712266460": false,
-        "241712266465": 12,
-        "241731552473": false
+    "c4b48bdbe2502": {
+        "247649449165": false,
+        "247649449166": false,
+        "247649449167": 12,
+        "247649449168": "standard"
     },
-    "a4663a74-b92b-4722-b38a-cfee43e00bae": {
-        "243440416969": false
+    "34651b07abe588": {
+        "247649449178": false
     },
-    "6008b3bf-0b03-473a-91ef-105aab5620c7": {
-        "241709571268": "professional",
-        "quantity_value": 100
+    "9c54b5135a2a": {
+        "quantity_value": 50,
+        "frequency_value": "lunar",
+        "247649449156": "source"
     },
-    "58b276bb-5c6f-4b4b-9c6d-bffbc843606f": {
-        "241706082523": "source",
-        "frequency_value": "weekly",
-        "quantity_value": 100,
-        "241706082533": false,
-        "241709571262": false
+    "f83ea592778928": {
+        "quantity_value": 150,
+        "frequency_value": "monthly",
+        "247649449156": "source"
     }
 }

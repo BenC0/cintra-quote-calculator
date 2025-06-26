@@ -22,11 +22,11 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Main extension component
 const Extension = ({ context, runServerlessFunction, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = false;
+    const debug = true;
     const debugPlans = false;
-    const debugQuote = false;
+    const debugQuote = true;
     const debugPSQ = false;
-    const debugPage = 1;
+    const debugPage = 3;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -60,6 +60,9 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
             product_type: getFirstValue("product_type", r) ?? null,
             product_sub_type: r?.values?.product_sub_type ?? null,
             requires_psq: r.values.requires_psq == 1,
+            is_contract_length_field: r.values.is_contract_length_field == 1,
+            is_education_client_field: r.values.is_education_client_field == 1,
+            is_public_sector_client_field: r.values.is_public_sector_client_field == 1,
         };
     };
 
@@ -486,7 +489,10 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
             quoteDiscountValues: quoteDiscountValues,
         });
         setQuote(result);
-        if ((debug || debugQuote) && !!result) console.log("Quote Calculated: ", result);
+        if ((debug || debugQuote) && !!result) console.log({
+            event: "Quote Calculated",
+            result,
+        });
         
     }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues]);
 
