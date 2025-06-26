@@ -55,7 +55,7 @@ export const PSQTables = ({
                             <TableHeader>Resource</TableHeader>
                             <TableHeader align="center">Hours</TableHeader>
                             <TableHeader align="center">Rate</TableHeader>
-                            <TableHeader align="center">Estimated Monthly Fees</TableHeader>
+                            <TableHeader align="center">Total Fees</TableHeader>
                             <TableHeader></TableHeader>
                         </TableRow>
                     </TableHead>
