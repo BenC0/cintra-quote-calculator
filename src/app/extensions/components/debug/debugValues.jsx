@@ -6,8 +6,10 @@ export const debugPlanIdsByType = {
         "34651b07abe588"
     ],
     "Payroll": [
-        "9c54b5135a2a",
-        "f83ea592778928"
+        "9c54b5135a2a"
+    ],
+    "Capture Expense": [
+        "74d2d5ebeb44d"
     ]
 }
 
@@ -24,9 +26,9 @@ export const debugPlansById = {
         "id": "9c54b5135a2a",
         "type": "Payroll"
     },
-    "f83ea592778928": {
-        "id": "f83ea592778928",
-        "type": "Payroll"
+    "74d2d5ebeb44d": {
+        "id": "74d2d5ebeb44d",
+        "type": "Capture Expense"
     }
 }
 
@@ -37,17 +39,20 @@ export const debugSelectedValues = {
         "247649449167": 12,
         "247649449168": "standard"
     },
+    "74d2d5ebeb44d": {
+        "247649449171": "business",
+        "quantity_value": 150,
+        "247649449172": false,
+        "247649449174": false,
+        "247649449176": true
+    },
     "34651b07abe588": {
         "247649449178": false
     },
     "9c54b5135a2a": {
         "quantity_value": 50,
         "frequency_value": "monthly",
-        "247649449156": "source"
+        "247649449156": "saas",
+        "247649449159": true
     },
-    "f83ea592778928": {
-        "quantity_value": 150,
-        "frequency_value": "monthly",
-        "247649449156": "source"
-    }
 }

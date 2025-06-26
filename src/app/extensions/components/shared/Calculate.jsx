@@ -154,7 +154,6 @@ export const CalculateQuote = ({
             Quote["Details"][planType] = planIdsByType[planType].map(planId => {
                 if (planId == "temp") return;
                 let selectedPlanValues = selectedValues[planId] ?? {}
-
                 if (planType == PayrollDetails.label) {
                     Quote["Summary"]["PayrollHeadcount"] += selectedPlanValues.quantity_value
                 }
@@ -237,14 +236,25 @@ export const CalculateQuote = ({
                     if (fieldsWithPctPrice.length > 0) {
                         let nonPctFields = selectedPlanQuote.fields.filter(field => !field.price_band.band_price_is_percent)
                         let nonPctFieldsEstimatedMonthlyFee = nonPctFields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)
+                        console.warn({
+                            event: "Percent Field(s) Found",
+                            fieldsWithPctPrice,
+                            nonPctFields,
+                            nonPctFieldsEstimatedMonthlyFee
+                        })
+                        
                         selectedPlanQuote.fields = selectedPlanQuote.fields.map(field => {
-                            let pct = field.price / 100
-                            let estimated_monthly_fee = nonPctFieldsEstimatedMonthlyFee * pct
-                            return {
-                                ...field,
-                                estimated_monthly_fee,
-                                estimated_annual_fee: estimated_monthly_fee * 12
-                            } 
+                            let matchingField = fieldsWithPctPrice.find(pctField => field.field == pctField.field)
+                            if (!!matchingField) {
+                                let pct = field.price / 100
+                                let estimated_monthly_fee = nonPctFieldsEstimatedMonthlyFee * pct
+                                return {
+                                    ...field,
+                                    estimated_monthly_fee,
+                                    estimated_annual_fee: estimated_monthly_fee * 12
+                                } 
+                            }
+                            return field
                         })
                     }
 
