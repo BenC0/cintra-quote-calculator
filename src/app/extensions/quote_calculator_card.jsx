@@ -24,7 +24,7 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = true;
     const debugPlans = false;
-    const debugQuote = true;
+    const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 3;
     

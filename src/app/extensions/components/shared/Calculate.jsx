@@ -171,6 +171,7 @@ export const CalculateQuote = ({
 
                     const selectedPlanQuote = {
                         planId,
+                        payroll_payslips_modifier,
                         quantity_field_label: quantity_field_label,
                         quantity_field_type: quantity_field_type,
                         fields: []
@@ -231,7 +232,9 @@ export const CalculateQuote = ({
                                 output["estimated_monthly_fee"] -= output["estimated_monthly_fee"] * (output["discount"] / 100)
                             }
                             // TODO: How best to display monthly standing charge?
-                            // output["adjusted_price"] += output["monthly_standing_charge"]
+                            if (output["adjusted_price"] === 0) {
+                                output["adjusted_price"] += output["monthly_standing_charge"]
+                            }
                             output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
                             selectedPlanQuote["fields"] = [...selectedPlanQuote["fields"], output]
                         }
@@ -247,7 +250,8 @@ export const CalculateQuote = ({
                                 let estimated_monthly_fee = nonPctFieldsEstimatedMonthlyFee * pct
                                 return {
                                     ...field,
-                                    adjusted_price: estimated_monthly_fee / field.qty,
+                                    qty: 1,
+                                    adjusted_price: estimated_monthly_fee,
                                     estimated_monthly_fee,
                                     estimated_annual_fee: estimated_monthly_fee * 12
                                 } 
@@ -503,6 +507,7 @@ export const CalculateQuote = ({
                         }
                     })
                     if (!!associatedConfigValue) {
+                        console.warn({psqImpHours})
                         hoursBand = psqImpHours.filter(h => {
                             if (!!h.product_value) {
                                 return h.minimum_quantity <= psqConfig["Headcount"] 

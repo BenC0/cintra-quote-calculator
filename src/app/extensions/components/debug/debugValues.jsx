@@ -51,7 +51,7 @@ export const debugSelectedValues = {
     },
     "9c54b5135a2a": {
         "quantity_value": 120,
-        "frequency_value": "monthly",
+        "frequency_value": "weekly",
         "247649449156": "Cintra SaaS Payroll",
         "247649449159": true
     },

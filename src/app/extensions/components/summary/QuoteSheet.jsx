@@ -87,7 +87,7 @@ export const QuoteSheet = ({
                                     qty = 1
                                 }
                                 if (typeof productValue != "number") {
-                                    qty = headcount
+                                    // qty = headcount
                                     if (typeof productValue == "string") {
                                         label = `${label}: ${productValue}`
                                     }
@@ -144,7 +144,7 @@ export const QuoteSheet = ({
                                         {accordion.rows.map(row => (
                                             <TableRow>
                                                 <TableCell>{row.name}</TableCell>
-                                                <TableCell align="right">{row.quantity}</TableCell>
+                                                <TableCell align="right">{formatInt(row.quantity)}</TableCell>
                                                 <TableCell align="right">£{formatPrice(row.unitPrice)}</TableCell>
                                                 {/* <TableCell align="right">{row.discount}%</TableCell> */}
                                                 <TableCell align="right">
