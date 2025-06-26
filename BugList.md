@@ -20,5 +20,4 @@
 1. Custom Products aren't tested/used/accounted for. 
 1. Clone occasionaly breaks.
 2. Editing pre-existing plan has no Staging, it's live editing.
-3. Preselecting default values for dropdowns not built in.
-4. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.
+3. There are a bunch of conditional scenarios, for example, when a user has selected CintraHR, they need to remove Holiday & Absence, and Time Sheets from the Payrolls.

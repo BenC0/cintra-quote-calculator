@@ -22,11 +22,11 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Main extension component
 const Extension = ({ context, runServerlessFunction, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
+    const debug = false;
     const debugPlans = false;
-    const debugQuote = true;
+    const debugQuote = false;
     const debugPSQ = false;
-    const debugPage = 3;
+    const debugPage = 1;
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -34,6 +34,9 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
 
     // Initial state for the quote workflow, managed by useReducer
     const initialState = {
+        // plansById       : debug ? debugPlansById : {},       // Map of planId -> plan metadata
+        // planIdsByType   : debug ? debugPlanIdsByType : {},       // Grouping of plan IDs by product/PSQ type
+        // selectedValues  : debug ? debugSelectedValues : {},       // User-entered values for each plan
         plansById       : debug ? debugPlansById : {},       // Map of planId -> plan metadata
         planIdsByType   : debug ? debugPlanIdsByType : {},       // Grouping of plan IDs by product/PSQ type
         selectedValues  : debug ? debugSelectedValues : {},       // User-entered values for each plan
@@ -332,8 +335,13 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
                 case "Text": defaultValue = ""; break;
                 case "Radio":
                 case "Dropdown":
-                    // const vals = valueTables[f.input_values_table];
-                    // defaultValue = vals ? vals[0].values : null;
+                    const vals = valueTables[f.input_values_table];
+                    defaultValue = !!vals ? vals.find(v => !!v.values.default) : null
+                    if (!!defaultValue) {
+                        defaultValue = defaultValue.values.value
+                    } else if (!!vals) {
+                        defaultValue = vals[0].values.value
+                    }
                     break;
             }
             return { field: f.field, label: f.label, value: defaultValue };
@@ -478,7 +486,7 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
             quoteDiscountValues: quoteDiscountValues,
         });
         setQuote(result);
-        if (debug && debugQuote && !!result) console.log("Quote Calculated: ", result);
+        if ((debug || debugQuote) && !!result) console.log("Quote Calculated: ", result);
         
     }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues]);
 

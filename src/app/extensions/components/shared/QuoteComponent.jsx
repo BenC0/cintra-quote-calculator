@@ -19,7 +19,7 @@ import {
     Icon,
     Input,
 } from "@hubspot/ui-extensions";
-import { v4 as uuidv4 } from 'uuid';
+import { generateID } from "./utils";
 
 // Form panel for adding/editing a Custom Product entry
 export const CustomProductsForm = ({ isOpen, onClose, onSave, editingData }) => {
@@ -188,7 +188,7 @@ export const QuoteComponentContainer = ({ actions, initialItems = [], onChange }
     const handleSave = data => {
         setItems(prev => {
             if (editingIndex === null) {
-                return [...prev, { ...data, id: uuidv4(), number: prev.length + 1 }];
+                return [...prev, { ...data, id: generateID(), number: prev.length + 1 }];
             }
             return prev.map((item, i) => (i === editingIndex ? { ...data, number: item.number } : item));
         });
@@ -199,7 +199,7 @@ export const QuoteComponentContainer = ({ actions, initialItems = [], onChange }
     const handleClone = idx => {
         setItems(prev => {
             const item = prev[idx];
-            const clone = { ...JSON.parse(JSON.stringify(item)), id: uuidv4() };
+            const clone = { ...JSON.parse(JSON.stringify(item)), id: generateID() };
             const updated = [...prev.slice(0, idx + 1), clone, ...prev.slice(idx + 1)];
             return updated.map((p, i) => ({ ...p, number: i + 1 }));
         });

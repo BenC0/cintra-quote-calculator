@@ -87,10 +87,9 @@ export const CalculateQuote = ({
         "Summary": {},
     }
 
-    const ContractLengthFieldID = "241712266465"
-    const EducationClientFieldID = "241731552473"
-    const PublicSectorClientFieldID = "241712266460"
-    const ContractLengthField = productDefs.find(product => product.field == ContractLengthFieldID)
+    const findCorrectField = (IDs, values) => {
+        return IDs.filter(a => !!values[a] || values[a] == 0)[0]
+    }
 
     const conditions = [
         Object.keys(planIdsByType),
@@ -109,6 +108,18 @@ export const CalculateQuote = ({
     const QuoteDetails = productTypeAccordions.find(a => a.is_quote_details_type)
     const quoteDetailsPlanID = planIdsByType[QuoteDetails.label]
     const quoteDetailsValues = selectedValues[quoteDetailsPlanID]
+
+    const ContractLengthFieldID = findCorrectField(["241712266465", "247649449167"], quoteDetailsValues)
+    const EducationClientFieldID = findCorrectField(["241731552473", "247649449166"], quoteDetailsValues)
+    const PublicSectorClientFieldID = findCorrectField(["241712266460", "247649449165"], quoteDetailsValues)
+    if ([
+        ContractLengthFieldID,
+        EducationClientFieldID,
+        PublicSectorClientFieldID,
+    ].some(a => !!!a)) {
+        return Quote
+    }
+    const ContractLengthField = productDefs.find(product => product.field == ContractLengthFieldID)
     
     const ContractLengthValue = quoteDetailsValues[ContractLengthFieldID]
     const ContractLengthValuesRef = QuoteDetails.fields.find(a => a.field == ContractLengthFieldID).values

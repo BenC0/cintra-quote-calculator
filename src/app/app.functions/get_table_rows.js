@@ -8,7 +8,7 @@ const hubspot = require('@hubspot/api-client');
 exports.main = async (context) => {
     try {
         // Ensure the access token is provided
-        const accessToken = context.secrets.PRIVATE_APP_ACCESS_TOKEN;
+        const accessToken = process.env['PRIVATE_APP_ACCESS_TOKEN'];
         if (!accessToken) {
             throw new Error("Missing HUBSPOT_ACCESS_TOKEN secret");
         }
@@ -34,7 +34,7 @@ exports.main = async (context) => {
             body: { rows },
         };
     } catch (error) {
-            console.error("Error fetching HubDB rows:", error.message);
+        console.error("Error fetching HubDB rows:", error.message);
         return {
             statusCode: error.statusCode || 500,
             body: { message: error.message || "Internal Server Error" },
