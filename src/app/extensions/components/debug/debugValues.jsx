@@ -42,7 +42,7 @@ export const debugSelectedValues = {
     },
     "9c54b5135a2a": {
         "quantity_value": 50,
-        "frequency_value": "lunar",
+        "frequency_value": "monthly",
         "247649449156": "source"
     },
     "f83ea592778928": {

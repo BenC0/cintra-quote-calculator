@@ -1,14 +1,15 @@
-export const get_price_band = (qtyVal, field, price_table) => {
+export const get_price_band = (qtyVal, fieldValue, price_table) => {
     let output = {
         price: 0,
         monthly_standing_charge: 0,
-        band_price_is_percent: false
+        band_price_is_percent: false,
+        isFallback: true,
     }
-    if (!!field.fieldValue) {
+    if (!!fieldValue) {
         if (price_table.length > 0) {
             let price_bands = []
             if (price_table.some(band => !!band.product_value)) {
-                price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal) && (band.product_value == field.fieldValue))
+                price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal) && (band.product_value == fieldValue))
             } else {
                 price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal))
             }
@@ -56,13 +57,7 @@ export const checkPSQRequirements = (selectedValues, productDefs, productTypeAcc
     const PSQRequired = multiple_service_quote
         || professional_service_quote_flagged
         || min_headcount_for_psq
-
-    // Returning false during development until PSQ Implementation Fees funcitonality
-    // is being developed.
-    // console.error(`PSQ Requirement Check:
-    // - Returns "false" during this stage of development.
-    // - Actual Value = "${PSQRequired}"`)
-    // return false
+        
     return PSQRequired
 }
 
@@ -175,7 +170,7 @@ export const CalculateQuote = ({
                         }
                     }
 
-                    let selectedPlanQuote = {
+                    const selectedPlanQuote = {
                         planId,
                         quantity_field_label: quantity_field_label,
                         quantity_field_type: quantity_field_type,
@@ -186,7 +181,7 @@ export const CalculateQuote = ({
                         let fieldValue = selectedPlanValues[fieldKey]
                         let field = productDefs.find(a => a.field == fieldKey)
                         if (!!fieldValue && !!field) {
-                            let output = field
+                            let output = {...field}
                             let discount = quoteDiscountValues[field.field]
                             output["discount"] = 0
                             if (!!discount) output["discount"] = discount
@@ -198,9 +193,8 @@ export const CalculateQuote = ({
                             
                             qty = qty * payroll_payslips_modifier
 
-                            output["fieldValue"] = fieldValue
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
-                            output["price_band"] = get_price_band((selectedPlanValues.quantity_value || 1), field, output["price_table"])
+                            output["price_band"] = get_price_band(qty, fieldValue, output["price_table"])
                             let useBundlePrice = false
 
                             if (!!output["price_band"]["bundle_price"]) {
@@ -228,7 +222,7 @@ export const CalculateQuote = ({
                             
                             output["monthly_standing_charge"] = output["price_band"]["monthly_standing_charge"] ?? 0
 
-                            output["estimated_monthly_fee"] = ((output["adjusted_price"] * qty) + output["monthly_standing_charge"])
+                            output["estimated_monthly_fee"] = ((output["adjusted_price"] * output["qty"]) + output["monthly_standing_charge"])
 
                             if (output["discount"] > 0) {
                                 output["estimated_monthly_fee"] -= output["estimated_monthly_fee"] * (output["discount"] / 100)
@@ -236,7 +230,7 @@ export const CalculateQuote = ({
                             // TODO: How best to display monthly standing charge?
                             // output["adjusted_price"] += output["monthly_standing_charge"]
                             output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
-                            selectedPlanQuote.fields.push(output)
+                            selectedPlanQuote["fields"] = [...selectedPlanQuote["fields"], output]
                         }
                     }
                     let fieldsWithPctPrice = selectedPlanQuote.fields.filter(field => !!field.price_band.band_price_is_percent)
@@ -252,13 +246,6 @@ export const CalculateQuote = ({
                                 estimated_annual_fee: estimated_monthly_fee * 12
                             } 
                         })
-                        // console.log({
-                        //     event: "Evaluating product for % based pricing",
-                        //     nonPctFieldsEstimatedMonthlyFee,
-                        //     allFields: selectedPlanQuote.fields,
-                        //     fieldsWithPctPrice,
-                        //     selectedPlanQuote,
-                        // })
                     }
 
                     selectedPlanQuote["estimated_monthly_fee"] = selectedPlanQuote.fields.reduce((a, b) => a + b["estimated_monthly_fee"], 0)
