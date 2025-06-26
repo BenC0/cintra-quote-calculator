@@ -40,7 +40,7 @@ export const debugSelectedValues = {
         "247649449168": "standard"
     },
     "74d2d5ebeb44d": {
-        "247649449171": "business",
+        "247649449171": "Business",
         "quantity_value": 120,
         "247649449172": false,
         "247649449174": false,
@@ -52,7 +52,7 @@ export const debugSelectedValues = {
     "9c54b5135a2a": {
         "quantity_value": 120,
         "frequency_value": "monthly",
-        "247649449156": "saas",
+        "247649449156": "Cintra SaaS Payroll",
         "247649449159": true
     },
 }
