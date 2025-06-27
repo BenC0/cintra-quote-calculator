@@ -50,6 +50,12 @@ const QuoteSummaryComponent = ({
             type: "boolean",
             valid: !!quote["Summary"]["PublicSectorClient"],
         },
+        "Private Sector Client": {
+            label: "Private Sector Client",
+            count: quote["Implementation Fees"]["PSQ Config"]?.Sector?.private ?? 0,
+            type: "boolean",
+            valid: !!quote["Implementation Fees"]["PSQ Config"]?.Sector?.private ?? false,
+        },
         "Payroll Headcount": {
             label: "Total Employees",
             count: formatInt(quote["Summary"]["PayrollHeadcount"] ?? 0),

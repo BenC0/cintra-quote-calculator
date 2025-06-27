@@ -228,6 +228,14 @@ export const CalculateQuote = ({
 
                             output["estimated_monthly_fee"] = ((output["adjusted_price"] * output["qty"]) + output["monthly_standing_charge"])
 
+                            let minPrice = output["price_band"]["minimum_price"]
+                            if (
+                                !!minPrice &&
+                                output["estimated_monthly_fee"] < minPrice
+                            ) {
+                                output["estimated_monthly_fee"] = minPrice
+                            }
+
                             if (output["discount"] > 0) {
                                 output["estimated_monthly_fee"] -= output["estimated_monthly_fee"] * (output["discount"] / 100)
                             }
@@ -439,10 +447,7 @@ export const CalculateQuote = ({
             validPlanIdsByType[key] = planIdsByType[key].filter(a => a != "temp")
         }
 
-        let validPayrolls = validPlanIdsByType["Payroll"]
-        let validCintraHR = validPlanIdsByType["CintraHR"] || []
-        validCintraHR = validCintraHR.pop()
-        let cintraHRValue = !!validCintraHR ? selectedValues[validCintraHR] : {quantity_value: 0}
+        let validPayrolls = validPlanIdsByType[PayrollDetails.label]
 
         let psqConfig = {
             CustomHours: PSQImplementationCustomHours,
@@ -479,7 +484,10 @@ export const CalculateQuote = ({
         psqConfig["Sector"] = {
             public: !!quoteDetailsValues[PublicSectorClientFieldID],
             education: !!quoteDetailsValues[EducationClientFieldID],
+            private: !quoteDetailsValues[PublicSectorClientFieldID] || !!quoteDetailsValues[EducationClientFieldID],
         }
+
+        const sectorModifier = psqConfig["Sector"]["private"] ? 1 : 1.5;
         
         // validPayrolls.forEach(payroll => {
         //     let selectedPayrollValues = selectedValues[payroll]
@@ -507,7 +515,6 @@ export const CalculateQuote = ({
                         }
                     })
                     if (!!associatedConfigValue) {
-                        console.warn({psqImpHours})
                         hoursBand = psqImpHours.filter(h => {
                             if (!!h.product_value) {
                                 return h.minimum_quantity <= psqConfig["Headcount"] 
@@ -527,6 +534,8 @@ export const CalculateQuote = ({
                         hoursBand = {
                             hours: psqConfig["CustomHours"][field.field]
                         }
+                    } else {
+                        hoursBand.hours = hoursBand.hours * sectorModifier
                     }
                     
                     if (!!hoursBand.hours && !isNaN(hoursBand.hours)) {

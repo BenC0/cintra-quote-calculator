@@ -11,22 +11,29 @@ import { debugPlanIdsByType, debugPlansById, debugSelectedValues } from "./compo
 import { PSQTables } from "./components/shared/PSQTables";
 
 // Register the extension in the HubSpot CRM sidebar
-hubspot.extend(({ context, runServerlessFunction, actions }) => (
+hubspot.extend(({ context, actions }) => (
     <Extension
         context={context}
-        runServerless={runServerlessFunction}
         actions={actions}
     />
 ));
 
 // Main extension component
-const Extension = ({ context, runServerlessFunction, actions }) => {
+const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = true;
     const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 3;
+
+    const [FirstRun, setFirstRun] = useState(true);
+    useEffect(() => {
+        if (!FirstRun) return null;
+        console.log("Cintra Quote Calculator: v0.9.4")
+        setFirstRun(prev => false)
+    }, [FirstRun])
+
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -34,9 +41,6 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
 
     // Initial state for the quote workflow, managed by useReducer
     const initialState = {
-        // plansById       : debug ? debugPlansById : {},       // Map of planId -> plan metadata
-        // planIdsByType   : debug ? debugPlanIdsByType : {},       // Grouping of plan IDs by product/PSQ type
-        // selectedValues  : debug ? debugSelectedValues : {},       // User-entered values for each plan
         plansById       : debug ? debugPlansById : {},       // Map of planId -> plan metadata
         planIdsByType   : debug ? debugPlanIdsByType : {},       // Grouping of plan IDs by product/PSQ type
         selectedValues  : debug ? debugSelectedValues : {},       // User-entered values for each plan
@@ -165,6 +169,7 @@ const Extension = ({ context, runServerlessFunction, actions }) => {
             price: r.values.price,
             bundle_price: r.values.bundle_price,
             product_value: r.values.product_value,
+            minimum_price: r.values.minimum_price,
             minimum_quantity: r.values.minimum_quantity,
             band_price_is_percent: r.values.band_price_is_percent == 1,
             monthly_standing_charge: r.values.monthly_standing_charge,

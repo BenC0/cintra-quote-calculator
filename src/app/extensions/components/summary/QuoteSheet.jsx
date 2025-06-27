@@ -107,6 +107,7 @@ export const QuoteSheet = ({
                                     input_type: "Number",
                                     discount: productQuoteReference.discount,
                                     estimatedMonthlyFee: productQuoteReference.estimated_monthly_fee,
+                                    minPrice: productQuoteReference["price_band"]["minimum_price"],
                                     monthlyStandingCharge: productQuoteReference["monthly_standing_charge"],
                                     containsMonthlyStandingCharge: !!productQuoteReference["monthly_standing_charge"] && productQuoteReference["monthly_standing_charge"] > 0,
                                 })
@@ -157,6 +158,7 @@ export const QuoteSheet = ({
                                                 <TableCell align="right">
                                                     {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.estimatedMonthlyFee) || 0.00}</>}
                                                     {!!row.containsMonthlyStandingCharge && (<Text>(Includes Monthly Standing Charge | £{formatPrice(row.monthlyStandingCharge)})</Text>)}
+                                                    {!!row.minPrice && (<Text>(Minimum Charge | £{formatPrice(row.minPrice)})</Text>)}
                                                 </TableCell>
                                                 <TableCell>
                                                     {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (

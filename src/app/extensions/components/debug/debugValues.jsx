@@ -10,6 +10,9 @@ export const debugPlanIdsByType = {
     ],
     "Capture Expense": [
         "74d2d5ebeb44d"
+    ],
+    "CintraHR": [
+        "32b34abbb1e54"
     ]
 }
 
@@ -29,6 +32,10 @@ export const debugPlansById = {
     "74d2d5ebeb44d": {
         "id": "74d2d5ebeb44d",
         "type": "Capture Expense"
+    },
+    "32b34abbb1e54": {
+        "id": "32b34abbb1e54",
+        "type": "CintraHR"
     }
 }
 
@@ -52,7 +59,11 @@ export const debugSelectedValues = {
     "9c54b5135a2a": {
         "quantity_value": 120,
         "frequency_value": "weekly",
-        "247649449156": "Cintra SaaS Payroll",
+        "247649449156": "Cintra Outsourced Payroll",
         "247649449159": true
     },
+    "32b34abbb1e54": {
+        "247649449164": "CintraHR Intelligent",
+        "quantity_value": 120
+    }
 }
