@@ -75,6 +75,7 @@ export const CalculateQuote = ({
     psqImpConfig = [],
     PSQImplementationCustomHours = {},
     quoteDiscountValues = {},
+    quoteCustomRates = {},
 }) => {
     const Quote = {
         "Details": {},
@@ -216,7 +217,12 @@ export const CalculateQuote = ({
                                 output["price"] = output["price_band"]["price"]
                             }
                             
-                            output["adjusted_price"] = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
+                            let customRate = quoteCustomRates[field.field]
+                            if (!!customRate) {
+                                output["adjusted_price"] = customRate
+                            } else {
+                                output["adjusted_price"] = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
+                            }
 
                             output["qty"] = qty
                             output["payroll_payslips_discount"] = payroll_payslips_discount
@@ -392,11 +398,17 @@ export const CalculateQuote = ({
                         ratesRef = ratesRef.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                         if (ratesRef.length > 0) {
                             ratesRef = ratesRef[ratesRef.length - 1]
+
+                            let customRate = quoteCustomRates[services[serviceLabel]["field"]]
+                            if (!!customRate) {
+                                ratesRef = {price: customRate}
+                            }
                             if (!!ratesRef.fixed_price && services[serviceLabel]["Implementation Days"] > 0) {
                                 services[serviceLabel]["Implementation Fee"] = ratesRef.price
                             } else {
                                 services[serviceLabel]["Implementation Fee"] = ratesRef.price * services[serviceLabel]["Implementation Days"]
                             }
+                            services[serviceLabel]["Implementation Unit Price"] = ratesRef.price
                         }
                     }
                 } else if (
@@ -415,6 +427,12 @@ export const CalculateQuote = ({
                                 fee += rs[0].estimated_monthly_fee
                             }
                         })
+
+                        let customRate = quoteCustomRates[services[serviceLabel]["field"]]
+                        if (!!customRate) {
+                            fee = customRate
+                        }
+                        services[serviceLabel]["Implementation Unit Price"] = fee
                         services[serviceLabel]["Implementation Fee"] = fee
                         services[serviceLabel]["Implementation Days"] = 1
                     }
@@ -538,8 +556,15 @@ export const CalculateQuote = ({
                         hoursBand.hours = hoursBand.hours * sectorModifier
                     }
                     
+                    let hourly_rate = 0
                     if (!!hoursBand.hours && !isNaN(hoursBand.hours)) {
-                        psqFee = hoursBand.hours * (field.resource.hourly_rate || 0)
+                        hourly_rate = field.resource.hourly_rate || 0
+                        let customRate = quoteCustomRates[field.field]
+                        if (!!customRate) {
+                            console.log("Custom PSQ Rate", customRate)
+                            hourly_rate = customRate
+                        }
+                        psqFee = hoursBand.hours * hourly_rate
                     }
 
                     if (discount > 0) {
@@ -549,7 +574,7 @@ export const CalculateQuote = ({
                     if (isNaN(psqFee)) console.error({
                         event: "PSQ Fee is NaN",
                         hours: hoursBand.hours,
-                        hourly_rate: (field.resource.hourly_rate || 0),
+                        hourly_rate: hourly_rate,
                     })
                     
                     estimated_implementation_fee += psqFee
@@ -557,6 +582,7 @@ export const CalculateQuote = ({
                         ...field,
                         associatedConfigValue,
                         hoursBand,
+                        adjusted_hourly_rate: hourly_rate,
                         discount,
                         psqFee,
                     }

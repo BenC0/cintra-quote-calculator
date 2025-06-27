@@ -21,7 +21,7 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
+    const debug = false;
     const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
@@ -30,7 +30,7 @@ const Extension = ({ context, actions }) => {
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log("Cintra Quote Calculator: v0.9.4")
+        console.log("Cintra Quote Calculator: v0.9.5")
         setFirstRun(prev => false)
     }, [FirstRun])
 
@@ -390,6 +390,14 @@ const Extension = ({ context, actions }) => {
         }))
     }
 
+    const [quoteCustomRates, setquoteCustomRates] = useState({});
+    const quoteCustomRatesHandler = (fieldID, value) => {
+        setquoteCustomRates(prev => ({
+            ...prev,
+            [fieldID]: value
+        }))
+    }
+
     // ------------------------- Plan CRUD Handlers -------------------------
 
     // Add a new plan for a given product type
@@ -492,6 +500,7 @@ const Extension = ({ context, actions }) => {
             psqImpConfig: psqImpConfig,
             PSQImplementationCustomHours: PSQImplementationCustomHours,
             quoteDiscountValues: quoteDiscountValues,
+            quoteCustomRates: quoteCustomRates,
         });
         setQuote(result);
         if ((debug || debugQuote) && !!result) console.log({
@@ -499,7 +508,7 @@ const Extension = ({ context, actions }) => {
             result,
         });
         
-    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues]);
+    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues, quoteCustomRates]);
 
     const progressToImplementation = () => {
         if (RequiresPSQFee) {
@@ -607,6 +616,7 @@ const Extension = ({ context, actions }) => {
                         productTypeAccordions={productTypeAccordions}
                         quoteDiscountValues={quoteDiscountValues}
                         QuoteDiscountValueHandler={QuoteDiscountValueHandler}
+                        quoteCustomRatesHandler={quoteCustomRatesHandler}
                     />
 
                     <QuoteSummaryComponent
