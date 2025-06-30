@@ -35,7 +35,6 @@ export const renderTablePlans = (
     return validPlanIds.map((planId) => {
         const selectedPlanValues = selectedValues[planId]
         if (Object.keys(selectedPlanValues).length == 0) return null;
-        // console.log(`Rendering Table Plan for "${productType.label}"`, {productType, selectedValues, selectedPlanValues})
 
         const countValue = selectedPlanValues.quantity_value;
         const qtyLabel = productType.quantity_field_label;

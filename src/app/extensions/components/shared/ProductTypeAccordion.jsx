@@ -78,6 +78,7 @@ export const ProductTypeAccordion = ({
                                             initialLookup={defaultValues}
                                             actions={actions}
                                             onSubmit={(generatedId) => {
+                                                console.log("Submitted/cloning ", generatedId)
                                                 plan_handler.clone(productType.label, generatedId);
                                                 plan_handler.delete(productType.label, generatedId);
                                             }}

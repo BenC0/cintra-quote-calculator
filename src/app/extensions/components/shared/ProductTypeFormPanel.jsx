@@ -36,6 +36,23 @@ export const ProductTypeFormPanel = ({
         }
     }, [externalPlanId]);
     if (!localPlanId) return null;
+    
+    const [localLookup, setLocalLookup] = useState(initialLookup);
+    const localLookupHandler = (field, value, planId, action="add") => {
+        console.log("Updating localLookup")
+        if (action == "add") {
+            setLocalLookup(prev => ({
+                ...prev,
+                [field.field]: value
+            }));
+            console.log("Adding localLookup", localLookup)
+        } else if (action == "remove") {
+            setLocalLookup(prev => ({
+                ...prev,
+                [field.field]: null
+            }));
+        }
+    }
 
     const grouped_fields = {};
     fields.forEach((field) => {
@@ -53,7 +70,7 @@ export const ProductTypeFormPanel = ({
     }
 
     if (!!quantity) {
-        quantity.value =  initialLookup["quantity_value"]
+        quantity.value =  localLookup["quantity_value"]
         if (!grouped_fields["details"]) {
             grouped_fields["details"] = []
         }
@@ -82,11 +99,11 @@ export const ProductTypeFormPanel = ({
                                 <Text format={{ fontWeight: "bold" }}>{name} Details</Text>
                                     {grouped_fields.details.map((field) => renderField(
                                         field,
-                                        handler,
+                                        localLookupHandler,
                                         localPlanId,
                                         // pass initial value if exists
-                                        initialLookup[field.field] !== undefined
-                                        ? initialLookup[field.field]
+                                        localLookup[field.field] !== undefined
+                                        ? localLookup[field.field]
                                         : undefined
                                     ))}
                                 {(has_core || has_na || has_addon) && <Divider />}
@@ -98,10 +115,10 @@ export const ProductTypeFormPanel = ({
                                 {grouped_fields.core.map((field) =>
                                     renderField(
                                         field,
-                                        handler,
+                                        localLookupHandler,
                                         localPlanId,
-                                        initialLookup[field.field] !== undefined
-                                        ? initialLookup[field.field]
+                                        localLookup[field.field] !== undefined
+                                        ? localLookup[field.field]
                                         : undefined
                                     )
                                 )}
@@ -115,10 +132,10 @@ export const ProductTypeFormPanel = ({
                                 {grouped_fields["add-on"].map((field) =>
                                     renderField(
                                         field,
-                                        handler,
+                                        localLookupHandler,
                                         localPlanId,
-                                        initialLookup[field.field] !== undefined
-                                        ? initialLookup[field.field]
+                                        localLookup[field.field] !== undefined
+                                        ? localLookup[field.field]
                                         : undefined
                                     )
                                 )}
@@ -132,10 +149,10 @@ export const ProductTypeFormPanel = ({
                                 {grouped_fields.na.map((field) =>
                                     renderField(
                                         field,
-                                        handler,
+                                        localLookupHandler,
                                         localPlanId,
-                                        initialLookup[field.field] !== undefined
-                                        ? initialLookup[field.field]
+                                        localLookup[field.field] !== undefined
+                                        ? localLookup[field.field]
                                         : undefined
                                     )
                                 )}
@@ -158,6 +175,15 @@ export const ProductTypeFormPanel = ({
                     <Button
                         variant="primary"
                         onClick={() => {
+                            const allFields = [...fields, frequency, quantity]
+                            console.log(allFields)
+                            for (let key in localLookup) {
+                                let f = allFields.find(field => field.field == key || field.field == `${key}_value` || key == `${field.field}_value`)
+                                if (!!f) {
+                                    handler(f, localLookup[key], localPlanId)
+                                }
+                            }
+                            console.log({localPlanId})
                             onSubmit(localPlanId);
                             actions.closeOverlay(localPlanId);
                         }}

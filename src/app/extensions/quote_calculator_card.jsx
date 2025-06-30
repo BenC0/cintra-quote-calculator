@@ -21,16 +21,16 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = false;
-    const debugPlans = false;
+    const debug = true;
+    const debugPlans = true;
     const debugQuote = false;
     const debugPSQ = false;
-    const debugPage = 3;
+    const debugPage = 1;
 
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log("Cintra Quote Calculator: v0.9.10")
+        console.log("Cintra Quote Calculator: v0.9.11")
         setFirstRun(prev => false)
     }, [FirstRun])
 
