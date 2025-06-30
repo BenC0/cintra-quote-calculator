@@ -21,8 +21,8 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
-    const debugPlans = true;
+    const debug = false;
+    const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 1;
