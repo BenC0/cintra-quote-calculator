@@ -39,13 +39,11 @@ export const ProductTypeFormPanel = ({
     
     const [localLookup, setLocalLookup] = useState(initialLookup);
     const localLookupHandler = (field, value, planId, action="add") => {
-        console.log("Updating localLookup")
         if (action == "add") {
             setLocalLookup(prev => ({
                 ...prev,
                 [field.field]: value
             }));
-            console.log("Adding localLookup", localLookup)
         } else if (action == "remove") {
             setLocalLookup(prev => ({
                 ...prev,
@@ -181,7 +179,6 @@ export const ProductTypeFormPanel = ({
                         onClick={() => {
                             if (!isTemp) {
                                 const allFields = [...fields, frequency, quantity]
-                                console.log(allFields)
                                 for (let key in localLookup) {
                                     let f = allFields.find(field => field.field == key || field.field == `${key}_value` || key == `${field.field}_value`)
                                     if (!!f) {
@@ -189,7 +186,6 @@ export const ProductTypeFormPanel = ({
                                     }
                                 }
                             }
-                            console.log({localPlanId, isTemp})
                             onSubmit(localPlanId);
                             actions.closeOverlay(localPlanId);
                         }}

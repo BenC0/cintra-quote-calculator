@@ -113,6 +113,7 @@ export const CalculateQuote = ({
         ContractLengthFieldID,
         EducationClientFieldID,
         PublicSectorClientFieldID,
+        quoteDetailsValues,
     ].some(a => !!!a)) {
         return Quote
     }

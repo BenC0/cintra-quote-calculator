@@ -30,7 +30,7 @@ const Extension = ({ context, actions }) => {
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log("Cintra Quote Calculator: v0.9.11")
+        console.log("Cintra Quote Calculator: v0.9.12")
         setFirstRun(prev => false)
     }, [FirstRun])
 
@@ -627,6 +627,49 @@ const Extension = ({ context, actions }) => {
         }
     }, [plansById, planIdsByType, selectedValues, quoteDiscountValues]);
 
+    const resetForm = (plansById, productTypeAccordions) => {
+        for (let planKey in plansById) {
+            let plan = plansById[planKey]
+            let planProductType = productTypeAccordions.find(pt => pt.label == plan.type)
+            if (planProductType.input_display_type == "inline") {
+                // Helper to get default field entries based on type
+                const getDefaultFields = (pt) => pt.fields.map((f) => {
+                    console.log({f})
+                    let defaultValue = f.defaultValue;
+                    switch (f.input_type) {
+                        case "Toggle": defaultValue = false; break;
+                        case "Number": defaultValue = 0; break;
+                        case "Text": defaultValue = ""; break;
+                        case "Radio":
+                        case "Dropdown":
+                            const vals = valueTables[f.input_values_table];
+                            defaultValue = !!vals ? vals.find(v => !!v.values.default) : null
+                            if (!!defaultValue) {
+                                defaultValue = defaultValue.values.value
+                            } else if (!!vals) {
+                                defaultValue = vals[0].values.value
+                            }
+                            break;
+                    }
+                    return { field: f.field, label: f.label, value: defaultValue };
+                });
+
+                getDefaultFields(planProductType).forEach((field) => {
+                    dispatch({
+                        type: "UPDATE_SELECTED_VALUE",
+                        payload: {
+                            planId: plan.id,
+                            fieldKey: field.field,
+                            value: field.value,
+                        },
+                    });
+                })
+            } else {
+                deletePlan(plan.type, plan.id)
+            }
+        }
+    }
+
     return (
         <Flex direction="column" gap="md">
             {/* Page 1: Select products and quantities */}
@@ -725,6 +768,12 @@ const Extension = ({ context, actions }) => {
                     />
 
                     <Flex justify="end" gap="small">
+                        <Button variant="destructive" onClick={() => {
+                            resetForm(plansById, productTypeAccordions)
+                            setCurrentPage(1)
+                        }}>
+                            Reset Form
+                        </Button>
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
                             Review Schedule
                         </Button>
