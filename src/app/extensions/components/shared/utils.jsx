@@ -96,9 +96,9 @@ export const formatPrice = price => price.toLocaleString(undefined, {
     maximumFractionDigits: 2
 });
 
-export const formatToOneDecimal = price => price.toLocaleString(undefined, {
+export const formatToMaxTwoDecimal = price => price.toLocaleString(undefined, {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 2
 });
 
 export const formatInt = price => price.toLocaleString(undefined, {

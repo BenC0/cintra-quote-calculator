@@ -14,7 +14,7 @@ import {
     TableRow,
 } from "@hubspot/ui-extensions"
 import { renderTableSummaries } from "../shared/renderTableSummaries"
-import { formatInt, formatPrice, toTitleCase } from "../shared/utils"
+import { formatInt, formatPrice, toTitleCase, formatToMaxTwoDecimal } from "../shared/utils"
 import { renderField } from "../shared/Inputs";
 
 export const QuoteSheet = ({
@@ -182,7 +182,7 @@ export const QuoteSheet = ({
                                         {accordion.rows.map(row => (
                                             <TableRow>
                                                 <TableCell>{row.name}</TableCell>
-                                                <TableCell align="right">{formatInt(row.quantity)}</TableCell>
+                                                <TableCell align="right">{formatToMaxTwoDecimal(row.quantity)}</TableCell>
                                                 <TableCell align="right">
                                                     {(!row.no_custom_values && (!!RatesEditing[row.field] || RatesEditing[row.field] === 0)) ? (
                                                         renderField(row, (field, e, planId) => {
@@ -298,7 +298,7 @@ export const QuoteSheet = ({
                                 ((row.discount + row.psqFee)> 0) ? (
                                     <TableRow>
                                         <TableCell>{row.label}</TableCell>
-                                        <TableCell>{formatInt(row.hoursBand.hours)}</TableCell>
+                                        <TableCell>{formatToMaxTwoDecimal(row.hoursBand.hours)}</TableCell>
                                         {/* <TableCell>£{formatPrice(row.resource.hourly_rate)}</TableCell> */}
                                         <TableCell align="right">
                                             {(!!RatesEditing[row.field] || RatesEditing[row.field] === 0) ? (
@@ -378,7 +378,7 @@ export const QuoteSheet = ({
                     service["input_type"] = "Number"
                     stdRows.push(<TableRow>
                         <TableCell>{service.label}</TableCell>
-                        <TableCell>{formatInt(service["Implementation Days"])}</TableCell>
+                        <TableCell>{formatToMaxTwoDecimal(service["Implementation Days"])}</TableCell>
 
                         {/* <TableCell>£{formatPrice(service["Implementation Fee"] / service["Implementation Days"])}</TableCell> */}
                         <TableCell align="right">

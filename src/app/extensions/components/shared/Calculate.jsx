@@ -220,7 +220,30 @@ export const CalculateQuote = ({
                             if (!!customRate) {
                                 output["adjusted_price"] = customRate
                             } else {
-                                output["adjusted_price"] = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
+                                console.log({
+                                    list_price_formula_type: field.list_price_formula_type
+                                })
+                                const formula1 = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
+                                const formula2 = (output["price"] * SelectedContractLengthDiscount) / payroll_payslips_modifier
+                                const formula3 = output["price"]
+                                const formula4 = formula2 / qty
+                                switch (field.list_price_formula_type) {
+                                    case "formula1":
+                                        output["adjusted_price"] = formula1
+                                        break;
+                                    case "formula2":
+                                        output["adjusted_price"] = formula2
+                                        break;
+                                    case "formula3":
+                                        output["adjusted_price"] = formula3
+                                        break;
+                                    case "formula4":
+                                        output["adjusted_price"] = formula4
+                                        break;
+                                    default:
+                                        output["adjusted_price"] = formula3
+                                        break;
+                                }
                             }
 
                             output["qty"] = qty

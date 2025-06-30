@@ -30,7 +30,7 @@ const Extension = ({ context, actions }) => {
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log("Cintra Quote Calculator: v0.9.8")
+        console.log("Cintra Quote Calculator: v0.9.10")
         setFirstRun(prev => false)
     }, [FirstRun])
 
@@ -67,6 +67,7 @@ const Extension = ({ context, actions }) => {
             is_contract_length_field: r.values.is_contract_length_field == 1,
             is_education_client_field: r.values.is_education_client_field == 1,
             is_public_sector_client_field: r.values.is_public_sector_client_field == 1,
+            list_price_formula_type: r?.values?.list_price_formula_type?.name ?? "formula1",
         };
     };
 

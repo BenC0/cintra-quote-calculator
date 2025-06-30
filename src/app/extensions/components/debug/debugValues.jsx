@@ -45,8 +45,9 @@ export const debugSelectedValues = {
         "247649449178": false
     },
     "9c54b5135a2a": {
+        "247649449159": true,
         "quantity_value": 200,
-        "frequency_value": "monthly",
+        "frequency_value": "lunar",
         "247649449156": "Cintra Outsourced Payroll"
     },
     "4c8fe12c4d9388": {
