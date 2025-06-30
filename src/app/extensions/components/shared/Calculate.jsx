@@ -220,9 +220,6 @@ export const CalculateQuote = ({
                             if (!!customRate) {
                                 output["adjusted_price"] = customRate
                             } else {
-                                console.log({
-                                    list_price_formula_type: field.list_price_formula_type
-                                })
                                 const formula1 = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
                                 const formula2 = (output["price"] * SelectedContractLengthDiscount) / payroll_payslips_modifier
                                 const formula3 = output["price"]
