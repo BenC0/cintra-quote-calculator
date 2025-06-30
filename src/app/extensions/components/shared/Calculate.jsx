@@ -137,7 +137,6 @@ export const CalculateQuote = ({
     Quote["Summary"]["PublicSectorClient"] = isPublicSectorClientValue
     Quote["Summary"]["PayrollHeadcount"] = 0
 
-
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0
         let estimated_plan_annual_fee = 0
@@ -245,7 +244,6 @@ export const CalculateQuote = ({
                             if (output["discount"] > 0) {
                                 output["estimated_monthly_fee"] -= output["estimated_monthly_fee"] * (output["discount"] / 100)
                             }
-                            // TODO: How best to display monthly standing charge?
                             if (output["adjusted_price"] === 0) {
                                 output["adjusted_price"] += output["monthly_standing_charge"]
                             }
@@ -561,7 +559,6 @@ export const CalculateQuote = ({
                         hourly_rate = field.resource.hourly_rate || 0
                         let customRate = quoteCustomRates[field.field]
                         if (!!customRate) {
-                            console.log("Custom PSQ Rate", customRate)
                             hourly_rate = customRate
                         }
                         psqFee = hoursBand.hours * hourly_rate
@@ -587,6 +584,36 @@ export const CalculateQuote = ({
                         psqFee,
                     }
                 }),
+            }
+        })
+    }
+
+    if (!!planIdsByType["Custom Products"]) {
+        let customProductPlans = planIdsByType["Custom Products"]
+        let customProductPlanValues = customProductPlans.map(plan => ({...selectedValues[plan], plan}))
+        Quote["Details"]["Custom Products"] = customProductPlanValues.map(plan => {
+            let estimated_plan_monthly_fee = plan.quantity_value * plan.CustomProductPrice
+            let estimated_plan_annual_fee = estimated_plan_monthly_fee * 12
+            estimated_monthly_fee += estimated_plan_monthly_fee
+            estimated_annual_fee += estimated_plan_annual_fee
+            return {
+                "planId": plan.plan,
+                "quantity_field_label": "Quantity",
+                "quantity_field_type": "Quantity",
+                "fields": [
+                    {
+                        "field": "247649449156",
+                        "label": "Cintra Payroll Product",
+                        "discount": 0,
+                        "adjusted_price": plan.CustomProductPrice,
+                        "qty": plan.quantity_value,
+                        "monthly_standing_charge": 0,
+                        "estimated_monthly_fee": estimated_plan_monthly_fee,
+                        "estimated_annual_fee": estimated_plan_annual_fee
+                    }
+                ],
+                "estimated_monthly_fee": estimated_plan_monthly_fee,
+                "estimated_annual_fee": estimated_plan_annual_fee
             }
         })
     }

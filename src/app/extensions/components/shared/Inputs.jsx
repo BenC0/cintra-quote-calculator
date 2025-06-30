@@ -86,7 +86,6 @@ export const renderTextInput = (field, onChange, planId, existingValue, supressL
             value={existingValue ?? field.value}
             id={`${planId}__${field.field}`}
             name={`${planId}__${field.field}`}
-            label={field.label}
             labelDisplay="hidden"
             onChange={e => onChange(field, e, planId)}
         />

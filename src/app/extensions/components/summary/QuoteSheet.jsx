@@ -69,7 +69,6 @@ export const QuoteSheet = ({
                 const productTypePlans = planIdsByType[productType.label]
                 const productTypeQuoteReference = quote["Details"][productType.label]
                 if (!!!productTypePlans || productTypePlans.length == 0) return null;
-                
                 if (!!productTypePlans && !!productTypeQuoteReference) {
                     productTypePlans.forEach((plan, idx) => {
                         const planValues = selectedValues[plan]
@@ -88,44 +87,67 @@ export const QuoteSheet = ({
                             coreProductMonthlyFee: 0,
                             addonProductMonthlyFee: 0,
                         }
+                        
+                        if (productType.label == "Custom Products") {
+                            planDetails.no_custom_values = true
+                            let customPrice = planValues["CustomProductPrice"]
+                            let customName = planValues["CustomProductName"]
+                            let customQty = planValues["quantity_value"]
+                            planDetails["coreProductMonthlyFee"] += customPrice * customQty
 
-                        for (let productKey in planValues) {
-                            const productValue = planValues[productKey]
-                            const productReference = productType.fields.find(a => a.field == productKey)
-                            const productQuoteReference = planQuote.fields.find(a => a.field == productKey)
-                            if (!!productReference && !!productQuoteReference && !!productValue) {
-                                const isCoreProduct = productReference.product_sub_type.name == "core"
-                                let label = productReference.label
-                                // let qty = planValues.quantity_value
-                                let qty = productQuoteReference.qty
-                                if (!!!qty || qty < 1) {
-                                    qty = 1
-                                }
-                                if (typeof productValue != "number") {
-                                    // qty = headcount
-                                    if (typeof productValue == "string") {
-                                        label = `${label}: ${productValue}`
+                            planDetails["rows"].push({
+                                field: `Custom Product: ${plan}`,
+                                name: customName,
+                                pricingStructure: null,
+                                unitPrice: customPrice,
+                                quantity: customQty,
+                                input_type: "Number",
+                                discount: 0,
+                                estimatedMonthlyFee: customPrice * customQty,
+                                minPrice: null,
+                                monthlyStandingCharge: null,
+                                containsMonthlyStandingCharge: false,
+                                no_custom_values: true
+                            })
+                        } else {
+                            for (let productKey in planValues) {
+                                const productValue = planValues[productKey]
+                                const productReference = productType.fields.find(a => a.field == productKey)
+                                const productQuoteReference = planQuote.fields.find(a => a.field == productKey)
+                                if (!!productReference && !!productQuoteReference && !!productValue) {
+                                    const isCoreProduct = productReference.product_sub_type.name == "core"
+                                    let label = productReference.label
+                                    // let qty = planValues.quantity_value
+                                    let qty = productQuoteReference.qty
+                                    if (!!!qty || qty < 1) {
+                                        qty = 1
                                     }
-                                }
-                                if (isCoreProduct) {
-                                    planDetails["coreProductMonthlyFee"] += productQuoteReference.estimated_monthly_fee
-                                } else {
-                                    planDetails["addonProductMonthlyFee"] += productQuoteReference.estimated_monthly_fee
-                                }
+                                    if (typeof productValue != "number") {
+                                        // qty = headcount
+                                        if (typeof productValue == "string") {
+                                            label = `${label}: ${productValue}`
+                                        }
+                                    }
+                                    if (isCoreProduct) {
+                                        planDetails["coreProductMonthlyFee"] += productQuoteReference.estimated_monthly_fee
+                                    } else {
+                                        planDetails["addonProductMonthlyFee"] += productQuoteReference.estimated_monthly_fee
+                                    }
 
-                                planDetails["rows"].push({
-                                    field: productReference.field,
-                                    name: label,
-                                    pricingStructure: productReference.pricing_structure.name,
-                                    unitPrice: productQuoteReference.adjusted_price,
-                                    quantity: qty,
-                                    input_type: "Number",
-                                    discount: productQuoteReference.discount,
-                                    estimatedMonthlyFee: productQuoteReference.estimated_monthly_fee,
-                                    minPrice: productQuoteReference["price_band"]["minimum_price"],
-                                    monthlyStandingCharge: productQuoteReference["monthly_standing_charge"],
-                                    containsMonthlyStandingCharge: !!productQuoteReference["monthly_standing_charge"] && productQuoteReference["monthly_standing_charge"] > 0,
-                                })
+                                    planDetails["rows"].push({
+                                        field: productReference.field,
+                                        name: label,
+                                        pricingStructure: productReference.pricing_structure.name,
+                                        unitPrice: productQuoteReference.adjusted_price,
+                                        quantity: qty,
+                                        input_type: "Number",
+                                        discount: productQuoteReference.discount,
+                                        estimatedMonthlyFee: productQuoteReference.estimated_monthly_fee,
+                                        minPrice: productQuoteReference["price_band"]["minimum_price"],
+                                        monthlyStandingCharge: productQuoteReference["monthly_standing_charge"],
+                                        containsMonthlyStandingCharge: !!productQuoteReference["monthly_standing_charge"] && productQuoteReference["monthly_standing_charge"] > 0,
+                                    })
+                                }
                             }
                         }
                         if (planDetails.rows.length > 0) accordionDetails["plans"].push(planDetails)
@@ -145,7 +167,7 @@ export const QuoteSheet = ({
                                             <TableHeader></TableHeader>
                                             <TableHeader></TableHeader>
                                             <TableHeader></TableHeader>
-                                            <TableHeader></TableHeader>
+                                            {!accordion.no_custom_values ? <TableHeader></TableHeader> : <></> }
                                         </TableRow>
                                         <TableRow>
                                             <TableHeader align="left">Product Name</TableHeader>
@@ -153,7 +175,7 @@ export const QuoteSheet = ({
                                             <TableHeader align="right">Unit Price</TableHeader>
                                             <TableHeader align="right">Discount</TableHeader>
                                             <TableHeader align="right">Estimated Monthly Fee</TableHeader>
-                                            <TableHeader align="center"></TableHeader>
+                                            {!accordion.no_custom_values ? <TableHeader></TableHeader> : <></> }
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -162,14 +184,14 @@ export const QuoteSheet = ({
                                                 <TableCell>{row.name}</TableCell>
                                                 <TableCell align="right">{formatInt(row.quantity)}</TableCell>
                                                 <TableCell align="right">
-                                                    {(!!RatesEditing[row.field] || RatesEditing[row.field] === 0) ? (
+                                                    {(!row.no_custom_values && (!!RatesEditing[row.field] || RatesEditing[row.field] === 0)) ? (
                                                         renderField(row, (field, e, planId) => {
                                                             RatesHandler(row.field, e, "add")
                                                         }, "PSQ", (!!RatesEditing[row.field] || RatesEditing[row.field] === 0) && typeof RatesEditing[row.field] == "number" ? RatesEditing[row.field] : formatPrice(row.unitPrice), true, 100)
                                                     ) : `£${formatPrice(row.unitPrice)}` || `0%`}
                                                 </TableCell>
                                                 <TableCell align="right">
-                                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                    {(!row.no_custom_values && (!!discountEditing[row.field] || discountEditing[row.field] === 0)) ? (
                                                         renderField(row, (field, e, planId) => {
                                                             discountHandler(row.field, e, "add")
                                                         }, "PSQ", (!!discountEditing[row.field] || discountEditing[row.field] === 0) && typeof discountEditing[row.field] == "number" ? discountEditing[row.field] : row.discount, true, 100)
@@ -180,47 +202,48 @@ export const QuoteSheet = ({
                                                     {!!row.containsMonthlyStandingCharge && (<Text>(Includes Monthly Standing Charge | £{formatPrice(row.monthlyStandingCharge)})</Text>)}
                                                     {!!row.minPrice && (<Text>(Minimum Charge | £{formatPrice(row.minPrice)})</Text>)}
                                                 </TableCell>
-                                                <TableCell>
-                                                    {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
-                                                        <Flex direction="column" align="stretch" gap="sm">
+                                                {!row.no_custom_values ? (
+                                                    <TableCell>
+                                                        {((!!discountEditing[row.field] || discountEditing[row.field] === 0)) ? (
+                                                            <Flex direction="column" align="stretch" gap="sm">
+                                                                <Button
+                                                                    variant="primary"
+                                                                    onClick={_ => {
+                                                                        if (typeof discountEditing[row.field] == "number") {
+                                                                            QuoteDiscountValueHandler(row.field, discountEditing[row.field])
+                                                                        }
+                                                                        if (typeof RatesEditing[row.field] == "number") {
+                                                                            quoteCustomRatesHandler(row.field, RatesEditing[row.field])
+                                                                        }
+                                                                        RatesHandler(row.field, null, "remove")
+                                                                        discountHandler(row.field, null, "remove")
+                                                                    }}
+                                                                >
+                                                                    <Icon name="success"/>
+                                                                </Button>
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    onClick={_ => {
+                                                                        discountHandler(row.field, null, "remove")
+                                                                        RatesHandler(row.field, null, "remove")
+                                                                    }}
+                                                                >
+                                                                    <Icon name="delete"/>
+                                                                </Button>
+                                                            </Flex>                                            
+                                                        ) : (
                                                             <Button
-                                                                variant="primary"
+                                                                variant="transparent"
                                                                 onClick={_ => {
-                                                                    if (typeof discountEditing[row.field] == "number") {
-                                                                        console.log({discountEditing})
-                                                                        QuoteDiscountValueHandler(row.field, discountEditing[row.field])
-                                                                    }
-                                                                    if (typeof RatesEditing[row.field] == "number") {
-                                                                        quoteCustomRatesHandler(row.field, RatesEditing[row.field])
-                                                                    }
-                                                                    RatesHandler(row.field, null, "remove")
-                                                                    discountHandler(row.field, null, "remove")
+                                                                    discountHandler(row.field, true, "add")
+                                                                    RatesHandler(row.field, true, "add")
                                                                 }}
                                                             >
-                                                                <Icon name="success"/>
+                                                                <Icon name="edit"/>
                                                             </Button>
-                                                            <Button
-                                                                variant="destructive"
-                                                                onClick={_ => {
-                                                                    discountHandler(row.field, null, "remove")
-                                                                    RatesHandler(row.field, null, "remove")
-                                                                }}
-                                                            >
-                                                                <Icon name="delete"/>
-                                                            </Button>
-                                                        </Flex>                                            
-                                                    ) : (
-                                                        <Button
-                                                            variant="transparent"
-                                                            onClick={_ => {
-                                                                discountHandler(row.field, true, "add")
-                                                                RatesHandler(row.field, true, "add")
-                                                            }}
-                                                        >
-                                                            <Icon name="edit"/>
-                                                        </Button>
-                                                    )}
-                                                </TableCell>
+                                                        )}
+                                                    </TableCell>
+                                                ): <></>}
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -229,14 +252,14 @@ export const QuoteSheet = ({
                                             <TableRow>
                                                 <TableCell colSpan={4}>Estimated Core Product Charges</TableCell>
                                                 <TableCell align="right">£{formatPrice(accordion.coreProductMonthlyFee)}</TableCell>
-                                                <TableCell></TableCell>
+                                                {!accordion.no_custom_values ? <TableCell></TableCell> : <></> }
                                             </TableRow>
                                         ) : <></>}
                                         {accordion.addonProductMonthlyFee > 0 ? (
                                             <TableRow>
                                                 <TableCell colSpan={4}>Estimated Addon Product Charges</TableCell>
                                                 <TableCell align="right">£{formatPrice(accordion.addonProductMonthlyFee)}</TableCell>
-                                                <TableCell></TableCell>
+                                                {!accordion.no_custom_values ? <TableCell></TableCell> : <></> }
                                             </TableRow>
                                         ) : <></>}
                                     </TableFooter>
@@ -301,7 +324,6 @@ export const QuoteSheet = ({
                                                         variant="primary"
                                                         onClick={_ => {
                                                             if (typeof discountEditing[row.field] == "number") {
-                                                                console.log({discountEditing})
                                                                 QuoteDiscountValueHandler(row.field, discountEditing[row.field])
                                                             }
                                                             if (typeof RatesEditing[row.field] == "number") {
@@ -354,7 +376,6 @@ export const QuoteSheet = ({
                 for (let serviceKey in fee.services) {
                     let service = fee.services[serviceKey]
                     service["input_type"] = "Number"
-                    console.log({service})
                     stdRows.push(<TableRow>
                         <TableCell>{service.label}</TableCell>
                         <TableCell>{formatInt(service["Implementation Days"])}</TableCell>
@@ -385,7 +406,6 @@ export const QuoteSheet = ({
                                         variant="primary"
                                         onClick={_ => {
                                             if (typeof discountEditing[service.field] == "number") {
-                                                console.log({discountEditing})
                                                 QuoteDiscountValueHandler(service.field, discountEditing[service.field])
                                             }
                                             if (typeof RatesEditing[service.field] == "number") {

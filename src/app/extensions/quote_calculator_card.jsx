@@ -30,7 +30,7 @@ const Extension = ({ context, actions }) => {
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log("Cintra Quote Calculator: v0.9.5")
+        console.log("Cintra Quote Calculator: v0.9.8")
         setFirstRun(prev => false)
     }, [FirstRun])
 
@@ -268,16 +268,112 @@ const Extension = ({ context, actions }) => {
             && Object.keys(valueTables).length
         ) {
             if (!!debug) console.count("Initialising Product Type Accoridons")
-            // console.log({productTypeDefs, productDefs, valueTables})
+            const customProductTypeDef = {
+                "field": "CustomProductType",
+                "label": "Custom Products",
+                "sort_order": productTypeDefs.length,
+                "max_items": -1,
+                "quantity_field_type": {
+                    "id": "1",
+                    "name": "Quantity",
+                    "label": "Quantity",
+                    "type": "option",
+                    "order": 0
+                },
+                "quantity_field_label": "Quantity",
+                "input_display_type": "table",
+                "is_payroll_product_type": false,
+                "is_quote_details_type": false,
+                "use_quantity_as_implementation_headcount": false,
+                "standard_implementation_calculation_type": "default",
+                "standard_implementation_calculation_product": null,
+                "quantityFieldDef": {
+                    "field": "quantity",
+                    "label": "Quantity",
+                    "input_values_table": "",
+                    "input_type": "Number",
+                    "pricing_structure": null,
+                    "product_type": {
+                        "id": "CustomProductType",
+                        "name": "Custom Products",
+                        "type": "foreignid"
+                    },
+                    "product_sub_type": {
+                        "label": "Details",
+                        "name": "details"
+                    },
+                    "requires_psq": false,
+                    "is_contract_length_field": false,
+                    "is_education_client_field": false,
+                    "is_public_sector_client_field": false,
+                    "value": 0
+                },
+            }
+            const customProductFields = [
+                {
+                    "field": "CustomProductName",
+                    "label": "Custom Product Name",
+                    "input_values_table": "",
+                    "input_type": "Text",
+                    "pricing_structure": {
+                        "id": "247649449155",
+                        "name": "N/A",
+                        "type": "foreignid"
+                    },
+                    "product_type": {
+                        "id": "CustomProductType",
+                        "name": "Custom Products",
+                        "type": "foreignid"
+                    },
+                    "product_sub_type": {
+                        "id": "1",
+                        "name": "core",
+                        "label": "Core",
+                        "type": "option",
+                        "order": 0
+                    },
+                    "requires_psq": false,
+                    "is_contract_length_field": false,
+                    "is_education_client_field": false,
+                    "is_public_sector_client_field": false
+                },
+                {
+                    "field": "CustomProductPrice",
+                    "label": "Custom Product Price",
+                    "input_values_table": "",
+                    "input_type": "Number",
+                    "pricing_structure": {
+                        "id": "247649449155",
+                        "name": "N/A",
+                        "type": "foreignid"
+                    },
+                    "product_type": {
+                        "id": "CustomProductType",
+                        "name": "Custom Products",
+                        "type": "foreignid"
+                    },
+                    "product_sub_type": {
+                        "id": "1",
+                        "name": "core",
+                        "label": "Core",
+                        "type": "option",
+                        "order": 0
+                    },
+                    "requires_psq": false,
+                    "is_contract_length_field": false,
+                    "is_education_client_field": false,
+                    "is_public_sector_client_field": false
+                }
+            ]
             setProductTypeAccordions(
-                productTypeDefs.map((productType) => {
+                [...productTypeDefs, customProductTypeDef].map((productType) => {
                     const output = { ...productType };
                     // Populate frequency field options from dynamic tables
                     if (output.frequencyFieldDef) {
                         output.frequencyFieldDef.values = valueTables[output.quantity_frequency_values_table] || null;
                     }
                     // Build field definitions including default values per input type
-                    output.fields = productDefs
+                    output.fields = [...productDefs, ...customProductFields]
                         .filter((a) => a.product_type.id === productType.field)
                         .map((field) => {
                             let values = null;

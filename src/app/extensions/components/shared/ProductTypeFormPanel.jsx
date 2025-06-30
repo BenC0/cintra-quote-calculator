@@ -94,7 +94,7 @@ export const ProductTypeFormPanel = ({
                         )}
                         {has_core && (
                             <>
-                                <Text format={{ fontWeight: "bold" }}>Core {name} Products</Text>
+                                <Text format={{ fontWeight: "bold" }}>Core {name.indexOf("Product") > -1 ? name : `${name} Products`}</Text>
                                 {grouped_fields.core.map((field) =>
                                     renderField(
                                         field,
