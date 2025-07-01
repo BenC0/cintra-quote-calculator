@@ -72,7 +72,7 @@ export const ProductTypeFormPanel = ({
     }
 
     if (!!quantity) {
-        quantity.value =  preferredLookup["quantity_value"]
+        quantity.value =  preferredLookup["quantity_value"] || 0
         if (!grouped_fields["details"]) {
             grouped_fields["details"] = []
         }

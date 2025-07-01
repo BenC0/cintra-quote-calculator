@@ -30,7 +30,7 @@ const Extension = ({ context, actions }) => {
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log("Cintra Quote Calculator: v0.9.12")
+        console.log("Cintra Quote Calculator: v0.9.13")
         setFirstRun(prev => false)
     }, [FirstRun])
 
@@ -634,7 +634,6 @@ const Extension = ({ context, actions }) => {
             if (planProductType.input_display_type == "inline") {
                 // Helper to get default field entries based on type
                 const getDefaultFields = (pt) => pt.fields.map((f) => {
-                    console.log({f})
                     let defaultValue = f.defaultValue;
                     switch (f.input_type) {
                         case "Toggle": defaultValue = false; break;
