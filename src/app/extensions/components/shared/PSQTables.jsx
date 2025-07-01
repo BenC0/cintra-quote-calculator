@@ -12,7 +12,7 @@ import {
     TableCell,
     Accordion,
 } from "@hubspot/ui-extensions";
-import { formatPrice } from "./utils";
+import { formatPrice, formatToMaxTwoDecimal } from "./utils";
 import { renderField } from "./Inputs";
 
 export const PSQTables = ({
@@ -69,8 +69,8 @@ export const PSQTables = ({
                                         {(!!tasksEditing[task.field] || tasksEditing[task.field] === 0) ? (
                                             renderField(task, (field, e, planId) => {
                                                 taskHandler(task.field, e, "add")
-                                            }, "PSQ", (!!tasksEditing[task.field] || tasksEditing[task.field] === 0) && typeof tasksEditing[task.field] == "number" ? tasksEditing[task.field] : task.hoursBand.hours, true)
-                                        ) : task.hoursBand.hours || 0}
+                                            }, "PSQ", (!!tasksEditing[task.field] || tasksEditing[task.field] === 0) && typeof tasksEditing[task.field] == "number" ? tasksEditing[task.field] : formatToMaxTwoDecimal(task.hoursBand.hours), true)
+                                        ) : formatToMaxTwoDecimal(task.hoursBand.hours) || 0}
                                     </TableCell>
                                     <TableCell align="center">£{formatPrice(task.resource.hourly_rate) || 0.00}</TableCell>
                                     <TableCell align="center">

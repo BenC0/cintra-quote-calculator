@@ -544,6 +544,7 @@ export const CalculateQuote = ({
                     let hoursBand = {hours: 0}
                     let psqFee = 0
                     let discount = 0
+                    let hours = 0
                     if (!!quoteDiscountValues[field.field]) discount = quoteDiscountValues[field.field]
                     let associatedConfigValue = null 
                     field.psq_config_reference.forEach(configField => {
@@ -565,18 +566,17 @@ export const CalculateQuote = ({
                         if (hoursBand.length > 0) {
                             hoursBand = hoursBand.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                             hoursBand = hoursBand.pop()
+                            hours = hoursBand.hours
                         }
                     }
                     if (!!psqConfig["CustomHours"][field.field] || psqConfig["CustomHours"][field.field] === 0) {
-                        hoursBand = {
-                            hours: psqConfig["CustomHours"][field.field]
-                        }
+                        hours = psqConfig["CustomHours"][field.field]
                     } else {
-                        hoursBand.hours = hoursBand.hours * sectorModifier
+                        hours = hoursBand.hours * sectorModifier
                     }
                     
                     let hourly_rate = 0
-                    if (!!hoursBand.hours && !isNaN(hoursBand.hours)) {
+                    if (!isNaN(hours)) {
                         hourly_rate = field.resource.hourly_rate || 0
                         let customRate = quoteCustomRates[field.field]
                         if (!!customRate) {
@@ -599,7 +599,9 @@ export const CalculateQuote = ({
                     return {
                         ...field,
                         associatedConfigValue,
-                        hoursBand,
+                        hoursBand: {
+                            hours
+                        },
                         adjusted_hourly_rate: hourly_rate,
                         discount,
                         psqFee,

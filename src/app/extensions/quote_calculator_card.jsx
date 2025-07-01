@@ -26,24 +26,26 @@ const Extension = ({ context, actions }) => {
     const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 1;
+    const versionLabel = "Cintra Quote Calculator: v0.9.18"
 
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log("Cintra Quote Calculator: v0.9.15")
+        console.log(versionLabel)
+        if (debug) console.time(versionLabel)
         setFirstRun(prev => false)
     }, [FirstRun])
 
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
-    const [currentPage, setCurrentPage] = useState(!!debug && !!debugPage ? debugPage : 1);
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Initial state for the quote workflow, managed by useReducer
     const initialState = {
-        plansById       : debug ? debugPlansById : {},       // Map of planId -> plan metadata
-        planIdsByType   : debug ? debugPlanIdsByType : {},       // Grouping of plan IDs by product/PSQ type
-        selectedValues  : debug ? debugSelectedValues : {},       // User-entered values for each plan
+        plansById       : {},       // Map of planId -> plan metadata
+        planIdsByType   : {},       // Grouping of plan IDs by product/PSQ type
+        selectedValues  : {},       // User-entered values for each plan
         quoteResult     : null,     // Computed quote output
         loading         : false,    // Loading flag for async operations
         error           : null,     // Error state
@@ -425,7 +427,6 @@ const Extension = ({ context, actions }) => {
         // Don't re-run
         if (plansInitialised.current) return;
         if (productTypeAccordions.length === 0) return;
-        if (debug) return;
 
         plansInitialised.current = true
 
@@ -600,7 +601,7 @@ const Extension = ({ context, actions }) => {
             quoteCustomRates: quoteCustomRates,
         });
         setQuote(result);
-        if ((debug || debugQuote) && !!result) console.log({
+        if ((debug && debugQuote) && !!result) console.log({
             event: "Quote Calculated",
             result,
         });
@@ -617,15 +618,21 @@ const Extension = ({ context, actions }) => {
 
     useEffect(() => {
         if (debug) {
-            console.warn({
-                event: "Debug Log",
-                plansById,
-                planIdsByType,
-                selectedValues,
-                quoteDiscountValues,
-            });
+            if (
+                Object.keys(plansById).length > 0 &&
+                Object.keys(planIdsByType).length > 0 &&
+                Object.keys(selectedValues).length > 0
+            ) {
+                console.warn({
+                    event: "Debug Log",
+                    plansById,
+                    planIdsByType,
+                    selectedValues,
+                });
+                console.timeEnd(versionLabel)
+            }
         }
-    }, [plansById, planIdsByType, selectedValues, quoteDiscountValues]);
+    }, [plansById, planIdsByType, selectedValues]);
 
     const resetForm = (plansById, productTypeAccordions) => {
         for (let planKey in plansById) {
