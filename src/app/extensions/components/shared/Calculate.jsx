@@ -521,7 +521,7 @@ export const CalculateQuote = ({
         psqConfig["Sector"] = {
             public: !!quoteDetailsValues[PublicSectorClientFieldID],
             education: !!quoteDetailsValues[EducationClientFieldID],
-            private: !quoteDetailsValues[PublicSectorClientFieldID] || !!quoteDetailsValues[EducationClientFieldID],
+            private: !quoteDetailsValues[PublicSectorClientFieldID] || !quoteDetailsValues[EducationClientFieldID],
         }
 
         const sectorModifier = psqConfig["Sector"]["private"] ? 1 : 1.5;

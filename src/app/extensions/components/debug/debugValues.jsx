@@ -6,12 +6,14 @@ export const debugPlanIdsByType = {
         "34651b07abe588"
     ],
     "Payroll": [
-        "9c54b5135a2a"
+        "c3dd558abe8ee",
+        "3cd53428ac111"
     ],
     "Capture Expense": [],
     "CintraHR": [],
-    "Custom Products": [
-        "4c8fe12c4d9388"
+    "Custom Products": [],
+    "HR Outsourcing": [
+        "1241af25e561e8"
     ]
 }
 
@@ -24,35 +26,46 @@ export const debugPlansById = {
         "id": "34651b07abe588",
         "type": "Groups"
     },
-    "9c54b5135a2a": {
-        "id": "9c54b5135a2a",
+    "c3dd558abe8ee": {
+        "id": "c3dd558abe8ee",
         "type": "Payroll"
     },
-    "4c8fe12c4d9388": {
-        "id": "4c8fe12c4d9388",
-        "type": "Custom Products"
+    "3cd53428ac111": {
+        "id": "3cd53428ac111",
+        "type": "Payroll"
+    },
+    "1241af25e561e8": {
+        "id": "1241af25e561e8",
+        "type": "HR Outsourcing"
     }
 }
 
 export const debugSelectedValues = {
     "c4b48bdbe2502": {
-        "247649449165": true,
+        "247649449165": false,
         "247649449166": false,
-        "247649449167": 12,
+        "247649449167": 36,
         "247649449168": "standard"
     },
     "34651b07abe588": {
         "247649449178": false
     },
-    "9c54b5135a2a": {
-        "247649449159": true,
-        "quantity_value": 200,
-        "frequency_value": "lunar",
-        "247649449156": "Cintra Outsourced Payroll"
+    "c3dd558abe8ee": {
+        "quantity_value": 52,
+        "frequency_value": "monthly",
+        "247649449156": "Cintra SaaS Payroll",
+        "247649449157": true,
+        "247649449158": true
     },
-    "4c8fe12c4d9388": {
-        "quantity_value": 1,
-        "CustomProductName": "Test Name",
-        "CustomProductPrice": 1000
+    "3cd53428ac111": {
+        "quantity_value": 30,
+        "frequency_value": "fortnightly",
+        "247649449156": "Cintra SaaS Payroll",
+        "247649449157": true
+    },
+    "1241af25e561e8": {
+        "quantity_value": 98,
+        "247649449169": true,
+        "247649449170": true
     }
 }
