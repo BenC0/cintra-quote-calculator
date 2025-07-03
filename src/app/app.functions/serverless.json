@@ -3,6 +3,18 @@
     "get_table_rows": {
       "file": "get_table_rows.js",
       "secrets": []
+    },
+    "create_quote_row": {
+      "file": "create_quote_row.js",
+      "secrets": []
+    },
+    "get_quote_row": {
+      "file": "get_quote_row.js",
+      "secrets": []
+    },
+    "update_quote_row": {
+      "file": "update_quote_row.js",
+      "secrets": []
     }
   }
 }

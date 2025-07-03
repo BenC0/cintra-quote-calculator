@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";  // Core React hooks
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID } from "./components/shared/utils";  // Data-fetching and helper functions
+import { useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote } from "./components/shared/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
@@ -27,16 +27,18 @@ const Extension = ({ context, actions }) => {
     const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 1;
-    const versionLabel = "Cintra Quote Calculator: v0.9.21"
+    const versionLabel = "Cintra Quote Calculator: v0.10.0"
 
+    const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
         console.log(versionLabel)
         console.time(versionLabel)
         setFirstRun(prev => false)
+        setDealId(prev => context.crm.objectId)
     }, [FirstRun])
-
+        
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -584,6 +586,38 @@ const Extension = ({ context, actions }) => {
     }, [selectedValues, productDefs, productTypeAccordions, planIdsByType]);
 
     // ------------------------- Quote Calculation -------------------------
+    
+    const [ExistingQuote, setExistingQuote] = useState(null);
+    useEffect(() => {
+        if (!!DealId && !ExistingQuote) {
+            console.log({
+                event: "Fetching Existing Quotes",
+                DealId,
+            })
+            useGetQuotes(DealId)
+            .then(rows => {
+                if (!!rows && rows.length > 0) {
+                    let latestQuote = rows[0]
+                    console.log("Found Existing Quote in HubDB")
+                    setExistingQuote(latestQuote)
+                } else {
+                    console.log("Creating New Quote in HubDB")
+                    useCreateQuote({deal: DealId, name: "Test"})
+                    .then(rows => setExistingQuote(rows))
+                }
+            })
+        }
+    }, [DealId])
+
+    useEffect(() => {
+        if (!!DealId && !!ExistingQuote) {
+            console.log({
+                event: "Fetched Existing Quote",
+                DealId,
+                ExistingQuote,
+            })
+        }
+    }, [DealId, ExistingQuote])
 
     // Recalculate quote whenever inputs change
     const [quote, setQuote] = useState({});
@@ -605,12 +639,20 @@ const Extension = ({ context, actions }) => {
             quoteCustomRates: quoteCustomRates,
         });
         setQuote(result);
+        if (!!result && !!result["Summary"]["Total Y1 Charges"]) {
+            useUpdateQuote({
+                deal: DealId,
+                quote_id: ExistingQuote.id,
+                name: "Test",
+                selected_values: JSON.stringify(selectedValues),
+            })
+        }
         if ((debug && debugQuote) && !!result) console.log({
             event: "Quote Calculated",
             result,
         });
         
-    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues, quoteCustomRates]);
+    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues, quoteCustomRates, DealId, ExistingQuote]);
 
     const progressToImplementation = () => {
         if (RequiresPSQFee) {
@@ -648,14 +690,17 @@ const Extension = ({ context, actions }) => {
             Object.keys(plansById).length > 0,
             Object.keys(valueTables).length > 0,
             plansInitialised.current,
-            !valuesInitialised.current
+            !valuesInitialised.current,
+            !!DealId,
+            !!ExistingQuote
         ]
         if (conditions.every(a => !!a)) {
             valuesInitialised.current = true
             resetForm(plansById, productTypeAccordions, valueTables)
-            if (!!debugValues) {
-                for (let planKey in debugSelectedValues) {
-                    let products = debugSelectedValues[planKey]
+            if (!!debugValues || !!ExistingQuote) {
+                const preLoadedValues = !!debugValues ? debugSelectedValues : JSON.parse(ExistingQuote.values.selected_values)
+                for (let planKey in preLoadedValues) {
+                    let products = preLoadedValues[planKey]
                     let productKeys = Object.keys(products)
                     let dynamicProductKeys = productKeys.filter(key => !key.match(/_value/g))
                     let productType = null
@@ -725,7 +770,7 @@ const Extension = ({ context, actions }) => {
                 }
             }
         }
-    }, [ StandardImplementationDefs, productPriceDefs, psqAccordions, productTypeAccordions, plansInitialised, valueTables, plansById ]);
+    }, [ StandardImplementationDefs, productPriceDefs, psqAccordions, productTypeAccordions, plansInitialised, valueTables, plansById, DealId, ExistingQuote ]);
 
     const resetForm = (plansById, productTypeAccordions, valueTables) => {
         for (let planKey in plansById) {
