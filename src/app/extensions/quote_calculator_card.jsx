@@ -27,7 +27,7 @@ const Extension = ({ context, actions }) => {
     const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 1;
-    const versionLabel = "Cintra Quote Calculator: v0.10.0"
+    const versionLabel = "Cintra Quote Calculator: v0.10.2"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -697,8 +697,21 @@ const Extension = ({ context, actions }) => {
         if (conditions.every(a => !!a)) {
             valuesInitialised.current = true
             resetForm(plansById, productTypeAccordions, valueTables)
-            if (!!debugValues || !!ExistingQuote) {
-                const preLoadedValues = !!debugValues ? debugSelectedValues : JSON.parse(ExistingQuote.values.selected_values)
+            if (!!debugValues || (!!ExistingQuote && !!ExistingQuote.values.selected_values)) {
+                let preLoadedValues = null
+                try {
+                    if (!debugValues && !!ExistingQuote && !!ExistingQuote.values.selected_values) {
+                        preLoadedValues = JSON.parse(ExistingQuote.values.selected_values)
+                    } else if (!!debugValues) {
+                        preLoadedValues = debugSelectedValues
+                    }
+                } catch (error) {
+                    return null;
+                }
+                if (!preLoadedValues) {
+                    return null;
+                }
+                // !!debugValues ? debugSelectedValues : JSON.parse(ExistingQuote.values.selected_values)
                 for (let planKey in preLoadedValues) {
                     let products = preLoadedValues[planKey]
                     let productKeys = Object.keys(products)
