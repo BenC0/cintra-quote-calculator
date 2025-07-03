@@ -21,18 +21,19 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
+    const debug = false;
+    const debugValues = false;
     const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
     const debugPage = 1;
-    const versionLabel = "Cintra Quote Calculator: v0.9.18"
+    const versionLabel = "Cintra Quote Calculator: v0.9.21"
 
     const [FirstRun, setFirstRun] = useState(true);
     useEffect(() => {
         if (!FirstRun) return null;
         console.log(versionLabel)
-        if (debug) console.time(versionLabel)
+        console.time(versionLabel)
         setFirstRun(prev => false)
     }, [FirstRun])
 
@@ -553,10 +554,13 @@ const Extension = ({ context, actions }) => {
         if (!!debug && !!debugPlans) console.log( `✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}` );
         // If this is a "brand new" planId for that type, dispatch ADD_PLAN
         if (!planIdsByType[productType]?.includes(planId)) {
-            addPlan(productType, planId);
+            // planId = addPlan(productType, planId);
+            dispatch({
+                type: 'ADD_PLAN',
+                payload: { plan: { id: planId, type: productType } }
+            });
         }
         // Dispatch a single UPDATE_SELECTED_VALUE action
-        // If you want to keep your quantity/frequency naming convention,
         const isQtyOrFreq = field.field === "quantity" || field.field === "frequency";
         const fieldKey = isQtyOrFreq ? `${field.field}_value` : field.field;
 
@@ -617,24 +621,113 @@ const Extension = ({ context, actions }) => {
     }
 
     useEffect(() => {
-        if (debug) {
-            if (
-                Object.keys(plansById).length > 0 &&
-                Object.keys(planIdsByType).length > 0 &&
-                Object.keys(selectedValues).length > 0
-            ) {
+        if (
+            Object.keys(plansById).length > 0 &&
+            Object.keys(planIdsByType).length > 0 &&
+            Object.keys(selectedValues).length > 0
+        ) {
+            if (debug) {
                 console.warn({
                     event: "Debug Log",
                     plansById,
                     planIdsByType,
                     selectedValues,
                 });
-                console.timeEnd(versionLabel)
             }
+            console.timeEnd(versionLabel)
         }
     }, [plansById, planIdsByType, selectedValues]);
 
-    const resetForm = (plansById, productTypeAccordions) => {
+    const valuesInitialised = useRef(false);
+    useEffect(() => {
+        let conditions = [
+            Object.keys(StandardImplementationDefs).length > 0,
+            Object.keys(productPriceDefs).length > 0,
+            Object.keys(psqAccordions).length > 0,
+            Object.keys(productTypeAccordions).length > 0,
+            Object.keys(plansById).length > 0,
+            Object.keys(valueTables).length > 0,
+            plansInitialised.current,
+            !valuesInitialised.current
+        ]
+        if (conditions.every(a => !!a)) {
+            valuesInitialised.current = true
+            resetForm(plansById, productTypeAccordions, valueTables)
+            if (!!debugValues) {
+                for (let planKey in debugSelectedValues) {
+                    let products = debugSelectedValues[planKey]
+                    let productKeys = Object.keys(products)
+                    let dynamicProductKeys = productKeys.filter(key => !key.match(/_value/g))
+                    let productType = null
+                    let productTypeMapping = []
+                    dynamicProductKeys.forEach(productKey => {
+                        productTypeMapping.push(
+                            productTypeAccordions.find(pt => {
+                                let firstMatchingField = pt.fields.find(field => field.field == productKey)
+                                return !!firstMatchingField
+                            })
+                        )
+                    })
+
+                    if (productTypeMapping.length > 0) {
+                        productType = productTypeMapping[0]
+                    }
+
+                    if (!!productType) {
+                        let usablePlanKey = planKey
+                        if (productType.input_display_type == "inline") {
+                            for (let knownPlanKey in plansById) {
+                                if (productType.label == plansById[knownPlanKey].type) {
+                                    usablePlanKey = knownPlanKey
+                                }
+                            }
+                        }
+                        let productFieldValuePairs = []
+                        for (let productKey in products) {
+                            let value = products[productKey]
+                            let productField = productType.fields.find(field => field.field == productKey)
+                            if (!!productKey.match(/^quantity_value$/g)) {
+                                productField = productType["quantityFieldDef"] 
+                            } else if (!!productKey.match(/^frequency_value$/g)) {
+                                productField = productType["frequencyFieldDef"] 
+                            }
+                            if (!!productField) {
+                                productFieldValuePairs.push({ productField, value })
+                            } else {
+                                console.error({
+                                    event: "Product Field Not Found",
+                                    productType,
+                                    productKey,
+                                })
+                            }
+                        }
+                        
+                        dispatch({
+                            type: 'ADD_PLAN',
+                            payload: { plan: { id: usablePlanKey, type: productType.label } }
+                        });
+
+                        productFieldValuePairs.forEach((pairing) => {
+                            let fieldKey = pairing.productField.field
+                            if (!!fieldKey.match(/^(quantity|frequency)$/g) && !fieldKey.match(/^_value$/g)) {
+                                fieldKey = `${fieldKey}_value`
+                            }
+                            dispatch({
+                                type: "UPDATE_SELECTED_VALUE",
+                                payload: {
+                                    planId: usablePlanKey,
+                                    fieldKey,
+                                    value: pairing.value,
+                                },
+                            });
+                        })
+                    }
+                }
+            }
+        }
+    }, [ StandardImplementationDefs, productPriceDefs, psqAccordions, productTypeAccordions, plansInitialised, valueTables, plansById ]);
+
+    const resetForm = (plansById, productTypeAccordions, valueTables) => {
         for (let planKey in plansById) {
             let plan = plansById[planKey]
             let planProductType = productTypeAccordions.find(pt => pt.label == plan.type)
@@ -775,7 +868,7 @@ const Extension = ({ context, actions }) => {
 
                     <Flex justify="end" gap="small">
                         <Button variant="destructive" onClick={() => {
-                            resetForm(plansById, productTypeAccordions)
+                            resetForm(plansById, productTypeAccordions, valueTables)
                             setCurrentPage(1)
                         }}>
                             Reset Form

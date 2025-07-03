@@ -31,7 +31,6 @@ export const renderTablePlans = (
         );
     }
 
-
     return validPlanIds.map((planId) => {
         const selectedPlanValues = selectedValues[planId]
         if (Object.keys(selectedPlanValues).length == 0) return null;

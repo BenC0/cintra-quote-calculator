@@ -44,18 +44,18 @@ export const debugSelectedValues = {
     "c4b48bdbe2502": {
         "247649449165": false,
         "247649449166": false,
-        "247649449167": 36,
+        "247649449167": 60,
         "247649449168": "standard"
     },
     "34651b07abe588": {
-        "247649449178": false
+        "247649449178": true
     },
     "c3dd558abe8ee": {
         "quantity_value": 52,
         "frequency_value": "monthly",
         "247649449156": "Cintra SaaS Payroll",
         "247649449157": true,
-        "247649449158": true
+        "247649449158": true,
     },
     "3cd53428ac111": {
         "quantity_value": 30,

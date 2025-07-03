@@ -113,3 +113,5 @@ export const reshapeArray = (inputArray, maxItemsPerRow) => {
     }
     return result;
 }
+
+export const dedupeArray = (array) => [...new Set(array)]

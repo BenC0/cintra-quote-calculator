@@ -1,8 +1,10 @@
+import { dedupeArray } from "./utils";
+
 export function quoteReducer(state, action) {
     switch (action.type) {
         case 'ADD_PLAN': {
             const { plan } = action.payload;
-            return {
+            let output = {
                 ...state,
                 plansById: {
                     ...state.plansById,
@@ -20,6 +22,9 @@ export function quoteReducer(state, action) {
                     ]
                 }
             };
+
+            output["planIdsByType"][plan.type] = dedupeArray(output["planIdsByType"][plan.type])
+            return output
         }
 
         case 'REMOVE_PLAN': {
