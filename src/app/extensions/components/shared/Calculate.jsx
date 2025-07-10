@@ -76,11 +76,13 @@ export const CalculateQuote = ({
     PSQImplementationCustomHours = {},
     quoteDiscountValues = {},
     quoteCustomRates = {},
+    QUOTE_ID = "",
 }) => {
     const Quote = {
         "Details": {},
         "Implementation Fees": {},
         "Summary": {},
+        "Line Item Mapping": []
     }
 
     const conditions = [
@@ -269,6 +271,31 @@ export const CalculateQuote = ({
                                 output["adjusted_price"] += output["monthly_standing_charge"]
                             }
                             output["estimated_annual_fee"] = (output["estimated_monthly_fee"] * 12)
+
+                            if (!output.line_item_id && !!output.input_values_table) {
+                                const accordion = productTypeAccordions.find(ptd => ptd.label == planType)
+                                if (!!accordion) {
+                                    const fullFieldReference = accordion.fields.find(f => f.field == field.field)
+                                    const fullFieldValueReference = fullFieldReference.values.find(v => v.values.value == fieldValue)
+                                    output.line_item_id = fullFieldValueReference.values.line_item_id
+                                }
+                            }
+                            
+                            if (!!output.line_item_id) {
+                                Quote["Line Item Mapping"] = [...Quote["Line Item Mapping"], {
+                                    "id": output.line_item_id,
+                                    "values": {
+                                        "quote_id": QUOTE_ID,
+                                        "quantity": output.qty,
+                                        "price": output.adjusted_price,
+                                        "hs_discount_percentage": output.discount,
+                                        // "hs_price_gbp": output.estimated_monthly_fee,
+                                        // "recurringbillingfrequency": "Monthly",
+                                        // "Estimated Monthly Fee": output.estimated_monthly_fee,
+                                    }
+                                }]
+                            }
+
                             selectedPlanQuote["fields"] = [...selectedPlanQuote["fields"], output]
                         }
                     }
@@ -594,8 +621,24 @@ export const CalculateQuote = ({
                         hours: hoursBand.hours,
                         hourly_rate: hourly_rate,
                     })
+
+                    if (psqFee + discount > 0) {
+                        if (!!field.line_item_id) {
+                            Quote["Line Item Mapping"] = [...Quote["Line Item Mapping"], {
+                                "id": field.line_item_id,
+                                "values": {
+                                    "quote_id": QUOTE_ID,
+                                    "quantity": hours,
+                                    "price": hourly_rate,
+                                    "hs_discount_percentage": discount,
+                                    // "hs_price_gbp": output.estimated_monthly_fee,
+                                    // "recurringbillingfrequency": "Monthly",
+                                }
+                            }]
+                        }
+                    }
                     
-                    estimated_implementation_fee += psqFee
+                    estimated_implementation_fee += psqFee 
                     return {
                         ...field,
                         associatedConfigValue,

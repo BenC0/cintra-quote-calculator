@@ -36,7 +36,7 @@ exports.main = async (context) => {
         const allRows = rows || [];
 
         // Filter rows matching the provided deal_id
-        const matchingRows = allRows.filter(row => String(row.values.deal_id) === String(dealId));
+        const matchingRows = allRows.filter(row => String(row.values.deal_id) === String(dealId) && row.values.submitted === 0);
 
         // Return matching rows
         return {

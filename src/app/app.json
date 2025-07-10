@@ -5,7 +5,12 @@
   "scopes": [
     "crm.objects.deals.read",
     "crm.objects.deals.write",
-    "hubdb"
+    "crm.objects.line_items.read",
+    "crm.objects.line_items.write",
+    "crm.schemas.line_items.read",
+    "hubdb",
+    "tax_rates.read",
+    "e-commerce"
   ],
   "public": false,
   "extensions": {

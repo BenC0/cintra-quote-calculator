@@ -24,6 +24,7 @@ export const QuoteSheet = ({
     planIdsByType = {},
     QuoteDiscountValueHandler = {},
     quoteCustomRatesHandler = {},
+    disableEdit = false
 }) => {
     const conditions = [
         Object.keys(quote).length > 0,
@@ -238,6 +239,7 @@ export const QuoteSheet = ({
                                                                     discountHandler(row.field, true, "add")
                                                                     RatesHandler(row.field, true, "add")
                                                                 }}
+                                                                disabled={disableEdit}
                                                             >
                                                                 <Icon name="edit"/>
                                                             </Button>
@@ -352,6 +354,7 @@ export const QuoteSheet = ({
                                                         discountHandler(row.field, true, "add")
                                                         RatesHandler(row.field, true, "add")
                                                     }}
+                                                    disabled={disableEdit}
                                                 >
                                                     <Icon name="edit"/>
                                                 </Button>
@@ -434,6 +437,7 @@ export const QuoteSheet = ({
                                         discountHandler(service.field, true, "add")
                                         RatesHandler(service.field, true, "add")
                                     }}
+                                    disabled={disableEdit}
                                 >
                                     <Icon name="edit"/>
                                 </Button>

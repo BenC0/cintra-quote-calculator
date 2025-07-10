@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";  // Core React hooks
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote } from "./components/shared/utils";  // Data-fetching and helper functions
+import { useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice } from "./components/shared/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
@@ -21,13 +21,12 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = false;
+    const debug = true;
     const debugValues = false;
     const debugPlans = false;
-    const debugQuote = false;
+    const debugQuote = true;
     const debugPSQ = false;
-    const debugPage = 1;
-    const versionLabel = "Cintra Quote Calculator: v0.10.2"
+    const versionLabel = "Cintra Quote Calculator: v0.12.1"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -49,9 +48,6 @@ const Extension = ({ context, actions }) => {
         plansById       : {},       // Map of planId -> plan metadata
         planIdsByType   : {},       // Grouping of plan IDs by product/PSQ type
         selectedValues  : {},       // User-entered values for each plan
-        quoteResult     : null,     // Computed quote output
-        loading         : false,    // Loading flag for async operations
-        error           : null,     // Error state
     };
     const [state, dispatch] = useReducer(quoteReducer, initialState);
     const { plansById, planIdsByType, selectedValues } = state;  // Destructure for convenience
@@ -73,6 +69,7 @@ const Extension = ({ context, actions }) => {
             is_education_client_field: r.values.is_education_client_field == 1,
             is_public_sector_client_field: r.values.is_public_sector_client_field == 1,
             list_price_formula_type: r?.values?.list_price_formula_type?.name ?? "formula1",
+            line_item_id: r?.values?.line_item_id ?? false,
         };
     };
 
@@ -226,6 +223,7 @@ const Extension = ({ context, actions }) => {
                 product_type: getFirstValue("product_type", r),
                 resource: impResourceDict[firstResourceId] || null,
                 psq_config_reference: r.values.psq_config_reference.map(a => a.id),
+                line_item_id: r?.values?.line_item_id ?? false,
             };
         });
     }, [rawImpProducts, impResourceDict]);
@@ -590,18 +588,18 @@ const Extension = ({ context, actions }) => {
     const [ExistingQuote, setExistingQuote] = useState(null);
     useEffect(() => {
         if (!!DealId && !ExistingQuote) {
-            console.log({
-                event: "Fetching Existing Quotes",
-                DealId,
-            })
+            // console.log({
+            //     event: "Fetching Existing Quotes",
+            //     DealId,
+            // })
             useGetQuotes(DealId)
             .then(rows => {
                 if (!!rows && rows.length > 0) {
                     let latestQuote = rows[0]
-                    console.log("Found Existing Quote in HubDB")
+                    // console.log("Found Existing Quote in HubDB")
                     setExistingQuote(latestQuote)
                 } else {
-                    console.log("Creating New Quote in HubDB")
+                    // console.log("Creating New Quote in HubDB")
                     useCreateQuote({deal: DealId, name: "Test"})
                     .then(rows => setExistingQuote(rows))
                 }
@@ -612,7 +610,7 @@ const Extension = ({ context, actions }) => {
     useEffect(() => {
         if (!!DealId && !!ExistingQuote) {
             console.log({
-                event: "Fetched Existing Quote",
+                event: "Existing Quote",
                 DealId,
                 ExistingQuote,
             })
@@ -622,36 +620,40 @@ const Extension = ({ context, actions }) => {
     // Recalculate quote whenever inputs change
     const [quote, setQuote] = useState({});
     useEffect(() => {
-        const result = CalculateQuote({
-            planIdsByType: planIdsByType,
-            selectedValues: selectedValues,
-            productPriceDefs: productPriceDefs,
-            productTypeDefs: productTypeDefs,
-            RequiresPSQFee: RequiresPSQFee,
-            StandardImplementationDefs: StandardImplementationDefs,
-            productDefs: productDefs,
-            productTypeAccordions: productTypeAccordions,
-            psqAccordions: psqAccordions,
-            psqImpHours: psqImpHours,
-            psqImpConfig: psqImpConfig,
-            PSQImplementationCustomHours: PSQImplementationCustomHours,
-            quoteDiscountValues: quoteDiscountValues,
-            quoteCustomRates: quoteCustomRates,
-        });
-        setQuote(result);
-        if (!!result && !!result["Summary"]["Total Y1 Charges"]) {
-            useUpdateQuote({
-                deal: DealId,
-                quote_id: ExistingQuote.id,
-                name: "Test",
-                selected_values: JSON.stringify(selectedValues),
-            })
+        if (!!DealId && !!ExistingQuote) {
+            const result = CalculateQuote({
+                planIdsByType: planIdsByType,
+                selectedValues: selectedValues,
+                productPriceDefs: productPriceDefs,
+                productTypeDefs: productTypeDefs,
+                RequiresPSQFee: RequiresPSQFee,
+                StandardImplementationDefs: StandardImplementationDefs,
+                productDefs: productDefs,
+                productTypeAccordions: productTypeAccordions,
+                psqAccordions: psqAccordions,
+                psqImpHours: psqImpHours,
+                psqImpConfig: psqImpConfig,
+                PSQImplementationCustomHours: PSQImplementationCustomHours,
+                quoteDiscountValues: quoteDiscountValues,
+                quoteCustomRates: quoteCustomRates,
+                QUOTE_ID: ExistingQuote.id,
+            });
+            setQuote(result);
+            if (!!result && !!result["Summary"]["Total Y1 Charges"]) {
+                useUpdateQuote({
+                    deal: DealId,
+                    quote_id: ExistingQuote.id,
+                    name: "Test",
+                    selected_values: JSON.stringify(selectedValues),
+                    submitted: 0,
+                    line_items: result["Line Item Mapping"]
+                })
+            }
+            if ((debug && debugQuote) && !!result) console.log({
+                event: "Quote Calculated",
+                result,
+            });
         }
-        if ((debug && debugQuote) && !!result) console.log({
-            event: "Quote Calculated",
-            result,
-        });
-        
     }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues, quoteCustomRates, DealId, ExistingQuote]);
 
     const progressToImplementation = () => {
@@ -827,6 +829,148 @@ const Extension = ({ context, actions }) => {
         }
     }
 
+    const [QuoteSubmitted, setQuoteSubmitted] = useState(false);
+    const [QuoteSubmitting, setQuoteSubmitting] = useState(false);
+    const submitQuote = (DealId, ExistingQuote, selectedValues, quote, productTypeAccordions) => {
+        setQuoteSubmitting(prev => true)
+        const now = new Date();
+        const monthYear = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        const jsonOutput = {
+            "details": {
+                "ClientName": "Example", // Associated company name
+                "CreateDate": monthYear, // "Today" date
+                "ClientFullName": "Example", // Associated company
+                "ClientLegalName": "Example", // Associated company
+                "CompanyNumber": "Example", // Associated company
+                "RegisteredAddress": "Example", // Associated company
+                "ContractLength": `${quote["Summary"]["ContractLength"]} Months`,
+                "EstGoLive": "Example 2025" // Deal record - provisional_go_live_date
+            },
+            "tables": []
+        }
+        let targetPTs = productTypeAccordions.filter(pt => !pt.is_quote_details_type).sort((a, b) => a.sort_order - b.sort_order)
+
+        targetPTs.forEach(pt => {
+            let relevantPlans = quote["Details"][pt.label]
+            !!relevantPlans && relevantPlans.forEach((plan, idx) => {
+                const planValues = selectedValues[plan.planId]
+                plan.fields.length > 0 && jsonOutput["tables"].push({
+                    "name": `${pt.label} ${idx + 1}: ${planValues.quantity_value} ${toTitleCase(planValues.frequency_value)} ${pt.quantity_field_label}`,
+                    "TotalFees": `£${formatPrice(plan.estimated_monthly_fee)}`,
+                    "Type": `Product`,
+                    "rows": plan.fields.map(field => (
+                        {
+                            "ProductType": `${field.label}: ${planValues[field.field]}`,
+                            "PricingStructure": `${field.pricing_structure.name}`,
+                            "Quantity": `${formatToMaxTwoDecimal(field.qty)}`,
+                            "UnitPrice": `£${formatPrice(field.adjusted_price)}`,
+                            "TotalFee": `£${formatPrice(field.estimated_monthly_fee)}`
+                        }
+                    ))
+                })
+            })
+        })
+
+        
+        let impFees = quote["Implementation Fees"]
+        if (impFees["Implementation Type"] == "PSQ") {
+            let psqPlans = []
+            let serviceRows = []
+            for (let key in impFees) {
+                if (!!key.match(/^[0-9]*$/g)) psqPlans.push(impFees[key])
+            }
+            psqPlans.forEach(plan => {
+                let validFields = plan.fields.filter(field => (field.psqFee + field.discount) > 0)
+                if (validFields.length > 0) {
+                    validFields.forEach(service => {
+                        serviceRows.push(
+                        {
+                            "ProductType": `${service.label}`,
+                            "PricingStructure": `One Time Fee`,
+                            "Quantity": `${formatToMaxTwoDecimal(service["hoursBand"]["hours"])}`,
+                            "UnitPrice": `£${formatPrice(service["adjusted_hourly_rate"])}`,
+                            "TotalFee": `£${formatPrice(service["psqFee"])}`
+                        })
+                    })
+                }
+                jsonOutput["tables"].push({
+                    "name": `Implementation Fees`,
+                    "TotalFees": `£${formatPrice(serviceRows.reduce((a, t) => a.TotalFee + t))}`,
+                    "Type": `Implementation`,
+                    "rows": serviceRows
+                })
+            })
+
+        } else {
+            for (let key in impFees) {
+                let fee = impFees[key]
+                if (!!fee.services) {
+                    let serviceRows = []
+                    Object.keys(fee.services).forEach(serviceKey => {
+                        let service = fee.services[serviceKey]
+                        serviceRows.push(
+                        {
+                            "ProductType": `${service.label}: ${service.values.join(", ")}`,
+                            "PricingStructure": `One Time Fee`,
+                            "Quantity": `${formatToMaxTwoDecimal(service["Implementation Days"])}`,
+                            "UnitPrice": `£${formatPrice(service["Implementation Unit Price"])}`,
+                            "TotalFee": `£${formatPrice(service["Implementation Fee"])}`
+                        })
+                    })
+                    jsonOutput["tables"].push({
+                        "name": `Implementation Fees`,
+                        "TotalFees": `£${formatPrice(fee.totalImplementationFee)}`,
+                        "Type": `Implementation`,
+                        "rows": serviceRows
+                    })
+                }
+            }
+        }
+
+        jsonOutput["tables"].push({
+            "name": "Total Overall Costs",
+            "TotalFees": `£${formatPrice(quote["Summary"]["Total Y1 Charges"])}`,
+            "Type": "Summary",
+            "rows": [
+                {
+                    "ProductType": "Total Estimated Monthly Charges",
+                    "PricingStructure": "",
+                    "Quantity": "",
+                    "UnitPrice": "",
+                    "TotalFee": `£${formatPrice(quote["Summary"]["Total Estimated Monthly Costs"])}`
+                },
+                {
+                    "ProductType": "Total Estimated Annual Charges",
+                    "PricingStructure": "",
+                    "Quantity":"",
+                    "UnitPrice": "",
+                    "TotalFee": `£${formatPrice(quote["Summary"]["Total Estimated Annual Costs"])}`
+                },
+                {
+                    "ProductType": "Total Implementation Charges",
+                    "PricingStructure": "",
+                    "Quantity": "",
+                    "UnitPrice": "",
+                    "TotalFee": `£${formatPrice(quote["Summary"]["Total Implementation Costs"])}`
+                }
+            ]
+        })
+
+        useUpdateQuote({
+            deal: DealId,
+            quote_id: ExistingQuote.id,
+            name: "Test",
+            selected_values: JSON.stringify(selectedValues),
+            submitted: 1,
+            line_items: quote["Line Item Mapping"],
+            jsonOutput: jsonOutput,
+        }).then(result => {
+            QuoteSubmitted
+            setQuoteSubmitting(prev => false)
+            setQuoteSubmitted(prev => true)
+        })
+    }
+
     return (
         <Flex direction="column" gap="md">
             {/* Page 1: Select products and quantities */}
@@ -914,6 +1058,7 @@ const Extension = ({ context, actions }) => {
                         quoteDiscountValues={quoteDiscountValues}
                         QuoteDiscountValueHandler={QuoteDiscountValueHandler}
                         quoteCustomRatesHandler={quoteCustomRatesHandler}
+                        disableEdit = {QuoteSubmitting || QuoteSubmitted}
                     />
 
                     <QuoteSummaryComponent
@@ -925,22 +1070,26 @@ const Extension = ({ context, actions }) => {
                     />
 
                     <Flex justify="end" gap="small">
-                        <Button variant="destructive" onClick={() => {
-                            resetForm(plansById, productTypeAccordions, valueTables)
-                            setCurrentPage(1)
-                        }}>
+                        <Button
+                            variant="destructive"
+                            onClick={() => {
+                                resetForm(plansById, productTypeAccordions, valueTables)
+                                setCurrentPage(1)
+                            }}
+                            disabled={QuoteSubmitting || QuoteSubmitted}
+                        >
                             Reset Form
                         </Button>
-                        <Button variant="secondary" onClick={() => setCurrentPage(1)}>
+                        <Button variant="secondary" onClick={() => setCurrentPage(1)} disabled={QuoteSubmitting || QuoteSubmitted}>
                             Review Schedule
                         </Button>
                         {RequiresPSQFee && (
-                            <Button variant="secondary" onClick={() => setCurrentPage(2)}>
+                            <Button variant="secondary" onClick={() => setCurrentPage(2)} disabled={QuoteSubmitting || QuoteSubmitted}>
                                 Review Implementation Fee
                             </Button>
                         )}
-                        <Button variant="primary" onClick={() => {/* finalize logic */}}>
-                            Finish
+                        <Button variant="primary" onClick={() => submitQuote(DealId, ExistingQuote, selectedValues, quote, productTypeAccordions)} disabled={QuoteSubmitting || QuoteSubmitted}>
+                            { QuoteSubmitted ? "Quote Submitted" : QuoteSubmitting ? "Submitting Quote" : "Submit Quote" }
                         </Button>
                     </Flex>
                 </>

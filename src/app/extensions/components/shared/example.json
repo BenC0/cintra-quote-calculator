@@ -1,0 +1,78 @@
+{
+    "details": {
+        "ClientName": "Example",
+        "CreateDate": "07/07/2025",
+        "ClientFullName": "Example",
+        "ClientLegalName": "Example",
+        "CompanyNumber": "Example",
+        "RegisteredAddress": "Example",
+        "ContractLength": "Example Months",
+        "EstGoLive": "Example"
+    },
+    "tables": [
+        {
+            "name": "Product",
+            "TotalFees": "1994",
+            "Type": "Product",
+            "rows": [
+                
+                {
+                    "ProductType": "Example Payroll 1 - 1994 Monthly Employees",
+                    "PricingStructure": "Example Pricing Structure",
+                    "Quantity": "1",
+                    "UnitPrice": "1",
+                    "TotalFee": "1"
+                },
+                {
+                    "ProductType": "Example Product",
+                    "PricingStructure": "Example Pricing Structure",
+                    "Quantity": "1994",
+                    "UnitPrice": "9.09",
+                    "TotalFee": "9.09"
+                }
+            ]
+        },
+        {
+            "name": "Implementation Fees",
+            "TotalFees": "1994",
+            "Type": "Implementation",
+            "rows": [
+                {
+                    "ProductType": "Payroll Transition Fees",
+                    "PricingStructure": "One Time Fee",
+                    "Quantity": "1",
+                    "UnitPrice": "9.09",
+                    "TotalFee": "9.09"
+                }
+            ]
+        },
+        {
+            "name": "Example Payroll 1 - 1994 Monthly Employees",
+            "TotalFees": "1994",
+            "Type": "Summary",
+            "rows": [
+                {
+                    "ProductType": "Total Estimated Monthly Charges",
+                    "PricingStructure": "Example Pricing Structure",
+                    "Quantity": "1",
+                    "UnitPrice": "1",
+                    "TotalFee": "9.09"
+                },
+                {
+                    "ProductType": "Total Estimated Annual Charges",
+                    "PricingStructure": "Example Pricing Structure",
+                    "Quantity":"1",
+                    "UnitPrice": "1",
+                    "TotalFee": "9.09"
+                },
+                {
+                    "ProductType": "Total Implementation Charges",
+                    "PricingStructure": "Example Pricing Structure",
+                    "Quantity": "1",
+                    "UnitPrice": "1",
+                    "TotalFee": "9.09"
+                }
+            ]
+        }
+    ]
+}

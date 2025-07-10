@@ -3,8 +3,8 @@ import { hubspot } from "@hubspot/ui-extensions";
 
 export const generateID = _ => Math.random().toString(16).slice(2)
 
-export const useUpdateQuote = ({deal, quote_id, name, selected_values}) => {
-    hubspot
+export const useUpdateQuote = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
+    return hubspot
     .serverless("update_quote_row", {
         parameters: {
             rowId: quote_id,
@@ -12,8 +12,31 @@ export const useUpdateQuote = ({deal, quote_id, name, selected_values}) => {
                 deal_id: `${deal}`,
                 name: `${name}-updated`,
                 selected_values,
+                submitted: false
             }
         },
+    }).then(res => {
+        if (!!submitted && !!jsonOutput) {
+            return hubspot
+            .serverless("submit_quote", {
+                parameters: {
+                    quote_id: quote_id,
+                    deal_id: `${deal}`,
+                    products: line_items,
+                    jsonOutput: JSON.stringify(jsonOutput),
+                }
+            })
+            .then(res => {
+                // console.log(res)
+                return true
+            })
+            .catch(error => {
+                console.warn(error)
+                return false
+            });
+        } else {
+            return true
+        }
     })
     .catch(console.warn);
 }
@@ -139,17 +162,17 @@ export const toTitleCase = (str = "") => str.replace(
     text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
 )
 
-export const formatPrice = price => price.toLocaleString(undefined, {
+export const formatPrice = (price = 0) => price.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
 });
 
-export const formatToMaxTwoDecimal = price => price.toLocaleString(undefined, {
+export const formatToMaxTwoDecimal = (price = 0) => price.toLocaleString(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
 });
 
-export const formatInt = price => price.toLocaleString(undefined, {
+export const formatInt = (price = 0) => price.toLocaleString(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
 });
