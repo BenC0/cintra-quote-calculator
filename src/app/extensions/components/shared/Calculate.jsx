@@ -143,7 +143,7 @@ export const CalculateQuote = ({
         let headcount = selectedPlanValues.quantity_value
         return headcount + total
     }, 0) ?? 0
-    console.log({PayrollHeadcount: Quote["Summary"]["PayrollHeadcount"]})
+    // console.log({PayrollHeadcount: Quote["Summary"]["PayrollHeadcount"]})
 
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0

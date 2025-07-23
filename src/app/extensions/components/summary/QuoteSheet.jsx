@@ -81,9 +81,27 @@ export const QuoteSheet = ({
                         if (typeof headcount != "number") {
                             headcount = planValues["quantity_value"]
                         }
+                        console.log({
+                            event: "Constructing Quote Sheet Table Header",
+                            label: productType.label,
+                            frequency_value: planValues.frequency_value,
+                            quantity_field_label: planQuote.quantity_field_label,
+                        })
+                        let heading = `${productType.label}`
+                        if (productTypePlans.length > 1) {
+                            heading = `${heading} ${idx + 1}`
+                        }
+                        if (!!planValues.frequency_value && !!planQuote.quantity_field_label) {
+                            heading = `${heading}: ${headcount} ${planValues.frequency_value} ${planQuote.quantity_field_label}`
+                        } else if (!!planQuote.quantity_field_label && !planQuote.quantity_field_label.match(/quantity/gi)) {
+                            heading = `${heading}: ${headcount} ${planQuote.quantity_field_label}`
+                        }
+
+                        // let heading = `${productType.label} ${idx + 1}: ${headcount} ${toTitleCase(planValues["frequency_value"])} ${toTitleCase(planQuote["quantity_field_label"])}`
+                        // `${idx + 1}: ${headcount} ${toTitleCase(planValues["frequency_value"])} ${toTitleCase(planQuote["quantity_field_label"])}`
 
                         let planDetails = {
-                            heading: `${productType.label} ${idx + 1}: ${headcount} ${toTitleCase(planValues["frequency_value"])} ${toTitleCase(planQuote["quantity_field_label"])}`,
+                            heading,
                             rows: [],
                             coreProductMonthlyFee: 0,
                             addonProductMonthlyFee: 0,
@@ -126,7 +144,8 @@ export const QuoteSheet = ({
                                     if (typeof productValue != "number") {
                                         // qty = headcount
                                         if (typeof productValue == "string") {
-                                            label = `${label}: ${productValue}`
+                                            // label = `${label}: ${productValue}`
+                                            label = productValue
                                         }
                                     }
                                     if (isCoreProduct) {
