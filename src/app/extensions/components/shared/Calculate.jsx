@@ -138,7 +138,12 @@ export const CalculateQuote = ({
     Quote["Summary"]["ContractLength"] = ContractLengthValue
     Quote["Summary"]["EducationClient"] = isEducationClientValue
     Quote["Summary"]["PublicSectorClient"] = isPublicSectorClientValue
-    Quote["Summary"]["PayrollHeadcount"] = 0
+    Quote["Summary"]["PayrollHeadcount"] = payrollDetailsPlanIDs?.reduce((total, planId) => {
+        let selectedPlanValues = selectedValues[planId] ?? {quantity_value: 0}
+        let headcount = selectedPlanValues.quantity_value
+        return headcount + total
+    }, 0) ?? 0
+    console.log({PayrollHeadcount: Quote["Summary"]["PayrollHeadcount"]})
 
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0
@@ -157,9 +162,6 @@ export const CalculateQuote = ({
             Quote["Details"][planType] = planIdsByType[planType].map(planId => {
                 if (planId == "temp") return;
                 let selectedPlanValues = selectedValues[planId] ?? {}
-                if (planType == PayrollDetails.label) {
-                    Quote["Summary"]["PayrollHeadcount"] += selectedPlanValues.quantity_value
-                }
                 
                 if (Object.keys(selectedPlanValues).length > 0) {
                     let payroll_payslips_modifier = 1
@@ -197,7 +199,26 @@ export const CalculateQuote = ({
                             qty = qty * payroll_payslips_modifier
 
                             output["price_table"] = productPriceDefs.filter(priceDef => priceDef.product_field == field.field)
-                            output["price_band"] = get_price_band(qty, fieldValue, output["price_table"])
+
+                            let bandQty = qty
+                            if (
+                                (planType == PayrollDetails.label)
+                                && (typeof fieldValue != "number")
+                            ) {
+                                bandQty = Quote["Summary"]["PayrollHeadcount"]
+                            } else if (typeof fieldValue == "number") {
+                                bandQty = fieldValue
+                                qty = fieldValue
+                            }
+
+                            // console.log({
+                            //     fieldValue,
+                            //     typeof: typeof fieldValue,
+                            //     bandQty,
+                            //     qty,
+                            // })
+
+                            output["price_band"] = get_price_band(bandQty, fieldValue, output["price_table"])
                             if (field.pricing_structure.name == "Minimum Active Users") {
                                 qty = output["price_band"]["minimum_quantity"]
                             }
@@ -594,6 +615,8 @@ export const CalculateQuote = ({
                             hoursBand = hoursBand.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
                             hoursBand = hoursBand.pop()
                             hours = hoursBand.hours
+                        } else {
+                            hoursBand = { hours: 0 }
                         }
                     }
                     if (!!psqConfig["CustomHours"][field.field] || psqConfig["CustomHours"][field.field] === 0) {
@@ -603,6 +626,15 @@ export const CalculateQuote = ({
                     }
                     
                     let hourly_rate = 0
+                    if(isNaN(hours)) {
+                        console.error({
+                            event: `"${field.field}" is NaN Hours!`,
+                            hoursBand,
+                            sectorModifier,
+                            CustomHours: psqConfig["CustomHours"][field.field],
+                            psqImpHours,
+                        })
+                    }
                     if (!isNaN(hours)) {
                         hourly_rate = field.resource.hourly_rate || 0
                         let customRate = quoteCustomRates[field.field]

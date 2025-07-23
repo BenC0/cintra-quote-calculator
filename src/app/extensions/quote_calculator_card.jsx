@@ -26,7 +26,7 @@ const Extension = ({ context, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.12.1"
+    const versionLabel = "Cintra Quote Calculator: v0.12.4"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -955,6 +955,8 @@ const Extension = ({ context, actions }) => {
                 }
             ]
         })
+
+        console.log({jsonOutput})
 
         useUpdateQuote({
             deal: DealId,

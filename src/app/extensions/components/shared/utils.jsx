@@ -23,6 +23,7 @@ export const useUpdateQuote = ({deal, quote_id, name, selected_values, submitted
                     quote_id: quote_id,
                     deal_id: `${deal}`,
                     products: line_items,
+                    // jsonOutput: JSON.stringify({ "html": "<table> <tbody> <tr> <td>Hello World</td> </tr> </tbody> </table>" }),
                     jsonOutput: JSON.stringify(jsonOutput),
                 }
             })
