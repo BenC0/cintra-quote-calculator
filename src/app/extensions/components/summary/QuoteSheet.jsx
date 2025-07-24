@@ -397,12 +397,17 @@ export const QuoteSheet = ({
                 let fee = impFees[key]
                 for (let serviceKey in fee.services) {
                     let service = fee.services[serviceKey]
+                    let serviceValue = service.values[0]
+                    let label = service.label
+                    console.log({service})
+                    if (typeof serviceValue == "string") {
+                        label = serviceValue
+                    }
                     service["input_type"] = "Number"
                     stdRows.push(<TableRow>
-                        <TableCell>{service.label}</TableCell>
+                        <TableCell>{label}</TableCell>
                         <TableCell>{formatToMaxTwoDecimal(service["Implementation Days"])}</TableCell>
 
-                        {/* <TableCell>£{formatPrice(service["Implementation Fee"] / service["Implementation Days"])}</TableCell> */}
                         <TableCell align="right">
                             {(!!RatesEditing[service.field] || RatesEditing[service.field] === 0) ? (
                                 renderField(service, (field, e, planId) => {
