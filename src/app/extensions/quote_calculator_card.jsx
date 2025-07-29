@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";  // Core React hooks
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
 import { useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice } from "./components/shared/utils";  // Data-fetching and helper functions
-import { Divider, Button, hubspot, Flex, Heading } from "@hubspot/ui-extensions";  // HubSpot UI components
+import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
 import { quoteReducer } from "./components/shared/quoteReducer";  // Reducer for state management
@@ -26,12 +26,24 @@ const Extension = ({ context, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.12.7"
+    const versionLabel = "Cintra Quote Calculator: v0.14.0"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
+    const [managerApproval, setManagerApproval] = useState(false);
+    const [isManager, setIsManager] = useState(false);
+    
     useEffect(() => {
         if (!FirstRun) return null;
+        setIsManager(prev => {
+            const user = context?.user ?? { teams: [] }
+            const teams = user.teams
+            let userInManagerTeam = false
+            if (teams.length > 0) {
+                userInManagerTeam = !!teams.find(team => team.name == "Quote Tool Managers")
+            }
+            return userInManagerTeam
+        })
         console.log(versionLabel)
         console.time(versionLabel)
         setFirstRun(prev => false)
@@ -588,18 +600,12 @@ const Extension = ({ context, actions }) => {
     const [ExistingQuote, setExistingQuote] = useState(null);
     useEffect(() => {
         if (!!DealId && !ExistingQuote) {
-            // console.log({
-            //     event: "Fetching Existing Quotes",
-            //     DealId,
-            // })
             useGetQuotes(DealId)
             .then(rows => {
                 if (!!rows && rows.length > 0) {
                     let latestQuote = rows[0]
-                    // console.log("Found Existing Quote in HubDB")
                     setExistingQuote(latestQuote)
                 } else {
-                    // console.log("Creating New Quote in HubDB")
                     useCreateQuote({deal: DealId, name: "Test"})
                     .then(rows => setExistingQuote(rows))
                 }
@@ -973,6 +979,19 @@ const Extension = ({ context, actions }) => {
         })
     }
 
+    useEffect(_ => {
+        console.log({
+            event: "Quote calculated, checking manager approval requirements",
+            quote,
+            isManager,
+        })
+        const pHeadcount = quote?.Summary?.PayrollHeadcount ?? 0
+        const pCount = quote?.Summary?.PayrollCount ?? 0
+        const passedHeadcountThreshold = pHeadcount >= 2000
+        const passedPayrollThreshold = pCount >= 8
+        setManagerApproval(prev => passedHeadcountThreshold || passedPayrollThreshold)
+    }, [managerApproval, quote, isManager])
+
     return (
         <Flex direction="column" gap="md">
             {/* Page 1: Select products and quantities */}
@@ -997,6 +1016,12 @@ const Extension = ({ context, actions }) => {
                         quote={quote}
                         productTypeAccordions={productTypeAccordions}
                     />
+
+                    { !!managerApproval && (
+                        <Alert title="Manage Approval Required" variant={!!isManager ? "info" : "warning"}>
+                            Manager approval is required for this quote. This quote can only be submitted by managers.
+                        </Alert>
+                    )}
 
                     <Flex justify="end">
                         <Button onClick={() => progressToImplementation()}>
@@ -1029,6 +1054,13 @@ const Extension = ({ context, actions }) => {
                         productTypeAccordions={productTypeAccordions}
                         suppressImplementationFee = {false}
                     />
+                    
+                    { !!managerApproval && (
+                        <Alert title="Manage Approval Required" variant={!!isManager ? "info" : "warning"}>
+                            Manager approval is required for this quote. This quote can only be submitted by managers.
+                        </Alert>
+                    )}
+
                     <Flex justify="end" gap="small">
                         <Button variant="secondary" onClick={() => setCurrentPage(1)}>
                             Review Schedule
@@ -1061,6 +1093,7 @@ const Extension = ({ context, actions }) => {
                         QuoteDiscountValueHandler={QuoteDiscountValueHandler}
                         quoteCustomRatesHandler={quoteCustomRatesHandler}
                         disableEdit = {QuoteSubmitting || QuoteSubmitted}
+                        isManager = {isManager}
                     />
 
                     <QuoteSummaryComponent
@@ -1070,6 +1103,12 @@ const Extension = ({ context, actions }) => {
                         suppressQuoteFees = {false}
                         supressKeyDetails = {true}
                     />
+                    
+                    { !!managerApproval && (
+                        <Alert title="Manage Approval Required" variant={!!isManager ? "info" : "danger"}>
+                            Manager approval is required for this quote. This quote can only be submitted by managers.
+                        </Alert>
+                    )}
 
                     <Flex justify="end" gap="small">
                         <Button
@@ -1090,7 +1129,7 @@ const Extension = ({ context, actions }) => {
                                 Review Implementation Fee
                             </Button>
                         )}
-                        <Button variant="primary" onClick={() => submitQuote(DealId, ExistingQuote, selectedValues, quote, productTypeAccordions)} disabled={QuoteSubmitting || QuoteSubmitted}>
+                        <Button variant="primary" onClick={() => submitQuote(DealId, ExistingQuote, selectedValues, quote, productTypeAccordions)} disabled={!isManager && (!!managerApproval || QuoteSubmitting || QuoteSubmitted)}>
                             { QuoteSubmitted ? "Quote Submitted" : QuoteSubmitting ? "Submitting Quote" : "Submit Quote" }
                         </Button>
                     </Flex>

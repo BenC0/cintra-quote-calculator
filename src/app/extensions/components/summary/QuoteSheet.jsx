@@ -24,7 +24,8 @@ export const QuoteSheet = ({
     planIdsByType = {},
     QuoteDiscountValueHandler = {},
     quoteCustomRatesHandler = {},
-    disableEdit = false
+    disableEdit = false,
+    isManager = false,
 }) => {
     const conditions = [
         Object.keys(quote).length > 0,
@@ -81,12 +82,6 @@ export const QuoteSheet = ({
                         if (typeof headcount != "number") {
                             headcount = planValues["quantity_value"]
                         }
-                        console.log({
-                            event: "Constructing Quote Sheet Table Header",
-                            label: productType.label,
-                            frequency_value: planValues.frequency_value,
-                            quantity_field_label: planQuote.quantity_field_label,
-                        })
                         let heading = `${productType.label}`
                         if (productTypePlans.length > 1) {
                             heading = `${heading} ${idx + 1}`
@@ -97,14 +92,12 @@ export const QuoteSheet = ({
                             heading = `${heading}: ${headcount} ${planQuote.quantity_field_label}`
                         }
 
-                        // let heading = `${productType.label} ${idx + 1}: ${headcount} ${toTitleCase(planValues["frequency_value"])} ${toTitleCase(planQuote["quantity_field_label"])}`
-                        // `${idx + 1}: ${headcount} ${toTitleCase(planValues["frequency_value"])} ${toTitleCase(planQuote["quantity_field_label"])}`
-
                         let planDetails = {
                             heading,
                             rows: [],
                             coreProductMonthlyFee: 0,
                             addonProductMonthlyFee: 0,
+                            no_custom_values: !isManager,
                         }
                         
                         if (productType.label == "Custom Products") {
@@ -117,7 +110,7 @@ export const QuoteSheet = ({
                             planDetails["rows"].push({
                                 field: `Custom Product: ${plan}`,
                                 name: customName,
-                                pricingStructure: null,
+                                pricingStructure: "",
                                 unitPrice: customPrice,
                                 quantity: customQty,
                                 input_type: "Number",
@@ -153,8 +146,9 @@ export const QuoteSheet = ({
                                     } else {
                                         planDetails["addonProductMonthlyFee"] += productQuoteReference.estimated_monthly_fee
                                     }
-
+                                    
                                     planDetails["rows"].push({
+                                        no_custom_values: !isManager,
                                         field: productReference.field,
                                         name: label,
                                         pricingStructure: productReference.pricing_structure.name,
@@ -187,10 +181,12 @@ export const QuoteSheet = ({
                                             <TableHeader></TableHeader>
                                             <TableHeader></TableHeader>
                                             <TableHeader></TableHeader>
+                                            <TableHeader></TableHeader>
                                             {!accordion.no_custom_values ? <TableHeader></TableHeader> : <></> }
                                         </TableRow>
                                         <TableRow>
                                             <TableHeader align="left">Product Name</TableHeader>
+                                            <TableHeader align="left">Pricing Structure</TableHeader>
                                             <TableHeader align="right">Quantity</TableHeader>
                                             <TableHeader align="right">Unit Price</TableHeader>
                                             <TableHeader align="right">Discount</TableHeader>
@@ -201,8 +197,9 @@ export const QuoteSheet = ({
                                     <TableBody>
                                         {accordion.rows.map(row => (
                                             <TableRow>
-                                                <TableCell>{row.name}</TableCell>
-                                                <TableCell align="right">{formatToMaxTwoDecimal(row.quantity)}</TableCell>
+                                                <TableCell align="left">{row.name}</TableCell>
+                                                <TableCell align="left">{row.pricingStructure}</TableCell>
+                                                <TableCell align="right">{formatInt(row.quantity)}</TableCell>
                                                 <TableCell align="right">
                                                     {(!row.no_custom_values && (!!RatesEditing[row.field] || RatesEditing[row.field] === 0)) ? (
                                                         renderField(row, (field, e, planId) => {
@@ -271,14 +268,14 @@ export const QuoteSheet = ({
                                     <TableFooter>
                                         {accordion.coreProductMonthlyFee > 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={4}>Estimated Core Product Charges</TableCell>
+                                                <TableCell colSpan={5}>Estimated Core Product Charges</TableCell>
                                                 <TableCell align="right">£{formatPrice(accordion.coreProductMonthlyFee)}</TableCell>
                                                 {!accordion.no_custom_values ? <TableCell></TableCell> : <></> }
                                             </TableRow>
                                         ) : <></>}
                                         {accordion.addonProductMonthlyFee > 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={4}>Estimated Addon Product Charges</TableCell>
+                                                <TableCell colSpan={5}>Estimated Addon Product Charges</TableCell>
                                                 <TableCell align="right">£{formatPrice(accordion.addonProductMonthlyFee)}</TableCell>
                                                 {!accordion.no_custom_values ? <TableCell></TableCell> : <></> }
                                             </TableRow>
@@ -306,20 +303,22 @@ export const QuoteSheet = ({
                     psqTables.push(<Table>
                         <TableHead>
                             <TableRow>
-                                <TableHeader>{plan.title} - Implementation Product</TableHeader>
-                                <TableHeader>Units</TableHeader>
-                                <TableHeader>Unit Price</TableHeader>
-                                <TableHeader>Discount</TableHeader>
-                                <TableHeader>Total Fee</TableHeader>
-                                <TableHeader></TableHeader>
+                                <TableHeader align="left">{plan.title} - Implementation Product</TableHeader>
+                                <TableHeader align="left">Pricing Structure</TableHeader>
+                                <TableHeader align="right">Units</TableHeader>
+                                <TableHeader align="right">Unit Price</TableHeader>
+                                <TableHeader align="right">Discount</TableHeader>
+                                <TableHeader align="right">Total Fee</TableHeader>
+                                {!!isManager && <TableHeader></TableHeader> }
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {plan.fields.map(row => (
                                 ((row.discount + row.psqFee)> 0) ? (
                                     <TableRow>
-                                        <TableCell>{row.label}</TableCell>
-                                        <TableCell>{formatToMaxTwoDecimal(row.hoursBand.hours)}</TableCell>
+                                        <TableCell align="left">{row.label}</TableCell>
+                                        <TableCell align="left">One Time Fee</TableCell>
+                                        <TableCell align="right">{formatToMaxTwoDecimal(row.hoursBand.hours)}</TableCell>
                                         {/* <TableCell>£{formatPrice(row.resource.hourly_rate)}</TableCell> */}
                                         <TableCell align="right">
                                             {(!!RatesEditing[row.field] || RatesEditing[row.field] === 0) ? (
@@ -338,47 +337,49 @@ export const QuoteSheet = ({
                                         <TableCell align="right">
                                             {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? ("--"): <>£{formatPrice(row.psqFee) || 0.00}</>}
                                         </TableCell>
-                                        <TableCell>
-                                            {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
-                                                <Flex direction="column" align="stretch" gap="sm">
+                                        {!!isManager && (
+                                            <TableCell>
+                                                {(!!discountEditing[row.field] || discountEditing[row.field] === 0) ? (
+                                                    <Flex direction="column" align="stretch" gap="sm">
+                                                        <Button
+                                                            variant="primary"
+                                                            onClick={_ => {
+                                                                if (typeof discountEditing[row.field] == "number") {
+                                                                    QuoteDiscountValueHandler(row.field, discountEditing[row.field])
+                                                                }
+                                                                if (typeof RatesEditing[row.field] == "number") {
+                                                                    quoteCustomRatesHandler(row.field, RatesEditing[row.field])
+                                                                }
+                                                                RatesHandler(row.field, null, "remove")
+                                                                discountHandler(row.field, null, "remove")
+                                                            }}
+                                                        >
+                                                            <Icon name="success"/>
+                                                        </Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={_ => {
+                                                                discountHandler(row.field, null, "remove")
+                                                                RatesHandler(row.field, null, "remove")
+                                                            }}
+                                                        >
+                                                            <Icon name="delete"/>
+                                                        </Button>
+                                                    </Flex>                                            
+                                                ) : (
                                                     <Button
-                                                        variant="primary"
+                                                        variant="transparent"
                                                         onClick={_ => {
-                                                            if (typeof discountEditing[row.field] == "number") {
-                                                                QuoteDiscountValueHandler(row.field, discountEditing[row.field])
-                                                            }
-                                                            if (typeof RatesEditing[row.field] == "number") {
-                                                                quoteCustomRatesHandler(row.field, RatesEditing[row.field])
-                                                            }
-                                                            RatesHandler(row.field, null, "remove")
-                                                            discountHandler(row.field, null, "remove")
+                                                            discountHandler(row.field, true, "add")
+                                                            RatesHandler(row.field, true, "add")
                                                         }}
+                                                        disabled={disableEdit}
                                                     >
-                                                        <Icon name="success"/>
+                                                        <Icon name="edit"/>
                                                     </Button>
-                                                    <Button
-                                                        variant="destructive"
-                                                        onClick={_ => {
-                                                            discountHandler(row.field, null, "remove")
-                                                            RatesHandler(row.field, null, "remove")
-                                                        }}
-                                                    >
-                                                        <Icon name="delete"/>
-                                                    </Button>
-                                                </Flex>                                            
-                                            ) : (
-                                                <Button
-                                                    variant="transparent"
-                                                    onClick={_ => {
-                                                        discountHandler(row.field, true, "add")
-                                                        RatesHandler(row.field, true, "add")
-                                                    }}
-                                                    disabled={disableEdit}
-                                                >
-                                                    <Icon name="edit"/>
-                                                </Button>
-                                            )}
-                                        </TableCell>
+                                                )}
+                                            </TableCell>
+                                        )}
                                     </TableRow>
                                 ) : <></>
                             ))}
@@ -399,13 +400,13 @@ export const QuoteSheet = ({
                     let service = fee.services[serviceKey]
                     let serviceValue = service.values[0]
                     let label = service.label
-                    console.log({service})
                     if (typeof serviceValue == "string") {
                         label = serviceValue
                     }
                     service["input_type"] = "Number"
                     stdRows.push(<TableRow>
                         <TableCell>{label}</TableCell>
+                        <TableCell align="left">One Time Fee</TableCell>
                         <TableCell>{formatToMaxTwoDecimal(service["Implementation Days"])}</TableCell>
 
                         <TableCell align="right">
@@ -426,47 +427,49 @@ export const QuoteSheet = ({
                         <TableCell align="right">
                             {(!!discountEditing[service.field] || discountEditing[service.field] === 0) ? ("--"): <>£{formatPrice(service["Implementation Fee"]) || 0.00}</>}
                         </TableCell>
-                        <TableCell>
-                            {(!!discountEditing[service.field] || discountEditing[service.field] === 0) ? (
-                                <Flex direction="column" align="stretch" gap="sm">
+                        {!!isManager && (
+                            <TableCell>
+                                {(!!discountEditing[service.field] || discountEditing[service.field] === 0) ? (
+                                    <Flex direction="column" align="stretch" gap="sm">
+                                        <Button
+                                            variant="primary"
+                                            onClick={_ => {
+                                                if (typeof discountEditing[service.field] == "number") {
+                                                    QuoteDiscountValueHandler(service.field, discountEditing[service.field])
+                                                }
+                                                if (typeof RatesEditing[service.field] == "number") {
+                                                    quoteCustomRatesHandler(service.field, RatesEditing[service.field])
+                                                }
+                                                RatesHandler(service.field, null, "remove")
+                                                discountHandler(service.field, null, "remove")
+                                            }}
+                                        >
+                                            <Icon name="success"/>
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={_ => {
+                                                discountHandler(service.field, null, "remove")
+                                                RatesHandler(service.field, null, "remove")
+                                            }}
+                                        >
+                                            <Icon name="delete"/>
+                                        </Button>
+                                    </Flex>                                            
+                                ) : (
                                     <Button
-                                        variant="primary"
+                                        variant="transparent"
                                         onClick={_ => {
-                                            if (typeof discountEditing[service.field] == "number") {
-                                                QuoteDiscountValueHandler(service.field, discountEditing[service.field])
-                                            }
-                                            if (typeof RatesEditing[service.field] == "number") {
-                                                quoteCustomRatesHandler(service.field, RatesEditing[service.field])
-                                            }
-                                            RatesHandler(service.field, null, "remove")
-                                            discountHandler(service.field, null, "remove")
+                                            discountHandler(service.field, true, "add")
+                                            RatesHandler(service.field, true, "add")
                                         }}
+                                        disabled={disableEdit}
                                     >
-                                        <Icon name="success"/>
+                                        <Icon name="edit"/>
                                     </Button>
-                                    <Button
-                                        variant="destructive"
-                                        onClick={_ => {
-                                            discountHandler(service.field, null, "remove")
-                                            RatesHandler(service.field, null, "remove")
-                                        }}
-                                    >
-                                        <Icon name="delete"/>
-                                    </Button>
-                                </Flex>                                            
-                            ) : (
-                                <Button
-                                    variant="transparent"
-                                    onClick={_ => {
-                                        discountHandler(service.field, true, "add")
-                                        RatesHandler(service.field, true, "add")
-                                    }}
-                                    disabled={disableEdit}
-                                >
-                                    <Icon name="edit"/>
-                                </Button>
-                            )}
-                        </TableCell>
+                                )}
+                            </TableCell>
+                        )}
                     </TableRow>)
 
                 }
@@ -476,12 +479,13 @@ export const QuoteSheet = ({
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableHeader>Implementation Product</TableHeader>
-                                <TableHeader>Units</TableHeader>
-                                <TableHeader>Unit Price</TableHeader>
-                                <TableHeader>Discount</TableHeader>
-                                <TableHeader>Total Fee</TableHeader>
-                                <TableHeader></TableHeader>
+                                <TableHeader align="left">Implementation Product</TableHeader>
+                                <TableHeader align="left">Pricing Structure</TableHeader>
+                                <TableHeader align="right">Units</TableHeader>
+                                <TableHeader align="right">Unit Price</TableHeader>
+                                <TableHeader align="right">Discount</TableHeader>
+                                <TableHeader align="right">Total Fee</TableHeader>
+                                {!!isManager && <TableHeader></TableHeader>}
                             </TableRow>
                         </TableHead>
                         <TableBody>

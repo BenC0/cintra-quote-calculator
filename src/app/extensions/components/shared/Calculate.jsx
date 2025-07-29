@@ -138,6 +138,7 @@ export const CalculateQuote = ({
     Quote["Summary"]["ContractLength"] = ContractLengthValue
     Quote["Summary"]["EducationClient"] = isEducationClientValue
     Quote["Summary"]["PublicSectorClient"] = isPublicSectorClientValue
+    Quote["Summary"]["PayrollCount"] = payrollDetailsPlanIDs?.length ?? 0
     Quote["Summary"]["PayrollHeadcount"] = payrollDetailsPlanIDs?.reduce((total, planId) => {
         let selectedPlanValues = selectedValues[planId] ?? {quantity_value: 0}
         let headcount = selectedPlanValues.quantity_value
