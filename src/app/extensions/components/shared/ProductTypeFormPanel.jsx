@@ -28,6 +28,7 @@ export const ProductTypeFormPanel = ({
     frequency = null,
 }) => {
     const [localPlanId, setLocalPlanId] = useState(externalPlanId);
+    const [IsValid, setIsValid] = useState(false);
     useEffect(() => {
         if (externalPlanId) {
             setLocalPlanId(externalPlanId);
@@ -86,6 +87,48 @@ export const ProductTypeFormPanel = ({
     const has_addon = arrayHas(grouped_fields["add-on"]) 
     const has_na = arrayHas(grouped_fields["na"]) 
     const isEditMode = Boolean(externalPlanId);
+
+    useEffect(() => {
+        let fieldValueStatus = []
+        let requiredFields = []
+        if (has_core) { requiredFields = [...requiredFields, ...grouped_fields.core] }
+        if (has_details) { requiredFields = [...requiredFields, ...grouped_fields.details] }
+
+        if (has_details) {
+            grouped_fields.details.forEach(field => {
+                let fieldId = field.field
+                if (!!fieldId.match(/^((quantity)|(frequency))$/gi)) {
+                    fieldId = `${fieldId}_value`
+                }
+                let fieldValue = preferredLookup[fieldId]
+                fieldValueStatus.push(!!fieldValue)
+            })
+        }
+
+        if (has_core) {
+            let coreFieldStatus = []
+            grouped_fields.core.forEach(field => {
+                let fieldId = field.field
+                if (!!fieldId.match(/^((quantity)|(frequency))$/gi)) {
+                    fieldId = `${fieldId}_value`
+                }
+                let fieldValue = preferredLookup[fieldId]
+                coreFieldStatus.push(!!fieldValue)
+            })
+            fieldValueStatus.push(coreFieldStatus.some(a => !!a))
+        }
+
+        if (fieldValueStatus.length > 0) {
+            setIsValid(prev => fieldValueStatus.every(a => !!a))
+        } else {
+            setIsValid(prev => true)
+        }
+        console.log({
+            preferredLookup,
+            grouped_fields,
+            IsValid
+        })
+    }, [IsValid, preferredLookup, grouped_fields])
 
     return (
         <Panel
@@ -176,6 +219,8 @@ export const ProductTypeFormPanel = ({
                     </Button>
                     <Button
                         variant="primary"
+                        // To Do: Implement validation checks for disable property
+                        disabled={!IsValid}
                         onClick={() => {
                             if (!isTemp) {
                                 const allFields = [...fields, frequency, quantity]

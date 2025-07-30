@@ -26,7 +26,7 @@ const Extension = ({ context, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.14.0"
+    const versionLabel = "Cintra Quote Calculator: v0.14.4"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -35,6 +35,7 @@ const Extension = ({ context, actions }) => {
     
     useEffect(() => {
         if (!FirstRun) return null;
+        console.log({context})
         setIsManager(prev => {
             const user = context?.user ?? { teams: [] }
             const teams = user.teams
