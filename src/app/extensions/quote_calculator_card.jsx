@@ -50,7 +50,45 @@ const Extension = ({ context, actions }) => {
         setFirstRun(prev => false)
         setDealId(prev => context.crm.objectId)
     }, [FirstRun])
-        
+    
+    // ----- QUEUE SETUP -----
+    // get the actual updateQuote function once
+    // const updateQuote = useUpdateQuote();
+
+    // // in-memory queue to serialize updates
+    // const queueRef = useRef([]);
+    // const [hasNewItem, setHasNewItem] = useState(false);
+
+    // // enqueueUpdate returns a Promise<boolean> that resolves when updateQuote runs
+    // const enqueueUpdate = useCallback((details) => {
+    //     return new Promise(resolve => {
+    //         queueRef.current.push({ details, resolve });
+    //         setHasNewItem(prev => !prev);
+    //     });
+    // }, [updateQuote]);
+
+    // // effect to drain the queue whenever a new item is added
+    // useEffect(() => {
+    //     let isRunning = false;
+
+    //     const processQueue = async () => {
+    //         if (isRunning) return;
+    //         isRunning = true;
+
+    //         while (queueRef.current.length) {
+    //             const { details, resolve } = queueRef.current.shift();
+    //             try {
+    //                 const ok = await updateQuote(details);
+    //                 resolve(ok);
+    //             } catch {
+    //                 resolve(false);
+    //             }
+    //         }
+
+    //         isRunning = false;
+    //     };
+    //     processQueue();
+    // }, [hasNewItem, updateQuote]);
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet

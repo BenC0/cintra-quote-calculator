@@ -38,7 +38,7 @@ export const renderDropDown = (field, onChange, planId, existingValue, supressLa
             </Text>
         ) : <></>}
         <Select
-            options={field.values?.map(field => field.values).sort((a, b) => a.value - b.value) || []}
+            options={field.values?.map(field => ({ label: field.values.name, value: field.values.value })).sort((a, b) => a.value - b.value) || []}
             value={existingValue ?? field.value}
             id={`${planId}__${field.field}`}
             name={`${planId}__${field.field}`}
