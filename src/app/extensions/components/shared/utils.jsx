@@ -1,30 +1,43 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { hubspot } from "@hubspot/ui-extensions";
 
 export const generateID = _ => Math.random().toString(16).slice(2)
 
-export const useUpdateQuote = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
-    console.log("Updating Quote Row")
-    return hubspot
-    .serverless("update_quote_row", {
-        parameters: {
-            rowId: quote_id,
-            values: {
-                deal_id: `${deal}`,
-                name: `${name}-updated`,
-                selected_values,
-                submitted: false
-            }
-        },
-    })
-    .then(res => {
-        console.log("Updated Quote Row")
-        return true
-    })
-    .catch(e => {
-        console.error("Failed To Update Quote Row", e)
-        return false
-    });
+export const useUpdateQuote = () => {
+    return useCallback(async details => {
+        if (!details || !details.deal || !details.quote_id) {
+            return false;
+        }
+
+        const {
+            deal,
+            quote_id,
+            name,
+            selected_values
+        } = details;
+
+        console.log("Updating Quote Row")
+        return hubspot
+        .serverless("update_quote_row", {
+            parameters: {
+                rowId: quote_id,
+                values: {
+                    deal_id: `${deal}`,
+                    name: `${name}-updated`,
+                    selected_values,
+                    submitted: false
+                }
+            },
+        })
+        .then(res => {
+            console.log("Updated Quote Row")
+            return true
+        })
+        .catch(e => {
+            console.error("Failed To Update Quote Row", e)
+            return false
+        });
+    }, []);
 }
 
 export const setLineItems = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {

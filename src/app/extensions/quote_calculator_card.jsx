@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";  // Core React hooks
+import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
 import { setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice } from "./components/shared/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
@@ -52,43 +52,41 @@ const Extension = ({ context, actions }) => {
     }, [FirstRun])
     
     // ----- QUEUE SETUP -----
-    // get the actual updateQuote function once
-    // const updateQuote = useUpdateQuote();
+    const updateQuote = useUpdateQuote();
+    const queueRef = useRef([]);
+    const timerRef = useRef(null);
+    const DEBOUNCE_MS = 500;
 
-    // // in-memory queue to serialize updates
-    // const queueRef = useRef([]);
-    // const [hasNewItem, setHasNewItem] = useState(false);
-
-    // // enqueueUpdate returns a Promise<boolean> that resolves when updateQuote runs
-    // const enqueueUpdate = useCallback((details) => {
-    //     return new Promise(resolve => {
-    //         queueRef.current.push({ details, resolve });
-    //         setHasNewItem(prev => !prev);
-    //     });
-    // }, [updateQuote]);
-
-    // // effect to drain the queue whenever a new item is added
-    // useEffect(() => {
-    //     let isRunning = false;
-
-    //     const processQueue = async () => {
-    //         if (isRunning) return;
-    //         isRunning = true;
-
-    //         while (queueRef.current.length) {
-    //             const { details, resolve } = queueRef.current.shift();
-    //             try {
-    //                 const ok = await updateQuote(details);
-    //                 resolve(ok);
-    //             } catch {
-    //                 resolve(false);
-    //             }
-    //         }
-
-    //         isRunning = false;
-    //     };
-    //     processQueue();
-    // }, [hasNewItem, updateQuote]);
+    const enqueueUpdate = useCallback(details => {
+    return new Promise(resolve => {
+        queueRef.current.push({ details, resolve });
+        if (!timerRef.current) {
+        timerRef.current = setTimeout(async () => {
+            const items = queueRef.current.splice(0);
+            const byId = {};
+            items.forEach(({ details, resolve }) => {
+            const id = details.quote_id;
+            if (!byId[id]) {
+                byId[id] = { details: { ...details }, resolvers: [resolve] };
+            } else {
+                byId[id].details = { ...byId[id].details, ...details };
+                byId[id].resolvers.push(resolve);
+            }
+            });
+            await Promise.all(
+            Object.values(byId).map(async ({ details, resolvers }) => {
+                let ok = false;
+                try {
+                ok = await updateQuote(details);
+                } catch {}
+                resolvers.forEach(r => r(ok));
+            })
+            );
+            timerRef.current = null;
+        }, DEBOUNCE_MS);
+        }
+    });
+    }, [updateQuote]);
     
     // ------------------------- Rendering -------------------------
     // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
@@ -685,7 +683,7 @@ const Extension = ({ context, actions }) => {
             });
             setQuote(result);
             if (!!result && !!result["Summary"]["Total Y1 Charges"]) {
-                useUpdateQuote({
+                enqueueUpdate({
                     deal: DealId,
                     quote_id: ExistingQuote.id,
                     name: "Test",
@@ -1013,7 +1011,7 @@ const Extension = ({ context, actions }) => {
 
         console.log({jsonOutput})
 
-        useUpdateQuote(p)
+        enqueueUpdate(p)
         .then(result => { return pushQuoteToContract(p) })
         .then(result => { return setLineItems(p) })
         .then(result => {

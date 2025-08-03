@@ -44,7 +44,7 @@ exports.main = async (context) => {
             body: { row: result },
         };
     } catch (error) {
-        console.error("Error updating HubDB row:", error.message);
+        console.error("Error updating HubDB row:" + error.message);
         return {
             statusCode: error.statusCode || 500,
             body: { message: error.message || "Internal Server Error" },
