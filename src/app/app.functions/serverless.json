@@ -19,6 +19,10 @@
     "submit_quote": {
       "file": "submit_quote.js",
       "secrets": []
+    },
+    "associate_line_items": {
+      "file": "associate_line_items.js",
+      "secrets": []
     }
   }
 }

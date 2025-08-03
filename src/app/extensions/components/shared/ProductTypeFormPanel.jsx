@@ -123,11 +123,6 @@ export const ProductTypeFormPanel = ({
         } else {
             setIsValid(prev => true)
         }
-        console.log({
-            preferredLookup,
-            grouped_fields,
-            IsValid
-        })
     }, [IsValid, preferredLookup, grouped_fields])
 
     return (

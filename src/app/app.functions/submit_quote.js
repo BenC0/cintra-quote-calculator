@@ -25,7 +25,7 @@
         if (contextQuoteId === undefined || contextQuoteId === null) throw new Error('Missing quote_id parameter');
         if (!Array.isArray(products) || products.length === 0) throw new Error('`products` must be a non-empty array');
 
-        fetch("https://prod-41.uksouth.logic.azure.com:443/workflows/fcec3bc6f6a346f19dc9cdc68e22c7fd/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZHvtWpVAYA9mBgYcEaZLBO74EX3AIOTs1QRC0EoDPqg", {
+        return fetch("https://prod-43.uksouth.logic.azure.com/workflows/0a9d53b2610547ed95b62ec8085cffcc/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KcjayBp9J5Zz3k5IMiomARDjUyYaf9ebs6_rzBN_cy0", {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -34,77 +34,15 @@
             body: jsonOutput
         })
         .then(res => res.text())
-        .then(text => console.log("Azure says:", text))
-
-        // 0. Fetch all existing line items associated with this deal
-        const assocResponse = await hubspotClient.crm.deals.associationsApi.getAll(
-            deal_id,
-            'line_items'
-        );
-        const dealLineItemAssociations = assocResponse.results || [];
-
-        // 1. Remove any existing line items matching this quote_id
-        for (const assoc of dealLineItemAssociations) {
-            const existingId = assoc.id;
-            // fetch its quote_id property
-            const { properties: existingProps } = await hubspotClient.crm.lineItems.basicApi.getById(existingId, ['quote_id']);
-            if (existingProps.quote_id === String(contextQuoteId)) {
-                // archive (delete) the line item
-                await hubspotClient.crm.lineItems.basicApi.archive(existingId);
-            }
-        }
-
-        const processedItems = [];
-
-        // 2. Create and associate fresh line items for this quote
-        for (const prod of products) {
-            const prodId = prod.id;
-            const overrideValues = prod.values || {};
-
-            if (!prodId) throw new Error('Each product entry must have an `id`');
-
-            // a) Retrieve product template
-            const { properties: prodProps } = await hubspotClient.crm.products.basicApi.getById(prodId);
-
-            // b) Build line-item properties (including the shared quote_id)
-            const lineItemProps = {
-                name: prodProps.name || prodProps.product_name,
-                description: prodProps.description,
-                price: prodProps.price,
-                quantity: prodProps.minimum_quantity || 1,
-                quote_id: contextQuoteId,
-                ...overrideValues
+        .then(text => {
+            return {
+                statusCode: 200,
+                body: { message: 'Quote submitted to document' }
             };
-
-            // c) Create new line item
-            const createResp = await hubspotClient.crm.lineItems.basicApi.create({ properties: lineItemProps });
-            const lineItemId = createResp.id;
-
-            // d) Associate to deal
-            await hubspotClient.crm.associations.batchApi.create('deals', 'line_items', {
-                inputs: [{
-                    _from: { id: deal_id },
-                    to: { id: lineItemId },
-                    type: 'deal_to_line_item'
-                }]
-            });
-
-            // e) Associate to product template (optional, if required)
-            await hubspotClient.crm.associations.batchApi.create('line_items', 'products', {
-                inputs: [{
-                    _from: { id: lineItemId },
-                    to: { id: prodId },
-                    type: 'line_item_to_product'
-                }]
-            });
-
-            processedItems.push({ productId: prodId, lineItemId, properties: lineItemProps });
-        }
-
-        return {
-            statusCode: 200,
-            body: { message: 'Quote line items reset and recreated', processedItems }
-        };
+        })
+        .catch(error => {
+            throw new Error(error)
+        })
     } catch (error) {
         console.error('Error resetting line items:', error);
         return {

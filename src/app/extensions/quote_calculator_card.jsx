@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";  // Core React hooks
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice } from "./components/shared/utils";  // Data-fetching and helper functions
+import { setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice } from "./components/shared/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
@@ -26,7 +26,7 @@ const Extension = ({ context, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.14.4"
+    const versionLabel = "Cintra Quote Calculator: v0.15.0"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -868,7 +868,7 @@ const Extension = ({ context, actions }) => {
                     "rows": plan.fields.map(field => (
                         {
                             "ProductType": `${field.label}: ${planValues[field.field]}`,
-                            "PricingStructure": `${field.pricing_structure.name}`,
+                            "PricingStructure": `${field?.pricing_structure?.name ?? ""}`,
                             "Quantity": `${formatToMaxTwoDecimal(field.qty)}`,
                             "UnitPrice": `£${formatPrice(field.adjusted_price)}`,
                             "TotalFee": `£${formatPrice(field.estimated_monthly_fee)}`
@@ -963,9 +963,7 @@ const Extension = ({ context, actions }) => {
             ]
         })
 
-        console.log({jsonOutput})
-
-        useUpdateQuote({
+        const p = {
             deal: DealId,
             quote_id: ExistingQuote.id,
             name: "Test",
@@ -973,19 +971,22 @@ const Extension = ({ context, actions }) => {
             submitted: 1,
             line_items: quote["Line Item Mapping"],
             jsonOutput: jsonOutput,
-        }).then(result => {
-            QuoteSubmitted
+        }
+
+        console.log({jsonOutput})
+
+        useUpdateQuote(p)
+        .then(result => { return pushQuoteToContract(p) })
+        .then(result => { return setLineItems(p) })
+        .then(result => {
             setQuoteSubmitting(prev => false)
             setQuoteSubmitted(prev => true)
+            return true
         })
+        .catch(console.warn)
     }
 
     useEffect(_ => {
-        console.log({
-            event: "Quote calculated, checking manager approval requirements",
-            quote,
-            isManager,
-        })
         const pHeadcount = quote?.Summary?.PayrollHeadcount ?? 0
         const pCount = quote?.Summary?.PayrollCount ?? 0
         const passedHeadcountThreshold = pHeadcount >= 2000

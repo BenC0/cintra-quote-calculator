@@ -4,6 +4,7 @@ import { hubspot } from "@hubspot/ui-extensions";
 export const generateID = _ => Math.random().toString(16).slice(2)
 
 export const useUpdateQuote = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
+    console.log("Updating Quote Row")
     return hubspot
     .serverless("update_quote_row", {
         parameters: {
@@ -15,31 +16,57 @@ export const useUpdateQuote = ({deal, quote_id, name, selected_values, submitted
                 submitted: false
             }
         },
-    }).then(res => {
-        if (!!submitted && !!jsonOutput) {
-            return hubspot
-            .serverless("submit_quote", {
-                parameters: {
-                    quote_id: quote_id,
-                    deal_id: `${deal}`,
-                    products: line_items,
-                    // jsonOutput: JSON.stringify({ "html": "<table> <tbody> <tr> <td>Hello World</td> </tr> </tbody> </table>" }),
-                    jsonOutput: JSON.stringify(jsonOutput),
-                }
-            })
-            .then(res => {
-                // console.log(res)
-                return true
-            })
-            .catch(error => {
-                console.warn(error)
-                return false
-            });
-        } else {
-            return true
+    })
+    .then(res => {
+        console.log("Updated Quote Row")
+        return true
+    })
+    .catch(e => {
+        console.error("Failed To Update Quote Row", e)
+        return false
+    });
+}
+
+export const setLineItems = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
+    console.log("Associating Line Items")
+    return hubspot
+    .serverless("associate_line_items", {
+        parameters: {
+            quote_id: quote_id,
+            deal_id: `${deal}`,
+            products: line_items,
+        },
+    })
+    .then(res => {
+        console.log("Associated Line Items")
+        return true
+    })
+    .catch(e => {
+        console.error("Failed To Associate Line Items", e)
+        return false
+    });
+}
+
+export const pushQuoteToContract = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
+    console.log("Submitting Quote")
+    return hubspot
+    .serverless("submit_quote", {
+        parameters: {
+            quote_id: quote_id,
+            deal_id: `${deal}`,
+            products: line_items,
+            // jsonOutput: JSON.stringify({ "html": "<table> <tbody> <tr> <td>Hello World</td> </tr> </tbody> </table>" }),
+            jsonOutput: JSON.stringify(jsonOutput),
         }
     })
-    .catch(console.warn);
+    .then(res => {
+        console.log("Submitted Quote")
+        return true
+    })
+    .catch(e => {
+        console.error("Failed To Submit Quote", e)
+        return false
+    });
 }
 
 export const useCreateQuote = ({deal, name}) => {
