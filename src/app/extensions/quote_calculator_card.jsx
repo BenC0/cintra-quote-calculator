@@ -26,7 +26,7 @@ const Extension = ({ context, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.15.9"
+    const versionLabel = "Cintra Quote Calculator: v0.16.0"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
