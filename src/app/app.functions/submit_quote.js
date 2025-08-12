@@ -25,7 +25,7 @@
         if (contextQuoteId === undefined || contextQuoteId === null) throw new Error('Missing quote_id parameter');
         if (!Array.isArray(products) || products.length === 0) throw new Error('`products` must be a non-empty array');
 
-        return fetch("https://prod-43.uksouth.logic.azure.com/workflows/0a9d53b2610547ed95b62ec8085cffcc/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KcjayBp9J5Zz3k5IMiomARDjUyYaf9ebs6_rzBN_cy0", {
+        return fetch("https://prod-43.uksouth.logic.azure.com:443/workflows/0a9d53b2610547ed95b62ec8085cffcc/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KcjayBp9J5Zz3k5IMiomARDjUyYaf9ebs6_rzBN_cy0", {
             method: "POST",
             headers: {
                 'Accept': 'application/json',

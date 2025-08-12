@@ -21,6 +21,7 @@ export const renderTablePlans = (
     actions,
     handler,
     plan_handler,
+    productBasedValidationRules,
 ) => {
     const validPlanIds = planIds.filter(id => id != "temp")
     if (validPlanIds.length === 0) {
@@ -72,19 +73,20 @@ export const renderTablePlans = (
                                         onSubmit={(generatedId) => {
                                             plan_handler.edit(productType.label, generatedId);
                                         }}
+                                        productBasedValidationRules = {productBasedValidationRules}
                                     />
                                 }
                                 >
                                     <Icon name="edit"/> Edit
                                 </Button>
-                                {canAdd && (
+                                {/* {canAdd && (
                                     <Button
                                         variant="transparent"
                                         onClick={() => plan_handler.clone(productType.label, planId)}
                                     >
                                         <Icon name="copy"/> Clone
                                     </Button>
-                                )}
+                                )} */}
                                 <Button
                                     variant="transparent"
                                     onClick={() => plan_handler.delete(productType.label, planId)}

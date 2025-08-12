@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { hubspot } from "@hubspot/ui-extensions";
 
 export const generateID = _ => Math.random().toString(16).slice(2)
+export const isEmptyArray = a => a.length == 0
 
 export const useUpdateQuote = () => {
     return useCallback(async details => {
@@ -16,7 +17,7 @@ export const useUpdateQuote = () => {
             selected_values
         } = details;
 
-        console.log("Updating Quote Row")
+        // console.log("Updating Quote Row")
         return hubspot
         .serverless("update_quote_row", {
             parameters: {
@@ -30,7 +31,7 @@ export const useUpdateQuote = () => {
             },
         })
         .then(res => {
-            console.log("Updated Quote Row")
+            // console.log("Updated Quote Row")
             return true
         })
         .catch(e => {
@@ -40,8 +41,38 @@ export const useUpdateQuote = () => {
     }, []);
 }
 
+export const getDealProps = (dealID) => {
+    return hubspot
+    .serverless("get_deal_properties", {
+        parameters: {
+            dealId: `${dealID}`,
+        },
+    })
+    .then(res => {
+        return res
+    })
+    .catch(e => {
+        return false
+    });
+}
+
+export const getCompanies = (dealID) => {
+    return hubspot
+    .serverless("get_companies", {
+        parameters: {
+            dealId: `${dealID}`,
+        },
+    })
+    .then(res => {
+        return res
+    })
+    .catch(e => {
+        return false
+    });
+}
+
 export const setLineItems = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
-    console.log("Associating Line Items")
+    // console.log("Associating Line Items")
     return hubspot
     .serverless("associate_line_items", {
         parameters: {
@@ -51,7 +82,7 @@ export const setLineItems = ({deal, quote_id, name, selected_values, submitted, 
         },
     })
     .then(res => {
-        console.log("Associated Line Items")
+        // console.log("Associated Line Items")
         return true
     })
     .catch(e => {
@@ -61,7 +92,7 @@ export const setLineItems = ({deal, quote_id, name, selected_values, submitted, 
 }
 
 export const pushQuoteToContract = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
-    console.log("Submitting Quote")
+    // console.log("Submitting Quote")
     return hubspot
     .serverless("submit_quote", {
         parameters: {
@@ -73,7 +104,7 @@ export const pushQuoteToContract = ({deal, quote_id, name, selected_values, subm
         }
     })
     .then(res => {
-        console.log("Submitted Quote")
+        // console.log("Submitted Quote")
         return true
     })
     .catch(e => {

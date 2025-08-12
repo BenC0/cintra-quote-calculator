@@ -17,6 +17,7 @@ export const ProductTypeAccordion = ({
     plan_handler,
     selectedValues = {},
     actions,
+    productBasedValidationRules = []
 }) => {
     const maxItems = productType.max_items;
     const validPlanIds = planIds.filter(a => a != "temp")
@@ -60,6 +61,7 @@ export const ProductTypeAccordion = ({
                             actions,
                             handler,
                             plan_handler,
+                            productBasedValidationRules,
                         )}
                         {canAdd && (
                             <Flex>
@@ -81,6 +83,7 @@ export const ProductTypeAccordion = ({
                                                 plan_handler.clone(productType.label, generatedId);
                                                 plan_handler.delete(productType.label, generatedId);
                                             }}
+                                            productBasedValidationRules = {productBasedValidationRules}
                                         />
                                     }
                                 >

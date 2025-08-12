@@ -26,6 +26,7 @@ export const ProductTypeFormPanel = ({
     initialLookup = {},
     quantity = null,
     frequency = null,
+    productBasedValidationRules = [],
 }) => {
     const [localPlanId, setLocalPlanId] = useState(externalPlanId);
     const [IsValid, setIsValid] = useState(false);
@@ -80,6 +81,21 @@ export const ProductTypeFormPanel = ({
         grouped_fields["details"] = [quantity, ...grouped_fields["details"]]
     }
 
+    let activePlanLevelRules = productBasedValidationRules.plan.filter(rule => {
+        let condition = !!preferredLookup[rule.product_id]
+        if (!!rule.product_value) {
+            condition = condition && preferredLookup[rule.product_id] == rule.product_value
+        }
+        return condition
+    })
+
+    let activeQuoteLevelRules = productBasedValidationRules.quote.filter(rule => rule.isActive)
+    let activeValidationRules = [...activePlanLevelRules, ...activeQuoteLevelRules]
+
+    const rulesAffectingSelectedValues = activePlanLevelRules.filter(rule => {
+        return !!rule.excluded_products.find(product => !!preferredLookup[product.id])
+    })
+    
     const arrayHas = arr => Array.isArray(arr) && arr.length > 0
 
     const has_details = arrayHas(grouped_fields.details) 
@@ -119,11 +135,11 @@ export const ProductTypeFormPanel = ({
         }
 
         if (fieldValueStatus.length > 0) {
-            setIsValid(prev => fieldValueStatus.every(a => !!a))
+            setIsValid(prev => fieldValueStatus.every(a => !!a) && rulesAffectingSelectedValues.length == 0)
         } else {
             setIsValid(prev => true)
         }
-    }, [IsValid, preferredLookup, grouped_fields])
+    }, [IsValid, preferredLookup, grouped_fields, rulesAffectingSelectedValues])
 
     return (
         <Panel
@@ -144,7 +160,10 @@ export const ProductTypeFormPanel = ({
                                         // pass initial value if exists
                                         preferredLookup[field.field] !== undefined
                                         ? preferredLookup[field.field]
-                                        : undefined
+                                        : undefined,
+                                        false,
+                                        null,
+                                        activeValidationRules,
                                     ))}
                                 {(has_core || has_na || has_addon) && <Divider />}
                             </>
@@ -159,7 +178,10 @@ export const ProductTypeFormPanel = ({
                                         localPlanId,
                                         preferredLookup[field.field] !== undefined
                                         ? preferredLookup[field.field]
-                                        : undefined
+                                        : undefined,
+                                        false,
+                                        null,
+                                        activeValidationRules,
                                     )
                                 )}
                                 {(has_na || has_addon) && <Divider />}
@@ -176,7 +198,10 @@ export const ProductTypeFormPanel = ({
                                         localPlanId,
                                         preferredLookup[field.field] !== undefined
                                         ? preferredLookup[field.field]
-                                        : undefined
+                                        : undefined,
+                                        false,
+                                        null,
+                                        activeValidationRules,
                                     )
                                 )}
                                 {has_na && <Divider />}
@@ -193,7 +218,10 @@ export const ProductTypeFormPanel = ({
                                         localPlanId,
                                         preferredLookup[field.field] !== undefined
                                         ? preferredLookup[field.field]
-                                        : undefined
+                                        : undefined,
+                                        false,
+                                        null,
+                                        activeValidationRules,
                                     )
                                 )}
                             </>

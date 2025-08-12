@@ -16,12 +16,20 @@
       "file": "update_quote_row.js",
       "secrets": []
     },
+    "get_companies": {
+      "file": "get_companies.js",
+      "secrets": []
+    },
     "submit_quote": {
       "file": "submit_quote.js",
       "secrets": []
     },
     "associate_line_items": {
       "file": "associate_line_items.js",
+      "secrets": []
+    },
+    "get_deal_properties": {
+      "file": "get_deal_properties.js",
       "secrets": []
     }
   }

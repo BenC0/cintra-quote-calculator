@@ -5,7 +5,6 @@ exports.main = async (context) => {
   const hubspotClient = new Hubspot.Client({ accessToken: process.env.PRIVATE_APP_ACCESS_TOKEN });
 
   try {
-    console.log("1. Search existing line items for this deal and quote")
     const { results: existingItems = [], total: totalResults } = await hubspotClient.crm.lineItems.searchApi.doSearch({
       filterGroups: [{
             filters: [
@@ -17,14 +16,11 @@ exports.main = async (context) => {
         limit: 101
     });
 
-    console.log("2. Batch-delete existing if any, total results: ", totalResults)
     if (existingItems.length > 0) {
-        console.log("2.5 Batch-deleting existingItems: ", existingItems.length)
         // console.log(existingItems)
       await hubspotClient.crm.lineItems.batchApi.archive({ inputs: existingItems.map(li => ({ id: li.id })) });
     }
 
-    console.log("3. Batch-read product details")
     const productIds = products.map(p => p.id);
     const prodPropsMap = {};
     if (products.length > 0) {
@@ -35,7 +31,6 @@ exports.main = async (context) => {
         prodResults.forEach(p => { prodPropsMap[p.id] = p.properties || {}; });
     }
 
-    console.log("4. Create line items and associate")
     const creationAndAssocPromises = products.map(async (prod) => {
         const apiProps = prodPropsMap[prod.id] || {};
         const props = {
@@ -60,7 +55,6 @@ exports.main = async (context) => {
 
     const processedItems = await Promise.all(creationAndAssocPromises);
 
-    console.log("5. Return response")
     return {
       statusCode: 200,
       body: { message: 'Quote line items reset and associated successfully.', processedItems }

@@ -102,9 +102,9 @@ const CustomProductsRowActions = ({ onEdit, onClone, onRemove, closeForm, handle
         >
             <Icon name="edit"/> Edit
         </Button>
-        <Button variant="transparent" onClick={onClone}>
+        {/* <Button variant="transparent" onClick={onClone}>
             <Icon name="copy"/> Clone
-        </Button>
+        </Button> */}
         <Button variant="transparent" onClick={onRemove}>
             <Icon name="delete"/> Remove
         </Button>

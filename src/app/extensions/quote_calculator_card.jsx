@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice } from "./components/shared/utils";  // Data-fetching and helper functions
+import { getDealProps, setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice, isEmptyArray, getCompanies } from "./components/shared/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
@@ -26,7 +26,7 @@ const Extension = ({ context, actions }) => {
     const debugPlans = false;
     const debugQuote = true;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.15.0"
+    const versionLabel = "Cintra Quote Calculator: v0.15.9"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -50,6 +50,26 @@ const Extension = ({ context, actions }) => {
         setFirstRun(prev => false)
         setDealId(prev => context.crm.objectId)
     }, [FirstRun])
+
+    const [dealProps, setDealProps] = useState(false);
+    const [dealCompanies, setDealCompanies] = useState(false);
+    useEffect(() => {
+        if (!!DealId) {
+            getCompanies(DealId).then(result => {
+                console.log({
+                    companies: result.body.companies
+                })
+                setDealCompanies(result.body.companies)
+            })
+            getDealProps(DealId).then(result => {
+                console.log({
+                    dealProps: result
+                })
+                setDealProps(result)
+            })
+        }
+    }, [DealId])
+
     
     // ----- QUEUE SETUP -----
     const updateQuote = useUpdateQuote();
@@ -286,6 +306,64 @@ const Extension = ({ context, actions }) => {
     }, [productDefs, productTypeDefs]);
     // Fetch those value tables dynamically for dropdowns and radio groups
     const valueTables = useDynamicFetchDefs(tablesToFetch);
+
+    
+    const [productBasedValidationRules, setProductBasedValidationRules] = useState([]);
+    const productBasedValidationRulesDef = useFetchDefs(
+        "cintra_calculator_product_based_validation_rules",
+        r => ({
+            product_id: r.values.product_id,
+            product_value: r.values.product_value,
+            scope: r.values.scope.name,
+            excluded_products: r.values.excluded_products,
+        })
+    );
+    useEffect(() => {
+        if (!(
+            isEmptyArray(productBasedValidationRulesDef)
+            || isEmptyArray(productDefs)
+        )) {
+            const scopes = [...new Set(productBasedValidationRulesDef.map(r => r.scope))]
+            console.log({selectedValues})
+            setProductBasedValidationRules(prev => {
+                let scopedRules = {}
+                scopes.forEach(scope => {
+                    scopedRules[scope] = productBasedValidationRulesDef.filter(rule => rule.scope == scope)
+                    scopedRules[scope] = scopedRules[scope].map(rule => ({
+                        ...rule,
+                        productDef: productDefs.find(prod => prod.field == rule.product_id) || {label: "product"},
+                    }))
+                    scopedRules[scope] = scopedRules[scope].map(rule => ({
+                        ...rule,
+                        validationMessage: !!rule.product_value ? `${rule.productDef.label} is set to ${rule.product_value}` : `${rule.productDef.label} is added`
+                    }))
+                })
+                const ruleFilter = rule => {
+                    let condition = !!preferredLookup[rule.product_id]
+                    if (!!rule.product_value) {
+                        condition = condition && preferredLookup[rule.product_id] == rule.product_value
+                    }
+                    return condition
+                } 
+                scopedRules.quote = scopedRules.quote.map(rule => {
+                    let isActive = false
+                    for (let plan in selectedValues) {
+                        let planValues = selectedValues[plan]
+                        let condition = !!planValues[rule.product_id]
+                        if (!!rule.product_value) {
+                            condition = condition && planValues[rule.product_id] == rule.product_value
+                        }
+                        if (condition) isActive = true
+                    }
+                    return {
+                        ...rule,
+                        isActive
+                    }
+                })
+                return scopedRules
+            })
+        }
+    }, [productBasedValidationRulesDef, productDefs, selectedValues])
 
     // ------------------------- State for Accordions -------------------------
 
@@ -874,20 +952,20 @@ const Extension = ({ context, actions }) => {
 
     const [QuoteSubmitted, setQuoteSubmitted] = useState(false);
     const [QuoteSubmitting, setQuoteSubmitting] = useState(false);
-    const submitQuote = (DealId, ExistingQuote, selectedValues, quote, productTypeAccordions) => {
+    const submitQuote = (DealId, ExistingQuote, selectedValues, quote, productTypeAccordions, dealCompanies, dealProps) => {
         setQuoteSubmitting(prev => true)
         const now = new Date();
         const monthYear = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
         const jsonOutput = {
             "details": {
-                "ClientName": "Example", // Associated company name
+                "ClientName": dealCompanies.name ?? "", // Associated company name
                 "CreateDate": monthYear, // "Today" date
-                "ClientFullName": "Example", // Associated company
-                "ClientLegalName": "Example", // Associated company
-                "CompanyNumber": "Example", // Associated company
-                "RegisteredAddress": "Example", // Associated company
+                "ClientFullName": dealCompanies.client_full_name ?? "", // Associated company
+                "ClientLegalName": dealCompanies.client_legal_name ?? "", // Associated company
+                "CompanyNumber": dealCompanies.companies_house_number ?? "", // Associated company
+                "RegisteredAddress": dealCompanies.registered_address ?? "", // Associated company
                 "ContractLength": `${quote["Summary"]["ContractLength"]} Months`,
-                "EstGoLive": "Example 2025" // Deal record - provisional_go_live_date
+                "EstGoLive": dealProps.provisional_go_live_date ?? "" // Deal record - provisional_go_live_date
             },
             "tables": []
         }
@@ -1045,6 +1123,7 @@ const Extension = ({ context, actions }) => {
                                 selectedValues={selectedValues}
                                 handler={handler}
                                 plan_handler={plan_handler}
+                                productBasedValidationRules={productBasedValidationRules}
                             />
                             <Divider />
                         </React.Fragment>
@@ -1167,7 +1246,7 @@ const Extension = ({ context, actions }) => {
                                 Review Implementation Fee
                             </Button>
                         )}
-                        <Button variant="primary" onClick={() => submitQuote(DealId, ExistingQuote, selectedValues, quote, productTypeAccordions)} disabled={!isManager && (!!managerApproval || QuoteSubmitting || QuoteSubmitted)}>
+                        <Button variant="primary" onClick={() => submitQuote(DealId, ExistingQuote, selectedValues, quote, productTypeAccordions, dealCompanies, dealProps)} disabled={!isManager && (!!managerApproval || QuoteSubmitting || QuoteSubmitted)}>
                             { QuoteSubmitted ? "Quote Submitted" : QuoteSubmitting ? "Submitting Quote" : "Submit Quote" }
                         </Button>
                     </Flex>

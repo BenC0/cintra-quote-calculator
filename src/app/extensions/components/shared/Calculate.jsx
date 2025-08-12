@@ -420,7 +420,7 @@ export const CalculateQuote = ({
                 if (productType.standard_implementation_calculation_type == "default") {
                     if (service.plans != 0) {
                         let lookupValue = service["values"][0]
-                        let mod = service.plans > 1 ? 1.05 : 1
+                        let mod = (1 + ((service.plans-1) * 0.05))
                         let days = 0
                         let daysRef = StandardImplementationDefs["days"].filter(dayRef => {
                             if (!!dayRef.product_value) {

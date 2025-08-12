@@ -1,0 +1,112 @@
+{
+    "details": {
+        "ClientName": "Example",
+        "CreateDate": "August 2025",
+        "ClientFullName": "Example",
+        "ClientLegalName": "Example",
+        "CompanyNumber": "Example",
+        "RegisteredAddress": "Example",
+        "ContractLength": "36 Months",
+        "EstGoLive": "Example 2025"
+    },
+    "tables": [
+        {
+            "name": "Payroll 1: 50 Lunar Employees",
+            "TotalFees": "£493.90",
+            "Type": "Product",
+            "rows": [
+                {
+                    "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll",
+                    "PricingStructure": "Per Payslip",
+                    "Quantity": "54.15",
+                    "UnitPrice": "£9.12",
+                    "TotalFee": "£493.90"
+                }
+            ]
+        },
+        {
+            "name": "Payroll 2: 2 Lunar Employees",
+            "TotalFees": "£100.00",
+            "Type": "Product",
+            "rows": [
+                {
+                    "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll",
+                    "PricingStructure": "Per Payslip",
+                    "Quantity": "2.17",
+                    "UnitPrice": "£9.12",
+                    "TotalFee": "£100.00"
+                }
+            ]
+        },
+        {
+            "name": "CintraHR 1: 4  Quantity",
+            "TotalFees": "£22.93",
+            "Type": "Product",
+            "rows": [
+                {
+                    "ProductType": "HR Software: CintraHR Professional",
+                    "PricingStructure": "Per Employee per Month",
+                    "Quantity": "4",
+                    "UnitPrice": "£5.73",
+                    "TotalFee": "£22.93"
+                }
+            ]
+        },
+        {
+            "name": "Implementation Fees",
+            "TotalFees": "£1,100.00",
+            "Type": "Implementation",
+            "rows": [
+                {
+                    "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll, Cintra Outsourced Payroll",
+                    "PricingStructure": "One Time Fee",
+                    "Quantity": "4.2",
+                    "UnitPrice": "£1,100.00",
+                    "TotalFee": "£1,100.00"
+                }
+            ]
+        },
+        {
+            "name": "Implementation Fees",
+            "TotalFees": "£12,000.00",
+            "Type": "Implementation",
+            "rows": [
+                {
+                    "ProductType": "HR Software: CintraHR Professional",
+                    "PricingStructure": "One Time Fee",
+                    "Quantity": "1",
+                    "UnitPrice": "£12,000.00",
+                    "TotalFee": "£12,000.00"
+                }
+            ]
+        },
+        {
+            "name": "Total Overall Costs",
+            "TotalFees": "£20,501.93",
+            "Type": "Summary",
+            "rows": [
+                {
+                    "ProductType": "Total Estimated Monthly Charges",
+                    "PricingStructure": "",
+                    "Quantity": "",
+                    "UnitPrice": "",
+                    "TotalFee": "£616.83"
+                },
+                {
+                    "ProductType": "Total Estimated Annual Charges",
+                    "PricingStructure": "",
+                    "Quantity": "",
+                    "UnitPrice": "",
+                    "TotalFee": "£7,401.93"
+                },
+                {
+                    "ProductType": "Total Implementation Charges",
+                    "PricingStructure": "",
+                    "Quantity": "",
+                    "UnitPrice": "",
+                    "TotalFee": "£13,100.00"
+                }
+            ]
+        }
+    ]
+}
