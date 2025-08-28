@@ -3,7 +3,6 @@ import { renderField } from "./Inputs";
 
 export const renderInlinePlan = (productType, handler, planId, selectedValues) => {
     const selectedPlanValues = selectedValues[planId]
-    // console.log(`Rendering Inline Plan for "${productType.label}"`, {selectedValues, selectedPlanValues})
     if (!!productType.fields) {
         if (!selectedPlanValues || Object.keys(selectedPlanValues).length == 0) {
             return productType.fields.map((field) => (

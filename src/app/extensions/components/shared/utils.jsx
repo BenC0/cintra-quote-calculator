@@ -17,7 +17,6 @@ export const useUpdateQuote = () => {
             selected_values
         } = details;
 
-        // console.log("Updating Quote Row")
         return hubspot
         .serverless("update_quote_row", {
             parameters: {
@@ -31,7 +30,6 @@ export const useUpdateQuote = () => {
             },
         })
         .then(res => {
-            // console.log("Updated Quote Row")
             return true
         })
         .catch(e => {
@@ -72,7 +70,6 @@ export const getCompanies = (dealID) => {
 }
 
 export const setLineItems = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
-    // console.log("Associating Line Items")
     return hubspot
     .serverless("associate_line_items", {
         parameters: {
@@ -82,7 +79,6 @@ export const setLineItems = ({deal, quote_id, name, selected_values, submitted, 
         },
     })
     .then(res => {
-        // console.log("Associated Line Items")
         return true
     })
     .catch(e => {
@@ -92,19 +88,16 @@ export const setLineItems = ({deal, quote_id, name, selected_values, submitted, 
 }
 
 export const pushQuoteToContract = ({deal, quote_id, name, selected_values, submitted, line_items, jsonOutput}) => {
-    // console.log("Submitting Quote")
     return hubspot
     .serverless("submit_quote", {
         parameters: {
             quote_id: quote_id,
             deal_id: `${deal}`,
             products: line_items,
-            // jsonOutput: JSON.stringify({ "html": "<table> <tbody> <tr> <td>Hello World</td> </tr> </tbody> </table>" }),
             jsonOutput: JSON.stringify(jsonOutput),
         }
     })
     .then(res => {
-        // console.log("Submitted Quote")
         return true
     })
     .catch(e => {

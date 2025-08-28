@@ -129,15 +129,12 @@ export const QuoteSheet = ({
                                 if (!!productReference && !!productQuoteReference && !!productValue) {
                                     const isCoreProduct = productReference.product_sub_type.name == "core"
                                     let label = productReference.label
-                                    // let qty = planValues.quantity_value
                                     let qty = productQuoteReference.qty
                                     if (!!!qty || qty < 1) {
                                         qty = 1
                                     }
                                     if (typeof productValue != "number") {
-                                        // qty = headcount
                                         if (typeof productValue == "string") {
-                                            // label = `${label}: ${productValue}`
                                             label = productValue
                                         }
                                     }
@@ -319,7 +316,6 @@ export const QuoteSheet = ({
                                         <TableCell align="left">{row.label}</TableCell>
                                         <TableCell align="left">One Time Fee</TableCell>
                                         <TableCell align="right">{formatToMaxTwoDecimal(row.hoursBand.hours)}</TableCell>
-                                        {/* <TableCell>£{formatPrice(row.resource.hourly_rate)}</TableCell> */}
                                         <TableCell align="right">
                                             {(!!RatesEditing[row.field] || RatesEditing[row.field] === 0) ? (
                                                 renderField(row, (field, e, planId) => {
@@ -408,7 +404,6 @@ export const QuoteSheet = ({
                         <TableCell>{label}</TableCell>
                         <TableCell align="left">One Time Fee</TableCell>
                         <TableCell>1</TableCell>
-                        {/* <TableCell>{formatToMaxTwoDecimal(service["Implementation Days"])}</TableCell> */}
 
                         <TableCell align="right">
                             {(!!RatesEditing[service.field] || RatesEditing[service.field] === 0) ? (

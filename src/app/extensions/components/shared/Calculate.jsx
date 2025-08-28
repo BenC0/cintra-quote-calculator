@@ -145,7 +145,6 @@ export const CalculateQuote = ({
         let headcount = selectedPlanValues.quantity_value
         return headcount + total
     }, 0) ?? 0
-    // console.log({PayrollHeadcount: Quote["Summary"]["PayrollHeadcount"]})
 
     for (let planType in planIdsByType) {
         let estimated_plan_monthly_fee = 0
@@ -207,13 +206,6 @@ export const CalculateQuote = ({
                                 bandQty = fieldValue
                                 qty = fieldValue
                             }
-
-                            // console.log({
-                            //     fieldValue,
-                            //     typeof: typeof fieldValue,
-                            //     bandQty,
-                            //     qty,
-                            // })
 
                             output["price_band"] = get_price_band(bandQty, fieldValue, output["price_table"])
                             if (field.pricing_structure.name == "Minimum Active Users") {
@@ -307,9 +299,6 @@ export const CalculateQuote = ({
                                         "quantity": output.qty,
                                         "price": output.adjusted_price,
                                         "hs_discount_percentage": output.discount,
-                                        // "hs_price_gbp": output.estimated_monthly_fee,
-                                        // "recurringbillingfrequency": "Monthly",
-                                        // "Estimated Monthly Fee": output.estimated_monthly_fee,
                                     }
                                 }]
                             }
@@ -583,16 +572,6 @@ export const CalculateQuote = ({
         }
 
         const sectorModifier = psqConfig["Sector"]["private"] ? 1 : 1.5;
-        
-        // validPayrolls.forEach(payroll => {
-        //     let selectedPayrollValues = selectedValues[payroll]
-        //     if (selectedPayrollValues["241706082523"] == "source" || psqConfig["Cintra Payroll Product"] == "source") {
-        //         psqConfig["Cintra Payroll Product"] = "source"
-        //     } else {
-        //         psqConfig["Cintra Payroll Product"] = selectedPayrollValues["241706082523"]
-        //     }
-        // })
-        
         Quote["Implementation Fees"]["PSQ Config"] = psqConfig
 
         psqAccordions.forEach(psqAccord => {
@@ -673,8 +652,6 @@ export const CalculateQuote = ({
                                     "quantity": hours,
                                     "price": hourly_rate,
                                     "hs_discount_percentage": discount,
-                                    // "hs_price_gbp": output.estimated_monthly_fee,
-                                    // "recurringbillingfrequency": "Monthly",
                                 }
                             }]
                         }

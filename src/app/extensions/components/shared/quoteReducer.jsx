@@ -4,9 +4,6 @@ export function quoteReducer(state, action) {
     switch (action.type) {
         case 'ADD_PLAN': {
             const { plan } = action.payload;
-            // if (plan.id == "temp") {
-            //     return state
-            // }
             let output = {
                 ...state,
                 plansById: {
@@ -50,9 +47,6 @@ export function quoteReducer(state, action) {
 
         case 'UPDATE_SELECTED_VALUE': {
             const { planId, fieldKey, value } = action.payload;
-            // if (planId == "temp") {
-            //     return state
-            // }
             return {
                 ...state,
                 selectedValues: {
@@ -67,9 +61,6 @@ export function quoteReducer(state, action) {
 
         case 'UPDATE_PLAN': {
             const { planId, updates } = action.payload;
-            // if (planId == "temp") {
-            //     return state
-            // }
             return {
                 ...state,
                 plansById: {

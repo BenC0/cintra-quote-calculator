@@ -29,10 +29,6 @@ export const renderInlineTablePlans = (
             </Text>
         );
     }
-    // console.log({
-    //     "msg": "Rendering Inline Table Plan",
-    //     productType
-    // })
 
     const [editing, setEditing] = useState(false)
 
@@ -61,7 +57,6 @@ export const renderInlineTablePlans = (
                 <TableBody>
                     {productType.fields.map((field) => {
                         const cell = selectedPlanValues.fields.find(a => a.field === field.field);
-                        // console.log({cell})
                         return (
                             <TableRow key={field.field}>
                                 <TableCell>{field.label}</TableCell>
