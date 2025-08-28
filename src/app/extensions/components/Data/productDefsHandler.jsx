@@ -1,3 +1,5 @@
+import { getFirstValue } from "../Utils/getFirstValue";
+
 export const productDefsHandler = r => ({
     field: r?.id ?? "",
     label: r?.values?.name ?? "",

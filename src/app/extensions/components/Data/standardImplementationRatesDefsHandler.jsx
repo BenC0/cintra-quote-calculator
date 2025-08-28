@@ -1,3 +1,5 @@
+import { getFirstValue } from "../Utils/getFirstValue"
+
 export const standardImplementationRatesDefsHandler = r => ({
     id: r.id,
     price: r.values.band_price,

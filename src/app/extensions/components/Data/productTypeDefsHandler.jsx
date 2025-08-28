@@ -1,6 +1,9 @@
+import { getFirstValue } from "../Utils/getFirstValue"
+import { productDefsHandler } from "./productDefsHandler";
+
 export const productTypeDefsHandler = r => {
     // Build synthetic fields for quantity and frequency inputs
-    const quantityFieldDef = buildProductDef({
+    const quantityFieldDef = productDefsHandler({
         id: "quantity",
         values: {
             name: r.values.quantity_field_label,
@@ -9,7 +12,7 @@ export const productTypeDefsHandler = r => {
             product_sub_type: { label: "Details", name: "details" }
         }
     });
-    const frequencyFieldDef = buildProductDef({
+    const frequencyFieldDef = productDefsHandler({
         id: "frequency",
         values: {
             name: "Frequency",

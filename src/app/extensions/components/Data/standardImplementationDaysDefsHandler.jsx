@@ -1,3 +1,5 @@
+import { getFirstValue } from "../Utils/getFirstValue"
+
 export const standardImplementationDaysDefsHandler = r => ({
     id: r.id,
     days: r.values.days,
