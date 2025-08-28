@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
-import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { getDealProps, setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice, isEmptyArray, getCompanies, formatInt } from "./components/shared/utils";  // Data-fetching and helper functions
+import { ProductTypeAccordion } from "./components/modules/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
+import { getDealProps, setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice, isEmptyArray, getCompanies, formatInt } from "./components/modules/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
-import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
-import { quoteReducer } from "./components/shared/quoteReducer";  // Reducer for state management
+import { CalculateQuote } from "./components/modules/Calculate/Calculate";  // Business logic for quote calculation
+import { checkPSQRequirements } from "./components/modules/Calculate/checkPSQRequirements";  // Business logic for quote calculation
+import { quoteReducer } from "./components/modules/quoteReducer";  // Reducer for state management
 import { QuoteSheet } from "./components/summary/QuoteSheet";
 
-import { PSQTables } from "./components/shared/PSQTables";
+import { PSQTables } from "./components/modules/PSQTables";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (

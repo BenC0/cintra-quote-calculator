@@ -1,65 +1,4 @@
-export const get_price_band = (qtyVal, fieldValue, price_table) => {
-    let output = {
-        price: 0,
-        monthly_standing_charge: 0,
-        band_price_is_percent: false,
-        isFallback: true,
-    }
-    if (!!fieldValue) {
-        if (price_table.length > 0) {
-            let price_bands = []
-            if (price_table.some(band => !!band.product_value)) {
-                price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal) && (band.product_value == fieldValue))
-            } else {
-                price_bands = price_table.filter(band => (band.minimum_quantity <= qtyVal))
-            }
-            if (price_bands.length > 0) {
-                price_bands = price_bands.sort((a, b) => a.minimum_quantity - b.minimum_quantity)
-                output = price_bands[price_bands.length - 1]
-            }
-        }
-    }
-    return output
-}
-
-export const checkPSQRequirements = (selectedValues, productDefs, productTypeAccordions, planIdsByType) => {
-    let validPayrolls = planIdsByType["Payroll"]
-    if (!!validPayrolls) {
-        validPayrolls = validPayrolls.filter(a => a != "temp")
-    } else {
-        validPayrolls = []
-    }
-    
-    let total_headcount = 0
-    let services = 0
-    let payrolls = validPayrolls.length
-    let psq_services = 0
-
-    validPayrolls.forEach(payroll => {
-        let selectedPayrollValues = selectedValues[payroll]
-        total_headcount += selectedPayrollValues.quantity_value
-        for (let serviceKey in selectedPayrollValues) {
-            let releventProduct = productDefs.find(p => p.field == serviceKey)
-            if (!!releventProduct) {
-                if (releventProduct.requires_psq && !!selectedPayrollValues[serviceKey]) {
-                    psq_services += 1
-                }
-                if (!!selectedPayrollValues[serviceKey]) {
-                    services += 1
-                }
-            }
-        }
-    })
-
-    let multiple_service_quote = services > payrolls
-    let professional_service_quote_flagged = psq_services > 0
-    let min_headcount_for_psq = total_headcount > 200
-    const PSQRequired = multiple_service_quote
-        || professional_service_quote_flagged
-        || min_headcount_for_psq
-        
-    return PSQRequired
-}
+import { getPriceBand } from "./getPriceBand"
 
 export const CalculateQuote = ({
     planIdsByType = {},
@@ -207,7 +146,7 @@ export const CalculateQuote = ({
                                 qty = fieldValue
                             }
 
-                            output["price_band"] = get_price_band(bandQty, fieldValue, output["price_table"])
+                            output["price_band"] = getPriceBand(bandQty, fieldValue, output["price_table"])
                             if (field.pricing_structure == "Minimum Active Users") {
                                 qty = output["price_band"]["minimum_quantity"]
                             }
