@@ -280,7 +280,6 @@ export const CalculateQuote = ({
     }
 
     if (!RequiresPSQFee) {
-        const containsStringOrBool = arr => arr.some(item => typeof item === 'string');
         let productTypeImplementationFees = {}
 
         productTypeDefs.forEach(productType => {
