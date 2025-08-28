@@ -10,7 +10,7 @@ import {
     Divider,
 } from "@hubspot/ui-extensions";
 import { renderField } from "../Inputs/Inputs";
-import { generateID } from "../utils";
+import { generateID } from "../Utils/generateID";
 
 export const ProductTypeFormPanel = ({
     name = "",

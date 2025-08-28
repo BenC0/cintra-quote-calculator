@@ -41,7 +41,6 @@ const Extension = ({ context, actions }) => {
     const debugValues = false;
     const debugPlans = false;
     const debugQuote = false;
-    const debugPSQ = false;
     const versionLabel = "Cintra Quote Calculator: v0.18.2"
 
     const [DealId, setDealId] = useState(null);
@@ -718,16 +717,6 @@ const Extension = ({ context, actions }) => {
             })
         }
     }, [DealId])
-
-    useEffect(() => {
-        if (!!DealId && !!ExistingQuote) {
-            console.log({
-                event: "Existing Quote",
-                DealId,
-                ExistingQuote,
-            })
-        }
-    }, [DealId, ExistingQuote])
 
     // Recalculate quote whenever inputs change
     const [quote, setQuote] = useState({});
