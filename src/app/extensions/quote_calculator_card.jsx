@@ -49,6 +49,7 @@ import { productTypeAccordionsMap } from "./components/Data/productTypeAccordion
 import { getDefaultFields } from "./components/Data/getDefaultFields";
 import { planHandler } from "./components/Data/planHandler";
 import { submitQuote } from "./components/Data/submitQuote";
+import { checkManagerApprovalRequired } from "./components/Utils/checkManagerApprovalRequired";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
@@ -78,7 +79,7 @@ const Extension = ({ context, actions }) => {
     const valuesInitialised = useRef(false);
     const FirstRun = useRef(false);
     const [isManager, setIsManager] = useState(false);
-    const [managerApproval, setManagerApproval] = useState(false);
+    const [managerApprovalRequired, setManagerApprovalRequired] = useState(false);
     const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
     const [QuoteSubmitted, setQuoteSubmitted] = useState(false);
     const [QuoteSubmitting, setQuoteSubmitting] = useState(false);
@@ -425,12 +426,8 @@ const Extension = ({ context, actions }) => {
     }, [ StandardImplementationDefs, productPriceDefs, psqAccordions, productTypeAccordions, plansInitialised, valueTables, plansById, DealId, ExistingQuote ]);
 
     useEffect(_ => {
-        const pHeadcount = quote?.Summary?.PayrollHeadcount ?? 0
-        const pCount = quote?.Summary?.PayrollCount ?? 0
-        const passedHeadcountThreshold = pHeadcount >= 2000
-        const passedPayrollThreshold = pCount >= 8
-        setManagerApproval(prev => passedHeadcountThreshold || passedPayrollThreshold)
-    }, [managerApproval, quote, isManager])
+        setManagerApprovalRequired(prev => checkManagerApprovalRequired(quote))
+    }, [managerApprovalRequired, quote, isManager])
 
     return (
         <Flex direction="column" gap="md">
@@ -459,7 +456,7 @@ const Extension = ({ context, actions }) => {
                         productTypeAccordions={productTypeAccordions}
                     />
 
-                    { !!managerApproval && (
+                    { !!managerApprovalRequired && (
                         <Alert title="Manage Approval Required" variant={!!isManager ? "info" : "warning"}>
                             Manager approval is required for this quote. This quote can only be submitted by managers.
                         </Alert>
@@ -497,7 +494,7 @@ const Extension = ({ context, actions }) => {
                         suppressImplementationFee = {false}
                     />
                     
-                    { !!managerApproval && (
+                    { !!managerApprovalRequired && (
                         <Alert title="Manage Approval Required" variant={!!isManager ? "info" : "warning"}>
                             Manager approval is required for this quote. This quote can only be submitted by managers.
                         </Alert>
@@ -546,7 +543,7 @@ const Extension = ({ context, actions }) => {
                         supressKeyDetails = {true}
                     />
                     
-                    { !!managerApproval && (
+                    { !!managerApprovalRequired && (
                         <Alert title="Manage Approval Required" variant={!!isManager ? "info" : "danger"}>
                             Manager approval is required for this quote. This quote can only be submitted by managers.
                         </Alert>
@@ -584,7 +581,7 @@ const Extension = ({ context, actions }) => {
                                 dealCompanies,
                                 dealProps
                             )
-                        }} disabled={!isManager && (!!managerApproval || QuoteSubmitting || QuoteSubmitted)}>
+                        }} disabled={!isManager && (!!managerApprovalRequired || QuoteSubmitting || QuoteSubmitted)}>
                             { QuoteSubmitted ? "Quote Submitted" : QuoteSubmitting ? "Submitting Quote" : "Submit Quote" }
                         </Button>
                     </Flex>
