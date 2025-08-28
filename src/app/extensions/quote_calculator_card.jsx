@@ -4,7 +4,7 @@ import { getDealProps, setLineItems, pushQuoteToContract, useFetchDefs, useDynam
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { CalculateQuote } from "./components/modules/Calculate/Calculate";  // Business logic for quote calculation
-import { checkPSQRequirements } from "./components/modules/Calculate/checkPSQRequirements";  // Business logic for quote calculation
+import { checkPSQRequirements } from "./components/modules/Utils/checkPSQRequirements";  // Business logic for quote calculation
 import { quoteReducer } from "./components/modules/quoteReducer";  // Reducer for state management
 import { QuoteSheet } from "./components/summary/QuoteSheet";
 
@@ -684,11 +684,14 @@ const Extension = ({ context, actions }) => {
     // ------------------------- PSQ Fee Requirement -------------------------
 
     const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
-    useEffect(() => {
-        const needsFee = checkPSQRequirements(selectedValues, productDefs, productTypeAccordions, planIdsByType);
-        setRequiresPSQFee(needsFee);
-        if (debug && debugPSQ) console.log("PSQ Fee Requirement Updated:", needsFee);
-    }, [selectedValues, productDefs, productTypeAccordions, planIdsByType]);
+    // useEffect(() => {
+    //     console.log({
+    //         selectedValues, productDefs, productTypeAccordions, planIdsByType
+    //     })
+    //     const needsFee = checkPSQRequirements(selectedValues, productDefs, productTypeAccordions, planIdsByType);
+    //     setRequiresPSQFee(needsFee);
+    //     if (debug && debugPSQ) console.log("PSQ Fee Requirement Updated:", needsFee);
+    // }, [selectedValues, productDefs, productTypeAccordions, planIdsByType]);
 
     // ------------------------- Quote Calculation -------------------------
     
@@ -722,12 +725,14 @@ const Extension = ({ context, actions }) => {
     const [quote, setQuote] = useState({});
     useEffect(() => {
         if (!!DealId && !!ExistingQuote) {
+            const needsFee = checkPSQRequirements(selectedValues, productDefs, productTypeAccordions, planIdsByType);
+            setRequiresPSQFee(needsFee);
             const result = CalculateQuote({
                 planIdsByType: planIdsByType,
                 selectedValues: selectedValues,
                 productPriceDefs: productPriceDefs,
                 productTypeDefs: productTypeDefs,
-                RequiresPSQFee: RequiresPSQFee,
+                RequiresPSQFee: needsFee,
                 StandardImplementationDefs: StandardImplementationDefs,
                 productDefs: productDefs,
                 productTypeAccordions: productTypeAccordions,

@@ -1,10 +1,8 @@
 export const checkPSQRequirements = (selectedValues, productDefs, productTypeAccordions, planIdsByType) => {
     const PayrollDetails = productTypeAccordions.find(a => a.is_payroll_product_type)
-    let validPayrolls = planIdsByType[PayrollDetails.label]
-    if (!!validPayrolls) {
-        validPayrolls = validPayrolls.filter(a => a != "temp")
-    } else {
-        validPayrolls = []
+    let validPayrolls = []
+    if (!!PayrollDetails && !!planIdsByType[PayrollDetails.label]) {
+        validPayrolls = planIdsByType[PayrollDetails.label].filter(a => a != "temp")
     }
     
     let total_headcount = 0

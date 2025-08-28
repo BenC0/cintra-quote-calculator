@@ -12,7 +12,7 @@ import {
     Accordion,
 } from "@hubspot/ui-extensions";
 import { formatPrice, formatToMaxTwoDecimal } from "./utils";
-import { renderField } from "./Inputs";
+import { renderField } from "./Inputs/Inputs";
 
 export const PSQTables = ({
     quote = {},

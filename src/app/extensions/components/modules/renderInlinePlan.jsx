@@ -1,5 +1,5 @@
 import React from "react";
-import { renderField } from "./Inputs";
+import { renderField } from "./Inputs/Inputs";
 
 export const renderInlinePlan = (productType, handler, planId, selectedValues) => {
     const selectedPlanValues = selectedValues[planId]
