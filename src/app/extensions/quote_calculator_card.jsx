@@ -248,7 +248,7 @@ const Extension = ({ context, actions }) => {
 
     // ------------------------- Field Change Handlers -------------------------
 
-    const handler = (field, value, planId) => {
+    const fieldHandler = (field, value, planId) => {
         const productType = field.product_type.name;
         // If this is a "brand new" planId for that type, dispatch ADD_PLAN
         if (!planIdsByType[productType]?.includes(planId)) {
@@ -697,7 +697,7 @@ const Extension = ({ context, actions }) => {
                                 planIds={planIdsByType[productType.label] || []}
                                 actions={actions}
                                 selectedValues={selectedValues}
-                                handler={handler}
+                                fieldHandler={fieldHandler}
                                 planHandler={planHandler}
                                 productBasedValidationRules={productBasedValidationRules}
                                 dispatch={dispatch}

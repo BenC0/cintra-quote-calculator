@@ -3,7 +3,7 @@ import { generateID } from "../Utils/generateID";
 // ------------------------- Plan CRUD Handlers -------------------------
 
 // Add a new plan for a given product type
-const addPlan = (dispatch, productTypeName, planIdArg = null) => {
+export const addPlan = (dispatch, productTypeName, planIdArg = null) => {
     const newId = planIdArg || generateID();
     dispatch({
         type: 'ADD_PLAN',
@@ -13,7 +13,7 @@ const addPlan = (dispatch, productTypeName, planIdArg = null) => {
 };
 
 // Clone an existing plan by copying its values
-const clonePlan = (dispatch, typeName, planId, selectedValues) => {
+export const clonePlan = (dispatch, typeName, planId, selectedValues) => {
     const newId = generateID();
     const originalValues = selectedValues[planId] || {};
     dispatch({
@@ -23,7 +23,7 @@ const clonePlan = (dispatch, typeName, planId, selectedValues) => {
 };
 
 // Delete a plan by removing it via reducer
-const deletePlan = (dispatch, typeName, planId) => {
+export const deletePlan = (dispatch, typeName, planId) => {
     dispatch({
         type: 'REMOVE_PLAN',
         payload: { planId }

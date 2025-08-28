@@ -18,7 +18,7 @@ export const renderTablePlans = (
     selectedValues,
     canAdd = false,
     actions,
-    handler,
+    fieldHandler,
     planHandler,
     productBasedValidationRules,
     dispatch
@@ -64,7 +64,7 @@ export const renderTablePlans = (
                                         quantity={productType.quantityFieldDef}
                                         frequency={productType.frequencyFieldDef}
                                         frequency_value={selectedPlanValues.frequency_value}
-                                        handler={handler}
+                                        fieldHandler={fieldHandler}
                                         actions={actions}
                                         planId={planId}
                                         initialLookup={selectedPlanValues}

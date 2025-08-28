@@ -15,7 +15,7 @@ import { generateID } from "../Utils/generateID";
 export const ProductTypeFormPanel = ({
     name = "",
     fields = [],
-    handler = () => {},
+    fieldHandler = () => {},
     onSubmit = () => {},
     actions,
     frequency_value = null,
@@ -53,7 +53,7 @@ export const ProductTypeFormPanel = ({
 
     const isTemp = localPlanId == "temp"
     const preferredLookup = isTemp ? initialLookup : localLookup
-    const preferredHandler = isTemp ? handler : localLookupHandler
+    const preferredHandler = isTemp ? fieldHandler : localLookupHandler
 
     const grouped_fields = {};
     fields.forEach((field) => {
@@ -247,7 +247,7 @@ export const ProductTypeFormPanel = ({
                                 for (let key in localLookup) {
                                     let f = allFields.find(field => field.field == key || field.field == `${key}_value` || key == `${field.field}_value`)
                                     if (!!f) {
-                                        handler(f, localLookup[key], localPlanId)
+                                        fieldHandler(f, localLookup[key], localPlanId)
                                     }
                                 }
                             }

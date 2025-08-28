@@ -17,7 +17,7 @@ export const renderInlineTablePlans = (
     productType,
     planIds,
     selectedValues,
-    handler,
+    fieldHandler,
 ) => {
     if (planIds.length === 0) {
         return (
@@ -59,7 +59,7 @@ export const renderInlineTablePlans = (
                                 <TableCell>{field.label}</TableCell>
                                 <TableCell  align="right">
                                     {editing ? (
-                                        renderField(field, handler, planId, cell.value)
+                                        renderField(field, fieldHandler, planId, cell.value)
                                     ) : (
                                         cell ? String(cell.value) : "-"
                                     )}

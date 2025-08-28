@@ -12,7 +12,7 @@ import { renderInlineTablePlans } from "./renderInlineTablePlans";
 export const ProductTypeAccordion = ({
     productType,
     planIds = [],
-    handler,
+    fieldHandler,
     planHandler,
     selectedValues = {},
     actions,
@@ -47,7 +47,7 @@ export const ProductTypeAccordion = ({
                 {productType.input_display_type === "inline" ? (
                     planIds.map((planId) => (
                         <React.Fragment key={planId}>
-                            {renderInlinePlan(productType, handler, planId, selectedValues)}
+                            {renderInlinePlan(productType, fieldHandler, planId, selectedValues)}
                         </React.Fragment>
                     ))
                 ) : <></>}
@@ -59,7 +59,7 @@ export const ProductTypeAccordion = ({
                             selectedValues,
                             canAdd,
                             actions,
-                            handler,
+                            fieldHandler,
                             planHandler,
                             productBasedValidationRules,
                             dispatch
@@ -75,7 +75,7 @@ export const ProductTypeAccordion = ({
                                             quantity={productType.quantityFieldDef}
                                             frequency={productType.frequencyFieldDef}
                                             planId="temp"
-                                            handler={handler}
+                                            fieldHandler={fieldHandler}
                                             initialLookup={defaultValues}
                                             actions={actions}
                                             onSubmit={(generatedId) => {
@@ -98,7 +98,7 @@ export const ProductTypeAccordion = ({
                             productType,
                             planIds,
                             selectedValues,
-                            handler,
+                            fieldHandler,
                         )}
                     </>
                 ) : <></>}
