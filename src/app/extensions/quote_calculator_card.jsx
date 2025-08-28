@@ -2,23 +2,16 @@
 import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";
 // Misc. utility functions
-import { generateID } from "./components/Utils/generateID";
 import { isEmptyArray } from "./components/Utils/isEmptyArray";
 import { resetForm } from "./components/Utils/resetForm";
 // HubSpot related functions
 import { getDealProps } from "./components/HubSpot/getDealProps";
-import { setLineItems } from "./components/HubSpot/setLineItems";
 import { useFetchDefs } from "./components/HubSpot/useFetchDefs";
 import { useGetQuotes } from "./components/HubSpot/useGetQuotes";
 import { getCompanies } from "./components/HubSpot/getCompanies";
 import { useCreateQuote } from "./components/HubSpot/useCreateQuote";
 import { useUpdateQuote } from "./components/HubSpot/useUpdateQuote";
-import { pushQuoteToContract } from "./components/HubSpot/pushQuoteToContract";
 import { useDynamicFetchDefs } from "./components/HubSpot/useDynamicFetchDefs";
-// Formatting related functions
-import { formatInt } from "./components/Format/formatInt";
-import { toTitleCase } from "./components/Format/toTitleCase";
-import { formatPrice } from "./components/Format/formatPrice";
 // UI related functions
 import { PSQTables } from "./components/Render/PSQTables";
 import { QuoteSheet } from "./components/Render/QuoteSheet";
@@ -427,7 +420,7 @@ const Extension = ({ context, actions }) => {
 
     useEffect(_ => {
         setManagerApprovalRequired(prev => checkManagerApprovalRequired(quote))
-    }, [managerApprovalRequired, quote, isManager])
+    }, [quote])
 
     return (
         <Flex direction="column" gap="md">
@@ -569,17 +562,20 @@ const Extension = ({ context, actions }) => {
                             </Button>
                         )}
                         <Button variant="primary" onClick={() => {
+                            setQuoteSubmitting(prev => true)
                             submitQuote(
-                                setQuoteSubmitted,
                                 enqueueUpdate,
-                                setQuoteSubmitting,
                                 DealId,
                                 ExistingQuote,
                                 selectedValues,
                                 quote,
                                 productTypeAccordions,
                                 dealCompanies,
-                                dealProps
+                                dealProps,
+                                _ => {
+                                    setQuoteSubmitting(prev => false)
+                                    setQuoteSubmitted(prev => true)
+                                }
                             )
                         }} disabled={!isManager && (!!managerApprovalRequired || QuoteSubmitting || QuoteSubmitted)}>
                             { QuoteSubmitted ? "Quote Submitted" : QuoteSubmitting ? "Submitting Quote" : "Submit Quote" }

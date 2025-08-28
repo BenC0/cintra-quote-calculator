@@ -1,11 +1,11 @@
 import { formatPrice } from "../Format/formatPrice";
 import { formatInt } from "../Format/formatInt";
-import { pushQuoteToContract } from "../HubSpot/pushQuoteToContract";
-import { setLineItems } from "../HubSpot/setLineItems";
 import { toTitleCase } from "../Format/toTitleCase";
 
-export const submitQuote = (setQuoteSubmitted, enqueueUpdate, setQuoteSubmitting, DealId, ExistingQuote, selectedValues, quote, productTypeAccordions, dealCompanies, dealProps) => {
-    setQuoteSubmitting(prev => true)
+import { pushQuoteToContract } from "../HubSpot/pushQuoteToContract";
+import { setLineItems } from "../HubSpot/setLineItems";
+
+export const submitQuote = (enqueueUpdate, DealId, ExistingQuote, selectedValues, quote, productTypeAccordions, dealCompanies, dealProps, callback) => {
     const now = new Date();
     const monthYear = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
     const jsonOutput = {
@@ -170,10 +170,6 @@ export const submitQuote = (setQuoteSubmitted, enqueueUpdate, setQuoteSubmitting
     enqueueUpdate(p)
     .then(result => { return pushQuoteToContract(p) })
     .then(result => { return setLineItems(p) })
-    .then(result => {
-        setQuoteSubmitting(prev => false)
-        setQuoteSubmitted(prev => true)
-        return true
-    })
+    .then(callback)
     .catch(console.warn)
 }
