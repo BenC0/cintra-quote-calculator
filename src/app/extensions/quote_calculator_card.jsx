@@ -4,7 +4,7 @@ import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-exte
 // Misc. utility functions
 import { generateID } from "./components/Utils/generateID";
 import { isEmptyArray } from "./components/Utils/isEmptyArray";
-import { getFirstValue } from "./components/Utils/getFirstValue";
+import { resetForm } from "./components/Utils/resetForm";
 // HubSpot related functions
 import { getDealProps } from "./components/HubSpot/getDealProps";
 import { setLineItems } from "./components/HubSpot/setLineItems";
@@ -134,17 +134,20 @@ const Extension = ({ context, actions }) => {
             getDealProps(DealId).then(result => {
                 setDealProps(result)
             })
-            if (!ExistingQuote) {
-                useGetQuotes(DealId)
-                .then(rows => {
-                    if (!!rows && rows.length > 0) {
-                        setExistingQuote(rows[0])
-                    } else {
-                        useCreateQuote({deal: DealId, name: "Test"})
-                        .then(rows => setExistingQuote(rows))
-                    }
-                })
-            }
+        }
+    }, [DealId])
+
+    useEffect(() => {
+        if (!!DealId && !ExistingQuote) {
+            useGetQuotes(DealId)
+            .then(rows => {
+                if (!!rows && rows.length > 0) {
+                    setExistingQuote(rows[0])
+                } else {
+                    useCreateQuote({deal: DealId, name: "Test"})
+                    .then(rows => setExistingQuote(rows))
+                }
+            })
         }
     }, [DealId])
 
@@ -311,10 +314,7 @@ const Extension = ({ context, actions }) => {
                     line_items: result["Line Item Mapping"]
                 })
             }
-            if ((debug && debugQuote) && !!result) console.log({
-                event: "Quote Calculated",
-                result,
-            });
+            if ((debug && debugQuote) && !!result) console.log({ event: "Quote Calculated", result });
         }
     }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues, quoteCustomRates, DealId, ExistingQuote]);
 
@@ -326,24 +326,7 @@ const Extension = ({ context, actions }) => {
         }
     }
 
-    useEffect(() => {
-        if (
-            Object.keys(plansById).length > 0 &&
-            Object.keys(planIdsByType).length > 0 &&
-            Object.keys(selectedValues).length > 0
-        ) {
-            if (debug) {
-                console.warn({
-                    event: "Debug Log",
-                    plansById,
-                    planIdsByType,
-                    selectedValues,
-                });
-                console.timeEnd(versionLabel)
-            }
-        }
-    }, [plansById, planIdsByType, selectedValues]);
-
+    // Initialise quote with stored values
     useEffect(() => {
         let conditions = [
             Object.keys(StandardImplementationDefs).length > 0,
@@ -359,32 +342,27 @@ const Extension = ({ context, actions }) => {
         ]
         if (conditions.every(a => !!a)) {
             valuesInitialised.current = true
-            resetForm(plansById, productTypeAccordions, valueTables)
-            if (!!debugValues || (!!ExistingQuote && !!ExistingQuote.values.selected_values)) {
+            resetForm(dispatch, plansById, productTypeAccordions, valueTables)
+            if (!!ExistingQuote && !!ExistingQuote.values.selected_values) {
                 let preLoadedValues = null
+                let cancel = false
                 try {
                     if (!!ExistingQuote && !!ExistingQuote.values.selected_values) {
                         preLoadedValues = JSON.parse(ExistingQuote.values.selected_values)
                     }
                 } catch (error) {
-                    return null;
+                    cancel = true
                 }
-                if (!preLoadedValues) {
+                if (!preLoadedValues || cancel) {
                     return null;
                 }
                 for (let planKey in preLoadedValues) {
                     let products = preLoadedValues[planKey]
-                    let productKeys = Object.keys(products)
-                    let dynamicProductKeys = productKeys.filter(key => !key.match(/_value/g))
+                    let dynamicProductKeys = Object.keys(products).filter(key => !key.match(/_value/g))
                     let productType = null
                     let productTypeMapping = []
                     dynamicProductKeys.forEach(productKey => {
-                        productTypeMapping.push(
-                            productTypeAccordions.find(pt => {
-                                let firstMatchingField = pt.fields.find(field => field.field == productKey)
-                                return !!firstMatchingField
-                            })
-                        )
+                        productTypeMapping.push( productTypeAccordions.find(pt => !!pt.fields.find(field => field.field == productKey)) )
                     })
 
                     if (productTypeMapping.length > 0) {
@@ -445,47 +423,6 @@ const Extension = ({ context, actions }) => {
         }
     }, [ StandardImplementationDefs, productPriceDefs, psqAccordions, productTypeAccordions, plansInitialised, valueTables, plansById, DealId, ExistingQuote ]);
 
-    const resetForm = (plansById, productTypeAccordions, valueTables) => {
-        for (let planKey in plansById) {
-            let plan = plansById[planKey]
-            let planProductType = productTypeAccordions.find(pt => pt.label == plan.type)
-            if (planProductType.input_display_type == "inline") {
-                // Helper to get default field entries based on type
-                const getDefaultFields = (pt) => pt.fields.map((f) => {
-                    let defaultValue = f.defaultValue;
-                    switch (f.input_type) {
-                        case "Toggle": defaultValue = false; break;
-                        case "Number": defaultValue = 0; break;
-                        case "Text": defaultValue = ""; break;
-                        case "Radio":
-                        case "Dropdown":
-                            const vals = valueTables[f.input_values_table];
-                            defaultValue = !!vals ? vals.find(v => !!v.values.default) : null
-                            if (!!defaultValue) {
-                                defaultValue = defaultValue.values.value
-                            } else if (!!vals) {
-                                defaultValue = vals[0].values.value
-                            }
-                            break;
-                    }
-                    return { field: f.field, label: f.label, value: defaultValue };
-                });
-
-                getDefaultFields(planProductType).forEach((field) => {
-                    dispatch({
-                        type: "UPDATE_SELECTED_VALUE",
-                        payload: {
-                            planId: plan.id,
-                            fieldKey: field.field,
-                            value: field.value,
-                        },
-                    });
-                })
-            } else {
-                planHandler.deletePlan(dispatch, plan.type, plan.id)
-            }
-        }
-    }
     const submitQuote = (DealId, ExistingQuote, selectedValues, quote, productTypeAccordions, dealCompanies, dealProps) => {
         setQuoteSubmitting(prev => true)
         const now = new Date();
@@ -798,7 +735,7 @@ const Extension = ({ context, actions }) => {
                         <Button
                             variant="destructive"
                             onClick={() => {
-                                resetForm(plansById, productTypeAccordions, valueTables)
+                                resetForm(dispatch, plansById, productTypeAccordions, valueTables)
                                 setCurrentPage(1)
                             }}
                             disabled={QuoteSubmitting || QuoteSubmitted}
