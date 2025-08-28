@@ -59,28 +59,6 @@ export function quoteReducer(state, action) {
             };
         }
 
-        case 'UPDATE_PLAN': {
-            const { planId, updates } = action.payload;
-            return {
-                ...state,
-                plansById: {
-                    ...state.plansById,
-                    [planId]: {
-                        ...state.plansById[planId],
-                        ...updates
-                    }
-                }
-            };
-        }
-
-        // optionally handle grouping separately
-        case 'SET_GROUPINGS': {
-            return {
-                ...state,
-                planIdsByType: action.payload.planIdsByType
-            };
-        }
-
         default:
             return state;
     }
