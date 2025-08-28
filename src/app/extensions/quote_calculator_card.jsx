@@ -134,10 +134,20 @@ const Extension = ({ context, actions }) => {
             getDealProps(DealId).then(result => {
                 setDealProps(result)
             })
+            if (!ExistingQuote) {
+                useGetQuotes(DealId)
+                .then(rows => {
+                    if (!!rows && rows.length > 0) {
+                        setExistingQuote(rows[0])
+                    } else {
+                        useCreateQuote({deal: DealId, name: "Test"})
+                        .then(rows => setExistingQuote(rows))
+                    }
+                })
+            }
         }
     }, [DealId])
 
-    
     // Setup quote queue function for updates
     // debounces updates to 500ms to reduce liklihood of table write errors in HubSpot.
     const updateQuote = useUpdateQuote();
@@ -244,10 +254,7 @@ const Extension = ({ context, actions }) => {
     const QuoteDiscountValueHandler = (fieldID, value) => { setquoteDiscountValues(prev => ({ ...prev, [fieldID]: value })) }
     const quoteCustomRatesHandler = (fieldID, value) => { setquoteCustomRates(prev => ({ ...prev, [fieldID]: value })) }
 
-
-
     // ------------------------- Field Change Handlers -------------------------
-
     const fieldHandler = (field, value, planId) => {
         const productType = field.product_type.name;
         // If this is a "brand new" planId for that type, dispatch ADD_PLAN
@@ -269,24 +276,7 @@ const Extension = ({ context, actions }) => {
         });
     };
 
-
     // ------------------------- Quote Calculation -------------------------
-    
-    useEffect(() => {
-        if (!!DealId && !ExistingQuote) {
-            useGetQuotes(DealId)
-            .then(rows => {
-                if (!!rows && rows.length > 0) {
-                    let latestQuote = rows[0]
-                    setExistingQuote(latestQuote)
-                } else {
-                    useCreateQuote({deal: DealId, name: "Test"})
-                    .then(rows => setExistingQuote(rows))
-                }
-            })
-        }
-    }, [DealId])
-
     // Recalculate quote whenever inputs change
     useEffect(() => {
         if (!!DealId && !!ExistingQuote) {
