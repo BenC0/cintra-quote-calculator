@@ -163,18 +163,18 @@ export const CalculateQuote = ({
                             }
                                 
                             if (useBundlePrice) {
-                                output["price"] = output["price_band"]["bundle_price"]
+                                output["band_price"] = output["price_band"]["bundle_price"]
                             } else {
-                                output["price"] = output["price_band"]["price"]
+                                output["band_price"] = output["price_band"]["band_price"]
                             }
                             
                             let customRate = quoteCustomRates[field.field]
                             if (!!customRate) {
                                 output["adjusted_price"] = customRate
                             } else {
-                                const formula1 = output["price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
-                                const formula2 = (output["price"] * SelectedContractLengthDiscount) / payroll_payslips_modifier
-                                const formula3 = output["price"]
+                                const formula1 = output["band_price"] * payroll_payslips_discount * EducationModifier * PublicSectorModifier * SelectedContractLengthDiscount
+                                const formula2 = (output["band_price"] * SelectedContractLengthDiscount) / payroll_payslips_modifier
+                                const formula3 = output["band_price"]
                                 const formula4 = formula2 / qty
                                 switch (field.list_price_formula_type) {
                                     case "formula1":
@@ -270,6 +270,7 @@ export const CalculateQuote = ({
                     selectedPlanQuote["estimated_annual_fee"] = (selectedPlanQuote["estimated_monthly_fee"] * 12)
                     estimated_plan_monthly_fee += selectedPlanQuote["estimated_monthly_fee"]
                     estimated_plan_annual_fee += selectedPlanQuote["estimated_annual_fee"]
+                    console.log({estimated_plan_monthly_fee, selectedPlanQuote})
                     return selectedPlanQuote
                 }
                 return false
@@ -392,7 +393,7 @@ export const CalculateQuote = ({
 
                             let customRate = quoteCustomRates[services[serviceLabel]["field"]]
                             if (!!customRate) {
-                                ratesRef = {price: customRate}
+                                ratesRef = {band_price: customRate}
                                 services[serviceLabel]["Implementation Fee"] = ratesRef.band_price
                                 services[serviceLabel]["Implementation Unit Price"] = ratesRef.band_price
                             } else {

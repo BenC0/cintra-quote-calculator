@@ -1,6 +1,6 @@
 export const getPriceBand = (qtyVal, fieldValue, price_table) => {
     let output = {
-        price: 0,
+        band_price: 0,
         monthly_standing_charge: 0,
         band_price_is_percent: false,
         isFallback: true,

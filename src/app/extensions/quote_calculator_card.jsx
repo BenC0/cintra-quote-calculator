@@ -1,6 +1,6 @@
 // 3rd party libraries/modules
-import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
-import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
+import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";
+import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";
 // Misc. utility functions
 import { generateID } from "./components/Utils/generateID";
 import { isEmptyArray } from "./components/Utils/isEmptyArray";
@@ -22,8 +22,8 @@ import { formatPrice } from "./components/Format/formatPrice";
 // UI related functions
 import { PSQTables } from "./components/Render/PSQTables";
 import { QuoteSheet } from "./components/Render/QuoteSheet";
-import { QuoteSummaryComponent } from "./components/Render/QuoteSummary";  // Summary of quote details
-import { ProductTypeAccordion } from "./components/Render/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
+import { QuoteSummaryComponent } from "./components/Render/QuoteSummary";
+import { ProductTypeAccordion } from "./components/Render/ProductTypeAccordion";
 // Data related functions
 import { quoteReducer } from "./components/Data/quoteReducer";
 import { productDefsHandler } from "./components/Data/productDefsHandler";
@@ -36,8 +36,10 @@ import { productBasedValidationRulesDefHandler } from "./components/Data/product
 import { standardImplementationDaysDefsHandler } from "./components/Data/standardImplementationDaysDefsHandler";
 import { standardImplementationRatesDefsHandler } from "./components/Data/standardImplementationRatesDefsHandler";
 // Data/calculation related functions
-import { CalculateQuote } from "./components/Calculate/Calculate";  // Business logic for quote calculation
-import { checkPSQRequirements } from "./components/Calculate/checkPSQRequirements";  // Business logic for quote calculation
+import { CalculateQuote } from "./components/Calculate/Calculate";
+import { checkIfManager } from "./components/Utils/checkIfManager";
+import { checkPSQRequirements } from "./components/Calculate/checkPSQRequirements";
+import { useQuoteUpdateQueue } from "./components/HubSpot/useQuoteUpdateQueue";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
@@ -65,7 +67,7 @@ const Extension = ({ context, actions }) => {
 
     // Boolean Flags
     const valuesInitialised = useRef(false);
-    const [FirstRun, setFirstRun] = useState(true);
+    const FirstRun = useRef(false);
     const [isManager, setIsManager] = useState(false);
     const [managerApproval, setManagerApproval] = useState(false);
     const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
@@ -98,25 +100,24 @@ const Extension = ({ context, actions }) => {
     const [StandardImplementationDefs, setStandardImplementationDefs] = useState({});
     const [productBasedValidationRules, setProductBasedValidationRules] = useState([]);
     
+    // On first run only:
+    // - Check if user is a manager
+    // - Log the version label to the console
+    // - Get and set the Deal ID from the context object
+    // - Sets console time if debug = true
     useEffect(() => {
-        if (!FirstRun) return null;
-        setIsManager(prev => {
-            const user = context?.user ?? { teams: [] }
-            const teams = user.teams
-            let userInManagerTeam = false
-            if (teams.length > 0) {
-                userInManagerTeam = !!teams.find(team => team.name == "Quote Tool Managers")
-            }
-            return userInManagerTeam
-        })
+        // Prevent running more than once
+        if (FirstRun.current) return;
+        FirstRun.current = true
+        if (!!debug) { console.time(versionLabel) }
         console.log(versionLabel)
-        if (!!debug) {
-            console.time(versionLabel)
-        }
+        setIsManager(prev => checkIfManager(context))
         setDealId(prev => context.crm.objectId)
-        setFirstRun(prev => false)
-    }, [FirstRun])
+    }, [])
 
+    // Once DealID has a value:
+    // - Get and set associated company information
+    // - Get and set associated deal information
     useEffect(() => {
         if (!!DealId) {
             getCompanies(DealId).then(result => {
@@ -129,45 +130,12 @@ const Extension = ({ context, actions }) => {
     }, [DealId])
 
     
-    // ----- QUEUE SETUP -----
+    // Setup quote queue function for updates
+    // debounces updates to 500ms to reduce liklihood of table write errors in HubSpot.
     const updateQuote = useUpdateQuote();
-    const queueRef = useRef([]);
-    const timerRef = useRef(null);
-    const DEBOUNCE_MS = 500;
-
-    const enqueueUpdate = useCallback(details => {
-        return new Promise(resolve => {
-            queueRef.current.push({ details, resolve });
-            if (!timerRef.current) {
-                timerRef.current = setTimeout(async () => {
-                    const items = queueRef.current.splice(0);
-                    const byId = {};
-                    items.forEach(({ details, resolve }) => {
-                        const id = details.quote_id;
-                        if (!byId[id]) {
-                            byId[id] = { details: { ...details }, resolvers: [resolve] };
-                        } else {
-                            byId[id].details = { ...byId[id].details, ...details };
-                            byId[id].resolvers.push(resolve);
-                        }
-                    });
-                    await Promise.all(
-                        Object.values(byId).map(async ({ details, resolvers }) => {
-                            let ok = false;
-                            try {
-                                ok = await updateQuote(details);
-                            } catch {}
-                            resolvers.forEach(r => r(ok));
-                        })
-                    );
-                    timerRef.current = null;
-                }, DEBOUNCE_MS);
-            }
-        });
-    }, [updateQuote]);
+    const enqueueUpdate = useQuoteUpdateQueue(updateQuote, 500);
     
     // ------------------------- Rendering -------------------------
-    // const { plansById, planIdsByType, selectedValues } = state;  // Destructure for convenience
 
     // ------------------------- Data Definitions -------------------------
     // Fetch standard implementation day/rate definitions with transformation
@@ -612,7 +580,9 @@ const Extension = ({ context, actions }) => {
                 psqPayrollMultiplerReference: psqPayrollMultiplerReference,
             });
             setQuote(result);
+            console.log({result})
             if (!!result && !!result["Summary"]["Total Y1 Charges"]) {
+                console.log("Saving changes")
                 enqueueUpdate({
                     deal: DealId,
                     quote_id: ExistingQuote.id,
