@@ -13,8 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from "@hubspot/ui-extensions"
-import { renderTableSummaries } from "../shared/renderTableSummaries"
-import { formatInt, formatPrice, toTitleCase, formatToMaxTwoDecimal } from "../shared/utils"
+import { formatInt, formatPrice, formatToMaxTwoDecimal } from "../shared/utils"
 import { renderField } from "../shared/Inputs";
 
 export const QuoteSheet = ({
@@ -148,7 +147,7 @@ export const QuoteSheet = ({
                                         no_custom_values: !isManager,
                                         field: productReference.field,
                                         name: label,
-                                        pricingStructure: productReference.pricing_structure.name,
+                                        pricingStructure: productReference.pricing_structure,
                                         unitPrice: productQuoteReference.adjusted_price,
                                         quantity: qty,
                                         input_type: "Number",

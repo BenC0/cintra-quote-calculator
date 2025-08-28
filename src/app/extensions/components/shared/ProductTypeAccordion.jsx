@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
     Accordion,
     Flex,
     Button,
-    Text,
 } from "@hubspot/ui-extensions";
 import { ProductTypeFormPanel } from "./ProductTypeFormPanel";
 import { renderInlinePlan } from "./renderInlinePlan";
@@ -70,10 +69,8 @@ export const ProductTypeAccordion = ({
                                     overlay={
                                         <ProductTypeFormPanel
                                             name={productType.label}
-                                            productTypeId={productType.field}
                                             fields={productType.fields}
                                             quantity={productType.quantityFieldDef}
-                                            quantity_value={0}
                                             frequency={productType.frequencyFieldDef}
                                             planId="temp"
                                             handler={handler}
@@ -99,9 +96,7 @@ export const ProductTypeAccordion = ({
                             productType,
                             planIds,
                             selectedValues,
-                            actions,
                             handler,
-                            plan_handler
                         )}
                     </>
                 ) : <></>}

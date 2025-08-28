@@ -7,7 +7,6 @@ import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calcul
 import { quoteReducer } from "./components/shared/quoteReducer";  // Reducer for state management
 import { QuoteSheet } from "./components/summary/QuoteSheet";
 
-import { debugPlanIdsByType, debugPlansById, debugSelectedValues } from "./components/debug/debugValues"
 import { PSQTables } from "./components/shared/PSQTables";
 
 // Register the extension in the HubSpot CRM sidebar
@@ -26,7 +25,7 @@ const Extension = ({ context, actions }) => {
     const debugPlans = false;
     const debugQuote = false;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.18.1"
+    const versionLabel = "Cintra Quote Calculator: v0.18.2"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -416,7 +415,7 @@ const Extension = ({ context, actions }) => {
                     "label": "Quantity",
                     "input_values_table": "",
                     "input_type": "Number",
-                    "pricing_structure": null,
+                    "pricing_structure": {"label": "N/A",},
                     "product_type": {
                         "id": "CustomProductType",
                         "name": "Custom Products",
@@ -804,10 +803,8 @@ const Extension = ({ context, actions }) => {
             if (!!debugValues || (!!ExistingQuote && !!ExistingQuote.values.selected_values)) {
                 let preLoadedValues = null
                 try {
-                    if (!debugValues && !!ExistingQuote && !!ExistingQuote.values.selected_values) {
+                    if (!!ExistingQuote && !!ExistingQuote.values.selected_values) {
                         preLoadedValues = JSON.parse(ExistingQuote.values.selected_values)
-                    } else if (!!debugValues) {
-                        preLoadedValues = debugSelectedValues
                     }
                 } catch (error) {
                     return null;
@@ -815,7 +812,6 @@ const Extension = ({ context, actions }) => {
                 if (!preLoadedValues) {
                     return null;
                 }
-                // !!debugValues ? debugSelectedValues : JSON.parse(ExistingQuote.values.selected_values)
                 for (let planKey in preLoadedValues) {
                     let products = preLoadedValues[planKey]
                     let productKeys = Object.keys(products)

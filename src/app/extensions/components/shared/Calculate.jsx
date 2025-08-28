@@ -208,7 +208,7 @@ export const CalculateQuote = ({
                             }
 
                             output["price_band"] = get_price_band(bandQty, fieldValue, output["price_table"])
-                            if (field.pricing_structure.name == "Minimum Active Users") {
+                            if (field.pricing_structure == "Minimum Active Users") {
                                 qty = output["price_band"]["minimum_quantity"]
                             }
 

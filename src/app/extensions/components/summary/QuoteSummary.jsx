@@ -1,23 +1,6 @@
-import React from "react";
-import { Flex, Accordion, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem, Tab, TableBody, TableHeader, TableHead, TableFooter, Divider } from "@hubspot/ui-extensions";
-import { formatPrice, formatInt, reshapeArray } from "../shared/utils";
+import { Flex, Accordion, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem, TableBody, TableHeader, TableHead, TableFooter } from "@hubspot/ui-extensions";
+import { formatPrice, formatInt } from "../shared/utils";
 
-/**
- * QuoteSummaryComponent dynamically generates tiles based on productTypeDefs and selectedValues.
- *
- * Props:
- *  - productTypeDefs: Array<{
- *      label: string,
- *      input_display_type: string
- *    }>
- *  - selectedValues: {
- *      [productTypeLabel: string]: Array<{
- *        id: string,
- *        fields: Array<{ field: string; label: string; value: any }>
- *      }>
- *    }
- *  - supressImplementationFee: boolean
-*/
 const QuoteSummaryComponent = ({
     quote = {},
     productTypeAccordions = [],

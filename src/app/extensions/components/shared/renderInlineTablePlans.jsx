@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
     Flex,
     Button,
@@ -11,16 +11,13 @@ import {
     TableBody,
     TableCell,
 } from "@hubspot/ui-extensions";
-import { ProductTypeFormPanel } from "./ProductTypeFormPanel";
 import { renderField } from "./Inputs";
 
 export const renderInlineTablePlans = (
     productType,
     planIds,
     selectedValues,
-    actions,
     handler,
-    plan_handler,
 ) => {
     if (planIds.length === 0) {
         return (

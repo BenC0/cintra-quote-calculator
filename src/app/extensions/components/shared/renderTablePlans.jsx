@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Flex,
     Button,
@@ -60,10 +59,8 @@ export const renderTablePlans = (
                                 overlay={
                                     <ProductTypeFormPanel
                                         name={productType.label}
-                                        productTypeId={productType.field}
                                         fields={productType.fields}
                                         quantity={productType.quantityFieldDef}
-                                        quantity_value={selectedPlanValues.quantity_value}
                                         frequency={productType.frequencyFieldDef}
                                         frequency_value={selectedPlanValues.frequency_value}
                                         handler={handler}

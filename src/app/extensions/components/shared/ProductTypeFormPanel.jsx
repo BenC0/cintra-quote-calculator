@@ -1,5 +1,5 @@
 // ProductTypeFormPanel.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
     Panel,
     PanelBody,
@@ -15,12 +15,10 @@ import { generateID } from "./utils";
 
 export const ProductTypeFormPanel = ({
     name = "",
-    productTypeId = "-1",
     fields = [],
     handler = () => {},
     onSubmit = () => {},
     actions,
-    quantity_value = 0,
     frequency_value = null,
     planId: externalPlanId = null,
     initialLookup = {},
