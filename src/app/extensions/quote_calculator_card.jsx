@@ -21,9 +21,19 @@ import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-exte
 import { QuoteSummaryComponent } from "./components/Render/QuoteSummary";  // Summary of quote details
 import { CalculateQuote } from "./components/Calculate/Calculate";  // Business logic for quote calculation
 import { checkPSQRequirements } from "./components/Calculate/checkPSQRequirements";  // Business logic for quote calculation
-import { quoteReducer } from "./components/quoteReducer";  // Reducer for state management
+import { quoteReducer } from "./components/Data/quoteReducer";  // Reducer for state management
 import { QuoteSheet } from "./components/Render/QuoteSheet";
 import { PSQTables } from "./components/Render/PSQTables";
+
+import { standardImplementationDaysDefsHandler } from "./components/Data/standardImplementationDaysDefsHandler";
+import { standardImplementationRatesDefsHandler } from "./components/Data/standardImplementationRatesDefsHandler";
+import { productTypeDefsHandler } from "./components/Data/productTypeDefsHandler";
+import { productDefsHandler } from "./components/Data/productDefsHandler";
+import { psqTypeDefsHandler } from "./components/Data/psqTypeDefsHandler";
+import { productPriceDefsHandler } from "./components/Data/productPriceDefsHandler";
+import { psqImpConfigHandler } from "./components/Data/psqImpConfigHandler";
+import { psqImpHoursHandler } from "./components/Data/psqImpHoursHandler";
+import { productBasedValidationRulesDefHandler } from "./components/Data/productBasedValidationRulesDefHandler";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
@@ -36,7 +46,7 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = false;
+    const debug = true;
     const debugValues = false;
     const debugPlans = false;
     const debugQuote = false;
@@ -131,155 +141,25 @@ const Extension = ({ context, actions }) => {
     const { plansById, planIdsByType, selectedValues } = state;  // Destructure for convenience
 
     // ------------------------- Data Definitions -------------------------
+    // Fetch standard implementation day/rate definitions with transformation
+    const standardImplementationDaysDefs = useFetchDefs( "cintra_calculator_implementation_product_days", standardImplementationDaysDefsHandler );
+    const standardImplementationRatesDefs = useFetchDefs( "cintra_calculator_implementation_rates", standardImplementationRatesDefsHandler );
 
-    // Function to map raw HubSpot record to a product definition object
-    const buildProductDef = (r) => {
-        return {
-            field: r?.id ?? "",
-            label: r?.values?.name ?? "",
-            input_values_table: r?.values?.input_values_table ?? "",
-            input_type: r?.values?.input_type?.name ?? null,
-            pricing_structure: r?.values?.pricing_structure?.label ?? "",
-            product_type: getFirstValue("product_type", r) ?? null,
-            product_sub_type: r?.values?.product_sub_type ?? null,
-            requires_psq: r.values.requires_psq == 1,
-            contract_length_dropdown: r.values.contract_length_dropdown == 1,
-            education_client_toggle: r.values.education_client_toggle == 1,
-            public_sector_toggle: r.values.public_sector_toggle == 1,
-            list_price_formula_type: r?.values?.list_price_formula_type?.name ?? "formula1",
-            line_item_id: r?.values?.line_item_id ?? false,
-        };
-    };
-
-    // Fetch standard implementation day definitions with transformation
-    const standardImplementationDaysDefs = useFetchDefs(
-        "cintra_calculator_implementation_product_days",
-        r => ({
-            id: r.id,
-            days: r.values.days,
-            product_value: r.values.product_value,
-            minimum_quantity: r.values.minimum_quantity,
-            product_id: getFirstValue("product_id", r).id,
-        })
-    );
-
-    // Fetch standard implementation rate definitions with transformation
-    const standardImplementationRatesDefs = useFetchDefs(
-        "cintra_calculator_implementation_rates",
-        r => ({
-            id: r.id,
-            price: r.values.band_price,
-            minimum_quantity: r.values.minimum_quantity,
-            band_fixed_price: !!r.values.band_fixed_price,
-            product_value: r.values.product_value ?? null,
-            product_id: getFirstValue("product_id", r)?.id ?? null,
-        })
-    );
-
-    // Fetch definitions for product types, add custom quantity/frequency field defs
-    const productTypeDefs = useFetchDefs(
-        "cintra_calculator_product_types",
-        (r) => {
-            // Build synthetic fields for quantity and frequency inputs
-            const quantityFieldDef = buildProductDef({
-                id: "quantity",
-                values: {
-                    name: r.values.quantity_field_label,
-                    input_type: { name: "Number" },
-                    product_type: [{ id: r.id, name: r.values.name, type: "foreignid" }],
-                    product_sub_type: { label: "Details", name: "details" }
-                }
-            });
-            const frequencyFieldDef = buildProductDef({
-                id: "frequency",
-                values: {
-                    name: "Frequency",
-                    input_type: { name: "Dropdown" },
-                    product_type: [{ id: r.id, name: r.values.name, type: "foreignid" }],
-                    product_sub_type: { label: "Details", name: "details" },
-                    input_values_table: r.values.quantity_frequency_values_table
-                }
-            });
-            // Return the full product type definition
-            return {
-                field: r.id,
-                label: r.values.name,
-                sort_order: r.values.sort_order,
-                max_plans: r.values.max_plans,
-                quantity_field_label: r.values.quantity_field_label,
-                input_display_type: r.values.input_display_type.name,
-                is_payroll_product_type: !!r.values.is_payroll_product_type && r.values.is_payroll_product_type == 1,
-                is_quote_details_type: !!r.values.is_quote_details_type && r.values.is_quote_details_type == 1,
-                quantity_frequency_values_table: r.values.quantity_frequency_values_table,
-                use_quantity_as_implementation_headcount: !!r.values.use_quantity_as_implementation_headcount,
-                standard_implementation_calculation_type: r.values.standard_implementation_calculation_type?.name ?? "default",
-                standard_implementation_calculation_product: getFirstValue("standard_implementation_calculation_product", r)?.id ?? null,
-                quantityFieldDef,
-                frequencyFieldDef,
-            };
-        },
-        "sort_order"  // Sort product types by this field
-    );
-
-    // Fetch basic product definitions
-    const productDefs = useFetchDefs("cintra_calculator_products", buildProductDef);
+    // Fetch definitions for product types
+    const productTypeDefs = useFetchDefs( "cintra_calculator_product_types", productTypeDefsHandler, "sort_order" );
+    // Fetch product definitions
+    const productDefs = useFetchDefs("cintra_calculator_products", productDefsHandler);
+    // Fetch product price definitions
+    const productPriceDefs = useFetchDefs( "cintra_calculator_product_prices", productPriceDefsHandler );
 
     // Fetch PSQ (Professional Services & Quality) type definitions
-    const psqTypeDefs = useFetchDefs(
-        "cintra_calculator_psq_types",
-        r => ({
-            field: r.id,
-            label: r.values.name,
-            sort_order: r.values.sort_order,
-            max_plans: 1,
-            quantity_field_label: null,
-            input_display_type: "inline-table",
-            quantity_frequency_values_table: null
-        }),
-        "sort_order"
-    );
-
-    const psqPayrollMultiplerReference = useFetchDefs(
-        "cintra_calculator_psq_payroll_multiplier_reference",
-        r => r.values,
-        "number_of_payrolls"
-    )
-
-    // Fetch product price definitions
-    const productPriceDefs = useFetchDefs(
-        "cintra_calculator_product_prices",
-        (r) => ({
-            field: r.id,
-            label: r.values.name,
-            price: r.values.band_price,
-            bundle_price: r.values.bundle_price,
-            product_value: r.values.product_value,
-            minimum_price: r.values.minimum_price,
-            minimum_quantity: r.values.minimum_quantity,
-            band_price_is_percent: r.values.band_price_is_percent == 1,
-            monthly_standing_charge: r.values.monthly_standing_charge,
-            product_field: !!getFirstValue("product_id", r) ? getFirstValue("product_id", r).id : null,
-        })
-    );
-
+    const psqTypeDefs = useFetchDefs( "cintra_calculator_psq_types", psqTypeDefsHandler, "sort_order" );
+    const psqPayrollMultiplerReference = useFetchDefs( "cintra_calculator_psq_payroll_multiplier_reference", r => r.values, "number_of_payrolls" )
     // Fetch raw PSQ implementation resources and products
     const rawImpResources = useFetchDefs("cintra_calculator_psq_implementation_resources");
     const rawImpProducts  = useFetchDefs("cintra_calculator_psq_implementation_products");
-    const psqImpConfig  = useFetchDefs("cintra_calculator_psq_implementation_config", r => ({
-        id: r.id,
-        name: r.values.name,
-        product_value: r.values.product_value,
-        product_references: r.values.product_reference?.map(a => a.id) ?? [],
-    }));
-    
-    const psqImpHours  = useFetchDefs("cintra_calculator_psq_implementation_hours", r => ({
-        id: r.id,
-        name: r.values.name,
-        hours: r.values.hours,
-        product_value: r.values.product_value,
-        psq_product_id: r.values.psq_product_id.map(a => a.id),
-        minimum_quantity: r.values.minimum_quantity,
-    }));
+    const psqImpConfig  = useFetchDefs("cintra_calculator_psq_implementation_config", psqImpConfigHandler);
+    const psqImpHours  = useFetchDefs("cintra_calculator_psq_implementation_hours", psqImpHoursHandler);
 
     // Build a lookup dictionary for PSQ resources (rates)
     const impResourceDict = React.useMemo(() => {
@@ -322,15 +202,7 @@ const Extension = ({ context, actions }) => {
 
     
     const [productBasedValidationRules, setProductBasedValidationRules] = useState([]);
-    const productBasedValidationRulesDef = useFetchDefs(
-        "cintra_calculator_product_based_validation_rules",
-        r => ({
-            product_id: r.values.product_id,
-            product_value: r.values.product_value,
-            scope: r.values.scope.name,
-            excluded_products: r.values.excluded_products,
-        })
-    );
+    const productBasedValidationRulesDef = useFetchDefs( "cintra_calculator_product_based_validation_rules", productBasedValidationRulesDefHandler );
     useEffect(() => {
         if (!(
             isEmptyArray(productBasedValidationRulesDef)
@@ -350,13 +222,6 @@ const Extension = ({ context, actions }) => {
                         validationMessage: !!rule.product_value ? `${rule.productDef.label} is set to ${rule.product_value}` : `${rule.productDef.label} is added`
                     }))
                 })
-                const ruleFilter = rule => {
-                    let condition = !!preferredLookup[rule.product_id]
-                    if (!!rule.product_value) {
-                        condition = condition && preferredLookup[rule.product_id] == rule.product_value
-                    }
-                    return condition
-                }
                 scopedRules.quote = scopedRules.quote.map(rule => {
                     let isActive = false
                     for (let plan in selectedValues) {

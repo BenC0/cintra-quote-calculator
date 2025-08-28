@@ -1,0 +1,15 @@
+export const productDefsHandler = r => ({
+    field: r?.id ?? "",
+    label: r?.values?.name ?? "",
+    input_values_table: r?.values?.input_values_table ?? "",
+    input_type: r?.values?.input_type?.name ?? null,
+    pricing_structure: r?.values?.pricing_structure?.label ?? "",
+    product_type: getFirstValue("product_type", r) ?? null,
+    product_sub_type: r?.values?.product_sub_type ?? null,
+    requires_psq: r.values.requires_psq == 1,
+    contract_length_dropdown: r.values.contract_length_dropdown == 1,
+    education_client_toggle: r.values.education_client_toggle == 1,
+    public_sector_toggle: r.values.public_sector_toggle == 1,
+    list_price_formula_type: r?.values?.list_price_formula_type?.name ?? "formula1",
+    line_item_id: r?.values?.line_item_id ?? false,
+})

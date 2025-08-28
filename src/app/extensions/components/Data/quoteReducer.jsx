@@ -1,4 +1,4 @@
-import { dedupeArray } from "./Utils/dedupeArray";
+import { dedupeArray } from "../Utils/dedupeArray";
 
 export function quoteReducer(state, action) {
     switch (action.type) {
