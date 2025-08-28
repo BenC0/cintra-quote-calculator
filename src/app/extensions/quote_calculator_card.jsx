@@ -1,30 +1,29 @@
 import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
-import { ProductTypeAccordion } from "./components/modules/Render/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
+import { ProductTypeAccordion } from "./components/Render/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
 
-import { getDealProps } from "./components/modules/Utils/getDealProps";
-import { setLineItems } from "./components/modules/Utils/setLineItems";
-import { pushQuoteToContract } from "./components/modules/Utils/pushQuoteToContract";
-import { useFetchDefs } from "./components/modules/Utils/useFetchDefs";
-import { useDynamicFetchDefs } from "./components/modules/Utils/useDynamicFetchDefs";
-import { getFirstValue } from "./components/modules/Utils/getFirstValue";
-import { generateID } from "./components/modules/Utils/generateID";
-import { useGetQuotes } from "./components/modules/Utils/useGetQuotes";
-import { useCreateQuote } from "./components/modules/Utils/useCreateQuote";
-import { useUpdateQuote } from "./components/modules/Utils/useUpdateQuote";
-import { toTitleCase } from "./components/modules/Utils/toTitleCase";
-import { formatPrice } from "./components/modules/Utils/formatPrice";
-import { isEmptyArray } from "./components/modules/Utils/isEmptyArray";
-import { getCompanies } from "./components/modules/Utils/getCompanies";
-import { formatInt } from "./components/modules/Utils/formatInt";
+import { getDealProps } from "./components/HubSpot/getDealProps";
+import { setLineItems } from "./components/HubSpot/setLineItems";
+import { pushQuoteToContract } from "./components/HubSpot/pushQuoteToContract";
+import { useFetchDefs } from "./components/HubSpot/useFetchDefs";
+import { useDynamicFetchDefs } from "./components/HubSpot/useDynamicFetchDefs";
+import { getFirstValue } from "./components/Utils/getFirstValue";
+import { generateID } from "./components/Utils/generateID";
+import { useGetQuotes } from "./components/HubSpot/useGetQuotes";
+import { useCreateQuote } from "./components/HubSpot/useCreateQuote";
+import { useUpdateQuote } from "./components/HubSpot/useUpdateQuote";
+import { toTitleCase } from "./components/Format/toTitleCase";
+import { formatPrice } from "./components/Format/formatPrice";
+import { isEmptyArray } from "./components/Utils/isEmptyArray";
+import { getCompanies } from "./components/HubSpot/getCompanies";
+import { formatInt } from "./components/Format/formatInt";
 
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
-import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
-import { CalculateQuote } from "./components/modules/Calculate/Calculate";  // Business logic for quote calculation
-import { checkPSQRequirements } from "./components/modules/Utils/checkPSQRequirements";  // Business logic for quote calculation
-import { quoteReducer } from "./components/modules/quoteReducer";  // Reducer for state management
-import { QuoteSheet } from "./components/summary/QuoteSheet";
-
-import { PSQTables } from "./components/modules/Render/PSQTables";
+import { QuoteSummaryComponent } from "./components/Render/QuoteSummary";  // Summary of quote details
+import { CalculateQuote } from "./components/Calculate/Calculate";  // Business logic for quote calculation
+import { checkPSQRequirements } from "./components/Calculate/checkPSQRequirements";  // Business logic for quote calculation
+import { quoteReducer } from "./components/quoteReducer";  // Reducer for state management
+import { QuoteSheet } from "./components/Render/QuoteSheet";
+import { PSQTables } from "./components/Render/PSQTables";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
@@ -41,7 +40,7 @@ const Extension = ({ context, actions }) => {
     const debugValues = false;
     const debugPlans = false;
     const debugQuote = false;
-    const versionLabel = "Cintra Quote Calculator: v0.18.2"
+    const versionLabel = "Cintra Quote Calculator: v0.18.3"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -63,8 +62,8 @@ const Extension = ({ context, actions }) => {
         if (!!debug) {
             console.time(versionLabel)
         }
-        setFirstRun(prev => false)
         setDealId(prev => context.crm.objectId)
+        setFirstRun(prev => false)
     }, [FirstRun])
 
     const [dealProps, setDealProps] = useState(false);

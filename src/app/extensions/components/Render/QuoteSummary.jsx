@@ -1,6 +1,6 @@
 import { Flex, Accordion, Icon, Text, Table, TableRow, TableCell, DescriptionList, DescriptionListItem, TableBody, TableHeader, TableHead, TableFooter } from "@hubspot/ui-extensions";
-import { formatInt } from "../modules/Utils/formatInt";
-import { formatPrice } from "../modules/Utils/formatPrice";
+import { formatInt } from "../Format/formatInt";
+import { formatPrice } from "../Format/formatPrice";
 
 const QuoteSummaryComponent = ({
     quote = {},

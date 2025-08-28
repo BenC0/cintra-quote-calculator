@@ -11,8 +11,8 @@ import {
     TableCell,
     Accordion,
 } from "@hubspot/ui-extensions";
-import { formatPrice } from "../Utils/formatPrice";
-import { formatToMaxTwoDecimal } from "../Utils/formatToMaxTwoDecimal";
+import { formatPrice } from "../Format/formatPrice";
+import { formatToMaxTwoDecimal } from "../Format/formatToMaxTwoDecimal";
 import { renderField } from "../Inputs/Inputs";
 
 export const PSQTables = ({

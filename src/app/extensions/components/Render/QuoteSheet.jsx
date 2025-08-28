@@ -13,10 +13,10 @@ import {
     TableHeader,
     TableRow,
 } from "@hubspot/ui-extensions"
-import { formatInt } from "../modules/Utils/formatInt"
-import { formatPrice } from "../modules/Utils/formatPrice"
-import { formatToMaxTwoDecimal } from "../modules/Utils/formatToMaxTwoDecimal"
-import { renderField } from "../modules/Inputs/Inputs";
+import { formatInt } from "../Format/formatInt"
+import { formatPrice } from "../Format/formatPrice"
+import { formatToMaxTwoDecimal } from "../Format/formatToMaxTwoDecimal"
+import { renderField } from "../Inputs/Inputs";
 
 export const QuoteSheet = ({
     quote = {},
