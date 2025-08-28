@@ -40,6 +40,9 @@ import { CalculateQuote } from "./components/Calculate/Calculate";
 import { checkIfManager } from "./components/Utils/checkIfManager";
 import { checkPSQRequirements } from "./components/Calculate/checkPSQRequirements";
 import { useQuoteUpdateQueue } from "./components/HubSpot/useQuoteUpdateQueue";
+import { impResourceDictHandler } from "./components/Data/impResourceDictHandler";
+import { psqProductDefsHandler } from "./components/Data/psqProductDefsHandler";
+import { getTablesToFetch } from "./components/Data/getTablesToFetch";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
@@ -159,41 +162,13 @@ const Extension = ({ context, actions }) => {
     const psqImpHours  = useFetchDefs("cintra_calculator_psq_implementation_hours", psqImpHoursHandler);
 
     // Build a lookup dictionary for PSQ resources (rates)
-    const impResourceDict = React.useMemo(() => {
-        const d = {};
-        rawImpResources.forEach((r) => {
-            const hourlyRate = Number(r.values.hourly_rate) || 0;
-            d[r.id] = {
-                field: r.id,
-                label: r.values.name,
-                hourly_rate: hourlyRate,
-            };
-        });
-        return d;
-    }, [rawImpResources]);
-
+    const impResourceDict = React.useMemo(() => impResourceDictHandler(rawImpResources), [rawImpResources]);
+    
     // Build PSQ product definitions by enriching each with its associated resource data
-    const psqProductDefs = React.useMemo(() => {
-        return rawImpProducts.map((r) => {
-            const [firstResourceId] = (r.values.resource || []).map((x) => x.id);
-            return {
-                field: r.id,
-                label: r.values.name,
-                product_type: getFirstValue("product_type", r),
-                resource: impResourceDict[firstResourceId] || null,
-                psq_config_reference: r.values.psq_config_reference.map(a => a.id),
-                line_item_id: r?.values?.line_item_id ?? false,
-            };
-        });
-    }, [rawImpProducts, impResourceDict]);
+    const psqProductDefs = React.useMemo(() => psqProductDefsHandler(rawImpProducts, impResourceDict), [rawImpProducts, impResourceDict]);
 
     // Identify all value tables needed for dropdown/radio inputs
-    const tablesToFetch = React.useMemo(() => {
-        // Collect any defined input_values_table or quantity_frequency_values_table references
-        return [...productDefs, ...productTypeDefs]
-            .map((p) => p.input_values_table || p.quantity_frequency_values_table)
-            .filter((tbl) => !!tbl);
-    }, [productDefs, productTypeDefs]);
+    const tablesToFetch = React.useMemo(() => getTablesToFetch(productDefs, productTypeDefs), [productDefs, productTypeDefs]);
     // Fetch those value tables dynamically for dropdowns and radio groups
     const valueTables = useDynamicFetchDefs(tablesToFetch);
 
@@ -580,9 +555,7 @@ const Extension = ({ context, actions }) => {
                 psqPayrollMultiplerReference: psqPayrollMultiplerReference,
             });
             setQuote(result);
-            console.log({result})
             if (!!result && !!result["Summary"]["Total Y1 Charges"]) {
-                console.log("Saving changes")
                 enqueueUpdate({
                     deal: DealId,
                     quote_id: ExistingQuote.id,

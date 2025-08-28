@@ -270,7 +270,6 @@ export const CalculateQuote = ({
                     selectedPlanQuote["estimated_annual_fee"] = (selectedPlanQuote["estimated_monthly_fee"] * 12)
                     estimated_plan_monthly_fee += selectedPlanQuote["estimated_monthly_fee"]
                     estimated_plan_annual_fee += selectedPlanQuote["estimated_annual_fee"]
-                    console.log({estimated_plan_monthly_fee, selectedPlanQuote})
                     return selectedPlanQuote
                 }
                 return false

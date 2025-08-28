@@ -5,7 +5,6 @@ export function useQuoteUpdateQueue(updateQuote, debounceMs = 500) {
     const timerRef = useRef(null);
 
     const enqueueUpdate = useCallback(details => {
-        console.log("yay")
         return new Promise(resolve => {
             queueRef.current.push({ details, resolve });
             if (!timerRef.current) {
