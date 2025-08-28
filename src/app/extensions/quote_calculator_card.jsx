@@ -1,39 +1,43 @@
+// 3rd party libraries/modules
 import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
-import { ProductTypeAccordion } from "./components/Render/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-
+import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
+// Misc. utility functions
+import { generateID } from "./components/Utils/generateID";
+import { isEmptyArray } from "./components/Utils/isEmptyArray";
+import { getFirstValue } from "./components/Utils/getFirstValue";
+// HubSpot related functions
 import { getDealProps } from "./components/HubSpot/getDealProps";
 import { setLineItems } from "./components/HubSpot/setLineItems";
-import { pushQuoteToContract } from "./components/HubSpot/pushQuoteToContract";
 import { useFetchDefs } from "./components/HubSpot/useFetchDefs";
-import { useDynamicFetchDefs } from "./components/HubSpot/useDynamicFetchDefs";
-import { getFirstValue } from "./components/Utils/getFirstValue";
-import { generateID } from "./components/Utils/generateID";
 import { useGetQuotes } from "./components/HubSpot/useGetQuotes";
+import { getCompanies } from "./components/HubSpot/getCompanies";
 import { useCreateQuote } from "./components/HubSpot/useCreateQuote";
 import { useUpdateQuote } from "./components/HubSpot/useUpdateQuote";
+import { pushQuoteToContract } from "./components/HubSpot/pushQuoteToContract";
+import { useDynamicFetchDefs } from "./components/HubSpot/useDynamicFetchDefs";
+// Formatting related functions
+import { formatInt } from "./components/Format/formatInt";
 import { toTitleCase } from "./components/Format/toTitleCase";
 import { formatPrice } from "./components/Format/formatPrice";
-import { isEmptyArray } from "./components/Utils/isEmptyArray";
-import { getCompanies } from "./components/HubSpot/getCompanies";
-import { formatInt } from "./components/Format/formatInt";
-
-import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
-import { QuoteSummaryComponent } from "./components/Render/QuoteSummary";  // Summary of quote details
-import { CalculateQuote } from "./components/Calculate/Calculate";  // Business logic for quote calculation
-import { checkPSQRequirements } from "./components/Calculate/checkPSQRequirements";  // Business logic for quote calculation
-import { quoteReducer } from "./components/Data/quoteReducer";  // Reducer for state management
-import { QuoteSheet } from "./components/Render/QuoteSheet";
+// UI related functions
 import { PSQTables } from "./components/Render/PSQTables";
-
+import { QuoteSheet } from "./components/Render/QuoteSheet";
+import { QuoteSummaryComponent } from "./components/Render/QuoteSummary";  // Summary of quote details
+import { ProductTypeAccordion } from "./components/Render/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
+// Data related functions
+import { quoteReducer } from "./components/Data/quoteReducer";
+import { productDefsHandler } from "./components/Data/productDefsHandler";
+import { psqImpHoursHandler } from "./components/Data/psqImpHoursHandler";
+import { psqTypeDefsHandler } from "./components/Data/psqTypeDefsHandler";
+import { psqImpConfigHandler } from "./components/Data/psqImpConfigHandler";
+import { productTypeDefsHandler } from "./components/Data/productTypeDefsHandler";
+import { productPriceDefsHandler } from "./components/Data/productPriceDefsHandler";
+import { productBasedValidationRulesDefHandler } from "./components/Data/productBasedValidationRulesDefHandler";
 import { standardImplementationDaysDefsHandler } from "./components/Data/standardImplementationDaysDefsHandler";
 import { standardImplementationRatesDefsHandler } from "./components/Data/standardImplementationRatesDefsHandler";
-import { productTypeDefsHandler } from "./components/Data/productTypeDefsHandler";
-import { productDefsHandler } from "./components/Data/productDefsHandler";
-import { psqTypeDefsHandler } from "./components/Data/psqTypeDefsHandler";
-import { productPriceDefsHandler } from "./components/Data/productPriceDefsHandler";
-import { psqImpConfigHandler } from "./components/Data/psqImpConfigHandler";
-import { psqImpHoursHandler } from "./components/Data/psqImpHoursHandler";
-import { productBasedValidationRulesDefHandler } from "./components/Data/productBasedValidationRulesDefHandler";
+// Data/calculation related functions
+import { CalculateQuote } from "./components/Calculate/Calculate";  // Business logic for quote calculation
+import { checkPSQRequirements } from "./components/Calculate/checkPSQRequirements";  // Business logic for quote calculation
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
