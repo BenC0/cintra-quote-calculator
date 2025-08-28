@@ -50,16 +50,53 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
+    const debug = false;
     const debugValues = false;
     const debugPlans = false;
     const debugQuote = false;
     const versionLabel = "Cintra Quote Calculator: v0.18.3"
 
-    const [DealId, setDealId] = useState(null);
+    // Initial state for the quote, managed by useReducer
+    const initialState = {
+        plansById       : {}, 
+        planIdsByType   : {}, 
+        selectedValues  : {}, 
+    };
+
+    // Boolean Flags
+    const valuesInitialised = useRef(false);
     const [FirstRun, setFirstRun] = useState(true);
-    const [managerApproval, setManagerApproval] = useState(false);
     const [isManager, setIsManager] = useState(false);
+    const [managerApproval, setManagerApproval] = useState(false);
+    const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
+    const [QuoteSubmitted, setQuoteSubmitted] = useState(false);
+    const [QuoteSubmitting, setQuoteSubmitting] = useState(false);
+
+    // Page Flag: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // Deal Associated Information
+    const [DealId, setDealId] = useState(null);
+    const [dealProps, setDealProps] = useState(null);
+    const [dealCompanies, setDealCompanies] = useState(null);
+
+    // Quote Associated Information
+    const [quote, setQuote] = useState({});
+    const [ExistingQuote, setExistingQuote] = useState(null);
+    const [quoteCustomRates, setquoteCustomRates] = useState({});
+    const [quoteDiscountValues, setquoteDiscountValues] = useState({});
+    const [PSQImplementationCustomHours, setPSQImplementationCustomHours] = useState({});
+    const [{
+        plansById,
+        planIdsByType,
+        selectedValues
+    }, dispatch ] = useReducer(quoteReducer, initialState);
+    
+    // Functional information
+    const [psqAccordions, setPSQAccordions] = useState([]);
+    const [productTypeAccordions, setProductTypeAccordions] = useState([]);
+    const [StandardImplementationDefs, setStandardImplementationDefs] = useState({});
+    const [productBasedValidationRules, setProductBasedValidationRules] = useState([]);
     
     useEffect(() => {
         if (!FirstRun) return null;
@@ -80,8 +117,6 @@ const Extension = ({ context, actions }) => {
         setFirstRun(prev => false)
     }, [FirstRun])
 
-    const [dealProps, setDealProps] = useState(false);
-    const [dealCompanies, setDealCompanies] = useState(false);
     useEffect(() => {
         if (!!DealId) {
             getCompanies(DealId).then(result => {
@@ -101,48 +136,38 @@ const Extension = ({ context, actions }) => {
     const DEBOUNCE_MS = 500;
 
     const enqueueUpdate = useCallback(details => {
-    return new Promise(resolve => {
-        queueRef.current.push({ details, resolve });
-        if (!timerRef.current) {
-        timerRef.current = setTimeout(async () => {
-            const items = queueRef.current.splice(0);
-            const byId = {};
-            items.forEach(({ details, resolve }) => {
-                const id = details.quote_id;
-                if (!byId[id]) {
-                    byId[id] = { details: { ...details }, resolvers: [resolve] };
-                } else {
-                    byId[id].details = { ...byId[id].details, ...details };
-                    byId[id].resolvers.push(resolve);
-                }
-            });
-            await Promise.all(
-                Object.values(byId).map(async ({ details, resolvers }) => {
-                    let ok = false;
-                    try {
-                        ok = await updateQuote(details);
-                    } catch {}
-                    resolvers.forEach(r => r(ok));
-                })
-            );
-            timerRef.current = null;
-        }, DEBOUNCE_MS);
-        }
-    });
+        return new Promise(resolve => {
+            queueRef.current.push({ details, resolve });
+            if (!timerRef.current) {
+                timerRef.current = setTimeout(async () => {
+                    const items = queueRef.current.splice(0);
+                    const byId = {};
+                    items.forEach(({ details, resolve }) => {
+                        const id = details.quote_id;
+                        if (!byId[id]) {
+                            byId[id] = { details: { ...details }, resolvers: [resolve] };
+                        } else {
+                            byId[id].details = { ...byId[id].details, ...details };
+                            byId[id].resolvers.push(resolve);
+                        }
+                    });
+                    await Promise.all(
+                        Object.values(byId).map(async ({ details, resolvers }) => {
+                            let ok = false;
+                            try {
+                                ok = await updateQuote(details);
+                            } catch {}
+                            resolvers.forEach(r => r(ok));
+                        })
+                    );
+                    timerRef.current = null;
+                }, DEBOUNCE_MS);
+            }
+        });
     }, [updateQuote]);
     
     // ------------------------- Rendering -------------------------
-    // Multi-page workflow: 1=Quote Details, 2=PSQ Details, 3=Quote Sheet
-    const [currentPage, setCurrentPage] = useState(1);
-
-    // Initial state for the quote workflow, managed by useReducer
-    const initialState = {
-        plansById       : {},       // Map of planId -> plan metadata
-        planIdsByType   : {},       // Grouping of plan IDs by product/PSQ type
-        selectedValues  : {},       // User-entered values for each plan
-    };
-    const [state, dispatch] = useReducer(quoteReducer, initialState);
-    const { plansById, planIdsByType, selectedValues } = state;  // Destructure for convenience
+    // const { plansById, planIdsByType, selectedValues } = state;  // Destructure for convenience
 
     // ------------------------- Data Definitions -------------------------
     // Fetch standard implementation day/rate definitions with transformation
@@ -205,7 +230,6 @@ const Extension = ({ context, actions }) => {
     const valueTables = useDynamicFetchDefs(tablesToFetch);
 
     
-    const [productBasedValidationRules, setProductBasedValidationRules] = useState([]);
     const productBasedValidationRulesDef = useFetchDefs( "cintra_calculator_product_based_validation_rules", productBasedValidationRulesDefHandler );
     useEffect(() => {
         if (!(
@@ -251,7 +275,6 @@ const Extension = ({ context, actions }) => {
     // ------------------------- State for Accordions -------------------------
 
     // PSQ accordion sections state
-    const [psqAccordions, setPSQAccordions] = useState([]);
     useEffect(() => {
         // Initialize PSQ accordions once types and products are loaded
         setPSQAccordions(
@@ -273,7 +296,6 @@ const Extension = ({ context, actions }) => {
     }, [psqTypeDefs, psqProductDefs]);
 
     // Product-type accordion sections state
-    const [productTypeAccordions, setProductTypeAccordions] = useState([]);
     useEffect(() => {
         // Initialize product-type accordions once definitions and tables are ready
         if (
@@ -400,7 +422,7 @@ const Extension = ({ context, actions }) => {
                                     defaultValue = values ? values[0].value : null;
                                     break;
                                 default:
-                                    return null;  // Skip any unknown input types
+                                    return null;
                             }
                             return { ...field, values, defaultValue };
                         })
@@ -412,7 +434,6 @@ const Extension = ({ context, actions }) => {
     }, [productTypeDefs, productDefs, valueTables]);
 
     // Standard implementation definitions state
-    const [StandardImplementationDefs, setStandardImplementationDefs] = useState({});
     useEffect(() => {
         // Group day- and rate-definitions into one object for CalculateQuote
         setStandardImplementationDefs({
@@ -472,7 +493,6 @@ const Extension = ({ context, actions }) => {
         });
     }, [productTypeAccordions]);
 
-    const [PSQImplementationCustomHours, setPSQImplementationCustomHours] = useState({});
     const PSQHandler = (fieldID, value) => {
         setPSQImplementationCustomHours(prev => ({
             ...prev,
@@ -480,7 +500,6 @@ const Extension = ({ context, actions }) => {
         }))
     }
 
-    const [quoteDiscountValues, setquoteDiscountValues] = useState({});
     const QuoteDiscountValueHandler = (fieldID, value) => {
         setquoteDiscountValues(prev => ({
             ...prev,
@@ -488,7 +507,6 @@ const Extension = ({ context, actions }) => {
         }))
     }
 
-    const [quoteCustomRates, setquoteCustomRates] = useState({});
     const quoteCustomRatesHandler = (fieldID, value) => {
         setquoteCustomRates(prev => ({
             ...prev,
@@ -501,18 +519,11 @@ const Extension = ({ context, actions }) => {
     // Add a new plan for a given product type
     const addPlan = (productTypeName, planIdArg = null) => {
         const newId = planIdArg || generateID();
-        if (!!debug && !!debugPlans) console.log(`⚡ Plan created -> productType="${productTypeName}", planId="${newId}"`);
-        // Dispatch to reducer
         dispatch({
             type: 'ADD_PLAN',
             payload: { plan: { id: newId, type: productTypeName } }
         });
         return newId;
-    };
-
-    // Placeholder for editing an existing plan (not implemented yet)
-    const editPlan = (productTypeName, planId) => {
-        if (!!debug && !!debugPlans) console.log({ event: "editPlan Called", productTypeName, planId });
     };
 
     // Clone an existing plan by copying its values
@@ -523,7 +534,6 @@ const Extension = ({ context, actions }) => {
             type: 'ADD_PLAN',
             payload: { plan: { id: newId, type: typeName, initialValues: originalValues } }
         });
-        if (!!debug && !!debugPlans) console.log({ event: "clonePlan -> new plan created", typeName, from: planId, newPlanId: newId });
     };
 
     // Delete a plan by removing it via reducer
@@ -532,17 +542,15 @@ const Extension = ({ context, actions }) => {
             type: 'REMOVE_PLAN',
             payload: { planId }
         });
-        if (!!debug && !!debugPlans) console.log({ event: "deletePlan -> removed", typeName, planId });
     };
 
     // Bundle plan handlers for passing into child components
-    const plan_handler = { add: addPlan, edit: editPlan, clone: clonePlan, delete: deletePlan };
+    const plan_handler = { add: addPlan, clone: clonePlan, delete: deletePlan };
 
     // ------------------------- Field Change Handlers -------------------------
 
     const handler = (field, value, planId) => {
         const productType = field.product_type.name;
-        if (!!debug && !!debugPlans) console.log( `✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}` );
         // If this is a "brand new" planId for that type, dispatch ADD_PLAN
         if (!planIdsByType[productType]?.includes(planId)) {
             dispatch({
@@ -550,10 +558,8 @@ const Extension = ({ context, actions }) => {
                 payload: { plan: { id: planId, type: productType, initialValues: {} } }
             });
         }
-        // Dispatch a single UPDATE_SELECTED_VALUE action
         const isQtyOrFreq = field.field === "quantity" || field.field === "frequency";
         const fieldKey = isQtyOrFreq ? `${field.field}_value` : field.field;
-
         dispatch({
             type: "UPDATE_SELECTED_VALUE",
             payload: {
@@ -564,13 +570,9 @@ const Extension = ({ context, actions }) => {
         });
     };
 
-    // ------------------------- PSQ Fee Requirement -------------------------
-
-    const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
 
     // ------------------------- Quote Calculation -------------------------
     
-    const [ExistingQuote, setExistingQuote] = useState(null);
     useEffect(() => {
         if (!!DealId && !ExistingQuote) {
             useGetQuotes(DealId)
@@ -587,7 +589,6 @@ const Extension = ({ context, actions }) => {
     }, [DealId])
 
     // Recalculate quote whenever inputs change
-    const [quote, setQuote] = useState({});
     useEffect(() => {
         if (!!DealId && !!ExistingQuote) {
             const needsFee = checkPSQRequirements(selectedValues, productDefs, productTypeAccordions, planIdsByType);
@@ -654,7 +655,6 @@ const Extension = ({ context, actions }) => {
         }
     }, [plansById, planIdsByType, selectedValues]);
 
-    const valuesInitialised = useRef(false);
     useEffect(() => {
         let conditions = [
             Object.keys(StandardImplementationDefs).length > 0,
@@ -797,9 +797,6 @@ const Extension = ({ context, actions }) => {
             }
         }
     }
-
-    const [QuoteSubmitted, setQuoteSubmitted] = useState(false);
-    const [QuoteSubmitting, setQuoteSubmitting] = useState(false);
     const submitQuote = (DealId, ExistingQuote, selectedValues, quote, productTypeAccordions, dealCompanies, dealProps) => {
         setQuoteSubmitting(prev => true)
         const now = new Date();
