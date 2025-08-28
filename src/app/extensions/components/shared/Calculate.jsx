@@ -77,6 +77,7 @@ export const CalculateQuote = ({
     quoteDiscountValues = {},
     quoteCustomRates = {},
     QUOTE_ID = "",
+    psqPayrollMultiplerReference = []
 }) => {
     const Quote = {
         "Details": {},
@@ -103,9 +104,9 @@ export const CalculateQuote = ({
     const quoteDetailsPlanID = planIdsByType[QuoteDetails.label]
     const quoteDetailsValues = selectedValues[quoteDetailsPlanID]
 
-    const ContractLengthField = productDefs.find(product => !!product.is_contract_length_field)
-    const EducationClientField = productDefs.find(product => !!product.is_education_client_field)
-    const PublicSectorClientField = productDefs.find(product => !!product.is_public_sector_client_field)
+    const ContractLengthField = productDefs.find(product => !!product.contract_length_dropdown)
+    const EducationClientField = productDefs.find(product => !!product.education_client_toggle)
+    const PublicSectorClientField = productDefs.find(product => !!product.public_sector_toggle)
     
     const ContractLengthFieldID = ContractLengthField.field
     const EducationClientFieldID = EducationClientField.field
@@ -152,14 +153,10 @@ export const CalculateQuote = ({
         let relevantProductTypes = productTypeDefs.filter(ptd => ptd.label == planType)
         if (relevantProductTypes.length > 0) {
             let quantity_field_label = relevantProductTypes[0].quantity_field_label
-            let quantity_field_type = relevantProductTypes[0].quantity_field_type
             let frequencyFieldDef = relevantProductTypes[0].frequencyFieldDef
             let frequency_values_table = frequencyFieldDef.values || []
             frequency_values_table = frequency_values_table.map(freq => freq.values)
 
-            if (!!quantity_field_type) {
-                quantity_field_type = quantity_field_type.name
-            }
             Quote["Details"][planType] = planIdsByType[planType].map(planId => {
                 if (planId == "temp") return;
                 let selectedPlanValues = selectedValues[planId] ?? {}
@@ -179,7 +176,6 @@ export const CalculateQuote = ({
                         planId,
                         payroll_payslips_modifier,
                         quantity_field_label: quantity_field_label,
-                        quantity_field_type: quantity_field_type,
                         fields: []
                     }
 
@@ -328,7 +324,7 @@ export const CalculateQuote = ({
                         selectedPlanQuote.fields = selectedPlanQuote.fields.map(field => {
                             let matchingField = fieldsWithPctPrice.find(pctField => field.field == pctField.field)
                             if (!!matchingField) {
-                                let pct = field.price / 100
+                                let pct = field.band_price / 100
                                 let estimated_monthly_fee = nonPctFieldsEstimatedMonthlyFee * pct
                                 return {
                                     ...field,
@@ -367,11 +363,12 @@ export const CalculateQuote = ({
             let relevantPlans = planIdsByType[ptLabel] || []
             relevantPlans = relevantPlans.filter(a => a != "temp")
             let relevantSelectedValues = relevantPlans.map(plan => selectedValues[plan])
+            relevantSelectedValues = relevantSelectedValues.filter(plan => !!plan)
             let services = {}
 
             if (relevantSelectedValues.length > 0) {
                 total_headcount += relevantSelectedValues.reduce((t, a) => {
-                    let q = a.quantity_value
+                    let q = a.quantity_value ?? 0
                     if (!!!q) {
                         for (let key in a) {
                             if (!!a[key]) q = 1
@@ -399,7 +396,7 @@ export const CalculateQuote = ({
                             } else {
                                 services[fieldKey] = {
                                     "plans": val,
-                                    "label": field.label,
+                                    "label": `${field.label} Implementation Fee`,
                                     "values": [fieldValue]
                                 }
                             }
@@ -407,7 +404,6 @@ export const CalculateQuote = ({
                     }
                 })
             }
-
             for (let serviceLabel in services) {
                 let service = services[serviceLabel]
                 services[serviceLabel]["Implementation Fee"] = 0
@@ -470,13 +466,17 @@ export const CalculateQuote = ({
                             let customRate = quoteCustomRates[services[serviceLabel]["field"]]
                             if (!!customRate) {
                                 ratesRef = {price: customRate}
-                            }
-                            if (!!ratesRef.fixed_price && services[serviceLabel]["Implementation Days"] > 0) {
-                                services[serviceLabel]["Implementation Fee"] = ratesRef.price
+                                services[serviceLabel]["Implementation Fee"] = ratesRef.band_price
+                                services[serviceLabel]["Implementation Unit Price"] = ratesRef.band_price
                             } else {
-                                services[serviceLabel]["Implementation Fee"] = ratesRef.price * services[serviceLabel]["Implementation Days"]
+                                if (!!ratesRef.band_fixed_price && services[serviceLabel]["Implementation Days"] > 0) {
+                                    services[serviceLabel]["Implementation Fee"] = ratesRef.band_price * mod
+                                    services[serviceLabel]["Implementation Unit Price"] = ratesRef.band_price * mod
+                                } else {
+                                    services[serviceLabel]["Implementation Fee"] = ratesRef.band_price * services[serviceLabel]["Implementation Days"]
+                                    services[serviceLabel]["Implementation Unit Price"] = ratesRef.band_price
+                                }
                             }
-                            services[serviceLabel]["Implementation Unit Price"] = ratesRef.price
                         }
                     }
                 } else if (
@@ -541,6 +541,15 @@ export const CalculateQuote = ({
         psqConfig["Headcount"] = Quote["Summary"]["PayrollHeadcount"]
         psqConfig["Payrolls"] = validPayrolls.length
         psqConfig["Cintra Payroll Product"] = null
+        psqConfig["PayrollModifier"] = null
+
+
+        if (psqConfig["Payrolls"] > 1 && psqConfig["Payrolls"] <= psqPayrollMultiplerReference.length) {
+            psqConfig["PayrollModifier"] = psqPayrollMultiplerReference[ psqConfig["Payrolls"] - 1 ].multiplier
+        } else if (psqConfig["Payrolls"] - 1 > psqPayrollMultiplerReference.length) {
+            psqConfig["PayrollModifier"] = psqPayrollMultiplerReference[psqPayrollMultiplerReference.length - 1].multiplier
+        }
+        psqConfig["PayrollModifier"] = psqConfig["PayrollModifier"] ?? 1
 
         psqImpConfig.forEach(c => {
             psqConfig[c.id] = null
@@ -623,7 +632,7 @@ export const CalculateQuote = ({
                     if (!!psqConfig["CustomHours"][field.field] || psqConfig["CustomHours"][field.field] === 0) {
                         hours = psqConfig["CustomHours"][field.field]
                     } else {
-                        hours = hoursBand.hours * sectorModifier
+                        hours = Math.round(hoursBand.hours * psqConfig["PayrollModifier"] * sectorModifier)
                     }
                     
                     let hourly_rate = 0
@@ -642,7 +651,7 @@ export const CalculateQuote = ({
                         if (!!customRate) {
                             hourly_rate = customRate
                         }
-                        psqFee = hoursBand.hours * hourly_rate
+                        psqFee = hours * hourly_rate
                     }
 
                     if (discount > 0) {
@@ -698,7 +707,6 @@ export const CalculateQuote = ({
             return {
                 "planId": plan.plan,
                 "quantity_field_label": "Quantity",
-                "quantity_field_type": "Quantity",
                 "fields": [
                     {
                         "field": "247649449156",

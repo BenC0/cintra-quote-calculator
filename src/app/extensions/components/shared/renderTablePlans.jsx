@@ -79,14 +79,14 @@ export const renderTablePlans = (
                                 >
                                     <Icon name="edit"/> Edit
                                 </Button>
-                                {/* {canAdd && (
+                                {canAdd && (
                                     <Button
                                         variant="transparent"
                                         onClick={() => plan_handler.clone(productType.label, planId)}
                                     >
                                         <Icon name="copy"/> Clone
                                     </Button>
-                                )} */}
+                                )}
                                 <Button
                                     variant="transparent"
                                     onClick={() => plan_handler.delete(productType.label, planId)}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
 import { ProductTypeAccordion } from "./components/shared/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { getDealProps, setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice, isEmptyArray, getCompanies } from "./components/shared/utils";  // Data-fetching and helper functions
+import { getDealProps, setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice, isEmptyArray, getCompanies, formatInt } from "./components/shared/utils";  // Data-fetching and helper functions
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { checkPSQRequirements, CalculateQuote } from "./components/shared/Calculate";  // Business logic for quote calculation
@@ -21,12 +21,12 @@ hubspot.extend(({ context, actions }) => (
 // Main extension component
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
-    const debug = true;
+    const debug = false;
     const debugValues = false;
     const debugPlans = false;
-    const debugQuote = true;
+    const debugQuote = false;
     const debugPSQ = false;
-    const versionLabel = "Cintra Quote Calculator: v0.16.0"
+    const versionLabel = "Cintra Quote Calculator: v0.18.1"
 
     const [DealId, setDealId] = useState(null);
     const [FirstRun, setFirstRun] = useState(true);
@@ -35,7 +35,6 @@ const Extension = ({ context, actions }) => {
     
     useEffect(() => {
         if (!FirstRun) return null;
-        console.log({context})
         setIsManager(prev => {
             const user = context?.user ?? { teams: [] }
             const teams = user.teams
@@ -46,7 +45,9 @@ const Extension = ({ context, actions }) => {
             return userInManagerTeam
         })
         console.log(versionLabel)
-        console.time(versionLabel)
+        if (!!debug) {
+            console.time(versionLabel)
+        }
         setFirstRun(prev => false)
         setDealId(prev => context.crm.objectId)
     }, [FirstRun])
@@ -56,15 +57,9 @@ const Extension = ({ context, actions }) => {
     useEffect(() => {
         if (!!DealId) {
             getCompanies(DealId).then(result => {
-                console.log({
-                    companies: result.body.companies
-                })
                 setDealCompanies(result.body.companies)
             })
             getDealProps(DealId).then(result => {
-                console.log({
-                    dealProps: result
-                })
                 setDealProps(result)
             })
         }
@@ -85,22 +80,22 @@ const Extension = ({ context, actions }) => {
             const items = queueRef.current.splice(0);
             const byId = {};
             items.forEach(({ details, resolve }) => {
-            const id = details.quote_id;
-            if (!byId[id]) {
-                byId[id] = { details: { ...details }, resolvers: [resolve] };
-            } else {
-                byId[id].details = { ...byId[id].details, ...details };
-                byId[id].resolvers.push(resolve);
-            }
+                const id = details.quote_id;
+                if (!byId[id]) {
+                    byId[id] = { details: { ...details }, resolvers: [resolve] };
+                } else {
+                    byId[id].details = { ...byId[id].details, ...details };
+                    byId[id].resolvers.push(resolve);
+                }
             });
             await Promise.all(
-            Object.values(byId).map(async ({ details, resolvers }) => {
-                let ok = false;
-                try {
-                ok = await updateQuote(details);
-                } catch {}
-                resolvers.forEach(r => r(ok));
-            })
+                Object.values(byId).map(async ({ details, resolvers }) => {
+                    let ok = false;
+                    try {
+                        ok = await updateQuote(details);
+                    } catch {}
+                    resolvers.forEach(r => r(ok));
+                })
             );
             timerRef.current = null;
         }, DEBOUNCE_MS);
@@ -129,14 +124,14 @@ const Extension = ({ context, actions }) => {
             field: r?.id ?? "",
             label: r?.values?.name ?? "",
             input_values_table: r?.values?.input_values_table ?? "",
-            input_type: getFirstValue("input_type", r)?.name ?? "",
-            pricing_structure: getFirstValue("pricing_structure", r) ?? null,
+            input_type: r?.values?.input_type?.name ?? null,
+            pricing_structure: r?.values?.pricing_structure?.label ?? "",
             product_type: getFirstValue("product_type", r) ?? null,
             product_sub_type: r?.values?.product_sub_type ?? null,
             requires_psq: r.values.requires_psq == 1,
-            is_contract_length_field: r.values.is_contract_length_field == 1,
-            is_education_client_field: r.values.is_education_client_field == 1,
-            is_public_sector_client_field: r.values.is_public_sector_client_field == 1,
+            contract_length_dropdown: r.values.contract_length_dropdown == 1,
+            education_client_toggle: r.values.education_client_toggle == 1,
+            public_sector_toggle: r.values.public_sector_toggle == 1,
             list_price_formula_type: r?.values?.list_price_formula_type?.name ?? "formula1",
             line_item_id: r?.values?.line_item_id ?? false,
         };
@@ -159,9 +154,9 @@ const Extension = ({ context, actions }) => {
         "cintra_calculator_implementation_rates",
         r => ({
             id: r.id,
-            price: r.values.price,
+            price: r.values.band_price,
             minimum_quantity: r.values.minimum_quantity,
-            fixed_price: !!r.values.fixed_price,
+            band_fixed_price: !!r.values.band_fixed_price,
             product_value: r.values.product_value ?? null,
             product_id: getFirstValue("product_id", r)?.id ?? null,
         })
@@ -176,7 +171,7 @@ const Extension = ({ context, actions }) => {
                 id: "quantity",
                 values: {
                     name: r.values.quantity_field_label,
-                    input_type: [{ name: "Number" }],
+                    input_type: { name: "Number" },
                     product_type: [{ id: r.id, name: r.values.name, type: "foreignid" }],
                     product_sub_type: { label: "Details", name: "details" }
                 }
@@ -185,7 +180,7 @@ const Extension = ({ context, actions }) => {
                 id: "frequency",
                 values: {
                     name: "Frequency",
-                    input_type: [{ name: "Dropdown" }],
+                    input_type: { name: "Dropdown" },
                     product_type: [{ id: r.id, name: r.values.name, type: "foreignid" }],
                     product_sub_type: { label: "Details", name: "details" },
                     input_values_table: r.values.quantity_frequency_values_table
@@ -196,8 +191,7 @@ const Extension = ({ context, actions }) => {
                 field: r.id,
                 label: r.values.name,
                 sort_order: r.values.sort_order,
-                max_items: r.values.max_items,
-                quantity_field_type: r.values.quantity_field_type,
+                max_plans: r.values.max_plans,
                 quantity_field_label: r.values.quantity_field_label,
                 input_display_type: r.values.input_display_type.name,
                 is_payroll_product_type: !!r.values.is_payroll_product_type && r.values.is_payroll_product_type == 1,
@@ -223,14 +217,19 @@ const Extension = ({ context, actions }) => {
             field: r.id,
             label: r.values.name,
             sort_order: r.values.sort_order,
-            max_items: 1,
+            max_plans: 1,
             quantity_field_label: null,
             input_display_type: "inline-table",
-            quantity_field_type: null,
             quantity_frequency_values_table: null
         }),
         "sort_order"
     );
+
+    const psqPayrollMultiplerReference = useFetchDefs(
+        "cintra_calculator_psq_payroll_multiplier_reference",
+        r => r.values,
+        "number_of_payrolls"
+    )
 
     // Fetch product price definitions
     const productPriceDefs = useFetchDefs(
@@ -238,7 +237,7 @@ const Extension = ({ context, actions }) => {
         (r) => ({
             field: r.id,
             label: r.values.name,
-            price: r.values.price,
+            price: r.values.band_price,
             bundle_price: r.values.bundle_price,
             product_value: r.values.product_value,
             minimum_price: r.values.minimum_price,
@@ -324,7 +323,6 @@ const Extension = ({ context, actions }) => {
             || isEmptyArray(productDefs)
         )) {
             const scopes = [...new Set(productBasedValidationRulesDef.map(r => r.scope))]
-            console.log({selectedValues})
             setProductBasedValidationRules(prev => {
                 let scopedRules = {}
                 scopes.forEach(scope => {
@@ -344,16 +342,18 @@ const Extension = ({ context, actions }) => {
                         condition = condition && preferredLookup[rule.product_id] == rule.product_value
                     }
                     return condition
-                } 
+                }
                 scopedRules.quote = scopedRules.quote.map(rule => {
                     let isActive = false
                     for (let plan in selectedValues) {
-                        let planValues = selectedValues[plan]
-                        let condition = !!planValues[rule.product_id]
-                        if (!!rule.product_value) {
-                            condition = condition && planValues[rule.product_id] == rule.product_value
+                        if (!!selectedValues[plan]) {
+                            let planValues = selectedValues[plan]
+                            let condition = !!planValues[rule.product_id]
+                            if (!!rule.product_value) {
+                                condition = condition && planValues[rule.product_id] == rule.product_value
+                            }
+                            if (condition) isActive = true
                         }
-                        if (condition) isActive = true
                     }
                     return {
                         ...rule,
@@ -381,7 +381,7 @@ const Extension = ({ context, actions }) => {
                         ...field,
                         value: 0,
                         defaultValue: 0,
-                        input_type: "Number",
+                        input_type: { name: "Number" },
                         product_sub_type: { name: "N/A" }
                     }));
                 return output;
@@ -403,14 +403,7 @@ const Extension = ({ context, actions }) => {
                 "field": "CustomProductType",
                 "label": "Custom Products",
                 "sort_order": productTypeDefs.length,
-                "max_items": -1,
-                "quantity_field_type": {
-                    "id": "1",
-                    "name": "Quantity",
-                    "label": "Quantity",
-                    "type": "option",
-                    "order": 0
-                },
+                "max_plans": -1,
                 "quantity_field_label": "Quantity",
                 "input_display_type": "table",
                 "is_payroll_product_type": false,
@@ -434,9 +427,9 @@ const Extension = ({ context, actions }) => {
                         "name": "details"
                     },
                     "requires_psq": false,
-                    "is_contract_length_field": false,
-                    "is_education_client_field": false,
-                    "is_public_sector_client_field": false,
+                    "contract_length_dropdown": false,
+                    "education_client_toggle": false,
+                    "public_sector_toggle": false,
                     "value": 0
                 },
             }
@@ -447,9 +440,7 @@ const Extension = ({ context, actions }) => {
                     "input_values_table": "",
                     "input_type": "Text",
                     "pricing_structure": {
-                        "id": "247649449155",
-                        "name": "N/A",
-                        "type": "foreignid"
+                        "label": "N/A",
                     },
                     "product_type": {
                         "id": "CustomProductType",
@@ -464,9 +455,9 @@ const Extension = ({ context, actions }) => {
                         "order": 0
                     },
                     "requires_psq": false,
-                    "is_contract_length_field": false,
-                    "is_education_client_field": false,
-                    "is_public_sector_client_field": false
+                    "contract_length_dropdown": false,
+                    "education_client_toggle": false,
+                    "public_sector_toggle": false
                 },
                 {
                     "field": "CustomProductPrice",
@@ -474,9 +465,7 @@ const Extension = ({ context, actions }) => {
                     "input_values_table": "",
                     "input_type": "Number",
                     "pricing_structure": {
-                        "id": "247649449155",
-                        "name": "N/A",
-                        "type": "foreignid"
+                        "label": "N/A",
                     },
                     "product_type": {
                         "id": "CustomProductType",
@@ -491,9 +480,9 @@ const Extension = ({ context, actions }) => {
                         "order": 0
                     },
                     "requires_psq": false,
-                    "is_contract_length_field": false,
-                    "is_education_client_field": false,
-                    "is_public_sector_client_field": false
+                    "contract_length_dropdown": false,
+                    "education_client_toggle": false,
+                    "public_sector_toggle": false
                 }
             ]
             setProductTypeAccordions(
@@ -647,17 +636,9 @@ const Extension = ({ context, actions }) => {
     const clonePlan = (typeName, planId) => {
         const newId = generateID();
         const originalValues = selectedValues[planId] || {};
-        // Add new plan
         dispatch({
             type: 'ADD_PLAN',
-            payload: { plan: { id: newId, type: typeName } }
-        });
-        // Copy each selected field value
-        Object.entries(originalValues).forEach(([fieldKey, value]) => {
-            dispatch({
-                type: 'UPDATE_SELECTED_VALUE',
-                payload: { planId: newId, fieldKey, value }
-            });
+            payload: { plan: { id: newId, type: typeName, initialValues: originalValues } }
         });
         if (!!debug && !!debugPlans) console.log({ event: "clonePlan -> new plan created", typeName, from: planId, newPlanId: newId });
     };
@@ -681,10 +662,9 @@ const Extension = ({ context, actions }) => {
         if (!!debug && !!debugPlans) console.log( `✏️ Plan updated -> planId="${planId}", field="${field.label}" (fieldId=${field.field}), newValue=${JSON.stringify(value)}` );
         // If this is a "brand new" planId for that type, dispatch ADD_PLAN
         if (!planIdsByType[productType]?.includes(planId)) {
-            // planId = addPlan(productType, planId);
             dispatch({
                 type: 'ADD_PLAN',
-                payload: { plan: { id: planId, type: productType } }
+                payload: { plan: { id: planId, type: productType, initialValues: {} } }
             });
         }
         // Dispatch a single UPDATE_SELECTED_VALUE action
@@ -758,6 +738,7 @@ const Extension = ({ context, actions }) => {
                 quoteDiscountValues: quoteDiscountValues,
                 quoteCustomRates: quoteCustomRates,
                 QUOTE_ID: ExistingQuote.id,
+                psqPayrollMultiplerReference: psqPayrollMultiplerReference,
             });
             setQuote(result);
             if (!!result && !!result["Summary"]["Total Y1 Charges"]) {
@@ -798,8 +779,8 @@ const Extension = ({ context, actions }) => {
                     planIdsByType,
                     selectedValues,
                 });
+                console.timeEnd(versionLabel)
             }
-            console.timeEnd(versionLabel)
         }
     }, [plansById, planIdsByType, selectedValues]);
 
@@ -958,14 +939,14 @@ const Extension = ({ context, actions }) => {
         const monthYear = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
         const jsonOutput = {
             "details": {
-                "ClientName": dealCompanies.name ?? "", // Associated company name
+                "ClientName": dealCompanies?.name ?? "", // Associated company name
                 "CreateDate": monthYear, // "Today" date
-                "ClientFullName": dealCompanies.client_full_name ?? "", // Associated company
-                "ClientLegalName": dealCompanies.client_legal_name ?? "", // Associated company
-                "CompanyNumber": dealCompanies.companies_house_number ?? "", // Associated company
-                "RegisteredAddress": dealCompanies.registered_address ?? "", // Associated company
+                "ClientFullName": dealCompanies?.client_full_name ?? "", // Associated company
+                "ClientLegalName": dealCompanies?.client_legal_name ?? "", // Associated company
+                "CompanyNumber": dealCompanies?.companies_house_number ?? "", // Associated company
+                "RegisteredAddress": dealCompanies?.registered_address ?? "", // Associated company
                 "ContractLength": `${quote["Summary"]["ContractLength"]} Months`,
-                "EstGoLive": dealProps.provisional_go_live_date ?? "" // Deal record - provisional_go_live_date
+                "EstGoLive": dealProps?.provisional_go_live_date ?? "" // Deal record - provisional_go_live_date
             },
             "tables": []
         }
@@ -975,19 +956,41 @@ const Extension = ({ context, actions }) => {
             let relevantPlans = quote["Details"][pt.label]
             !!relevantPlans && relevantPlans.forEach((plan, idx) => {
                 const planValues = selectedValues[plan.planId]
+                let planName = `\n${pt.label}`
+                if (relevantPlans.length > 1) {
+                    planName = `${planName} ${idx + 1}`
+                }
+                let shortPlanName = planName
+                let planDetails = ""
+                let freqDetails = ""
+                if (!!planValues.quantity_value && !!planValues.frequency_value && !!pt.quantity_field_label) {
+                    planDetails = `${planValues.quantity_value} ${pt.quantity_field_label}`
+                    freqDetails = `${toTitleCase(planValues.frequency_value)} Frequency`
+                    planName = `${planName}: ${planDetails}`
+                }
+                
                 plan.fields.length > 0 && jsonOutput["tables"].push({
-                    "name": `${pt.label} ${idx + 1}: ${planValues.quantity_value} ${toTitleCase(planValues.frequency_value)} ${pt.quantity_field_label}`,
+                    "name": `${planName}`,
+                    "shortName": `${shortPlanName}`,
+                    "details": `\n${planDetails}`,
+                    "frequency": `\n${freqDetails}`,
                     "TotalFees": `£${formatPrice(plan.estimated_monthly_fee)}`,
                     "Type": `Product`,
-                    "rows": plan.fields.map(field => (
-                        {
-                            "ProductType": `${field.label}: ${planValues[field.field]}`,
-                            "PricingStructure": `${field?.pricing_structure?.name ?? ""}`,
-                            "Quantity": `${formatToMaxTwoDecimal(field.qty)}`,
+                    "rows": plan.fields.map(field => {
+                        let label = field.label
+                        let fieldValue = planValues[field.field]
+                        if (typeof fieldValue == "string") {
+                            label = `${field.label}: ${planValues[field.field]}`
+                        }
+
+                        return {
+                            "ProductType": label,
+                            "PricingStructure": `${field?.pricing_structure ?? ""}`,
+                            "Quantity": `${formatInt(field.qty)}`,
                             "UnitPrice": `£${formatPrice(field.adjusted_price)}`,
                             "TotalFee": `£${formatPrice(field.estimated_monthly_fee)}`
                         }
-                    ))
+                    })
                 })
             })
         })
@@ -1002,54 +1005,58 @@ const Extension = ({ context, actions }) => {
             }
             psqPlans.forEach(plan => {
                 let validFields = plan.fields.filter(field => (field.psqFee + field.discount) > 0)
+                let totalFee = 0
                 if (validFields.length > 0) {
                     validFields.forEach(service => {
+                        totalFee += service["psqFee"]
                         serviceRows.push(
                         {
                             "ProductType": `${service.label}`,
                             "PricingStructure": `One Time Fee`,
-                            "Quantity": `${formatToMaxTwoDecimal(service["hoursBand"]["hours"])}`,
+                            "Quantity": `${formatInt(service["hoursBand"]["hours"])}`,
                             "UnitPrice": `£${formatPrice(service["adjusted_hourly_rate"])}`,
                             "TotalFee": `£${formatPrice(service["psqFee"])}`
                         })
                     })
                 }
                 jsonOutput["tables"].push({
-                    "name": `Implementation Fees`,
-                    "TotalFees": `£${formatPrice(serviceRows.reduce((a, t) => a.TotalFee + t))}`,
+                    "name": `${plan.title}`,
+                    "TotalFees": `£${formatPrice(totalFee)}`,
                     "Type": `Implementation`,
                     "rows": serviceRows
                 })
             })
 
         } else {
+            let serviceRows = []
+            let totalImplementationFee = 0
             for (let key in impFees) {
                 let fee = impFees[key]
                 if (!!fee.services) {
-                    let serviceRows = []
+                    totalImplementationFee += fee.totalImplementationFee
                     Object.keys(fee.services).forEach(serviceKey => {
                         let service = fee.services[serviceKey]
                         serviceRows.push(
                         {
-                            "ProductType": `${service.label}: ${service.values.join(", ")}`,
+                            "ProductType": `${service.label}`,
                             "PricingStructure": `One Time Fee`,
-                            "Quantity": `${formatToMaxTwoDecimal(service["Implementation Days"])}`,
+                            "Quantity": `${formatInt(service["Implementation Days"])}`,
                             "UnitPrice": `£${formatPrice(service["Implementation Unit Price"])}`,
                             "TotalFee": `£${formatPrice(service["Implementation Fee"])}`
                         })
                     })
-                    jsonOutput["tables"].push({
-                        "name": `Implementation Fees`,
-                        "TotalFees": `£${formatPrice(fee.totalImplementationFee)}`,
-                        "Type": `Implementation`,
-                        "rows": serviceRows
-                    })
                 }
             }
+            jsonOutput["tables"].push({
+                "name": `\nImplementation Fees`,
+                "TotalFees": `£${formatPrice(totalImplementationFee)}`,
+                "Type": `Implementation`,
+                "rows": serviceRows
+            })
         }
 
         jsonOutput["tables"].push({
-            "name": "Total Overall Costs",
+            "name": "\nTotal Overall Costs",
             "TotalFees": `£${formatPrice(quote["Summary"]["Total Y1 Charges"])}`,
             "Type": "Summary",
             "rows": [
@@ -1077,6 +1084,12 @@ const Extension = ({ context, actions }) => {
             ]
         })
 
+        let htmlTables = jsonOutput.tables.map(table => {
+            return  `<table> <tr> <td>${table.name}</td> </tr> </table>`
+        })
+
+        jsonOutput["htmlTables"] = htmlTables
+        
         const p = {
             deal: DealId,
             quote_id: ExistingQuote.id,
@@ -1084,7 +1097,7 @@ const Extension = ({ context, actions }) => {
             selected_values: JSON.stringify(selectedValues),
             submitted: 1,
             line_items: quote["Line Item Mapping"],
-            jsonOutput: jsonOutput,
+            jsonOutput: jsonOutput
         }
 
         console.log({jsonOutput})

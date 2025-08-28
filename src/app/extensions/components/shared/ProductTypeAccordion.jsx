@@ -19,7 +19,7 @@ export const ProductTypeAccordion = ({
     actions,
     productBasedValidationRules = []
 }) => {
-    const maxItems = productType.max_items;
+    const maxItems = productType.max_plans;
     const validPlanIds = planIds.filter(a => a != "temp")
     const hasTempId = planIds.filter(a => a == "temp").length > 0
     const tempPlanValues = selectedValues["temp"]

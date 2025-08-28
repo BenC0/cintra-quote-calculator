@@ -76,7 +76,7 @@ const QuoteSummaryComponent = ({
             
             let accordion = productTypeAccordions.find(a => a.label == productType)
             if (!!accordion) {
-                if (accordion.max_items == 1) {
+                if (accordion.max_plans == 1) {
                     type = "boolean"
                 }
             }

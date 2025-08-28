@@ -407,7 +407,8 @@ export const QuoteSheet = ({
                     stdRows.push(<TableRow>
                         <TableCell>{label}</TableCell>
                         <TableCell align="left">One Time Fee</TableCell>
-                        <TableCell>{formatToMaxTwoDecimal(service["Implementation Days"])}</TableCell>
+                        <TableCell>1</TableCell>
+                        {/* <TableCell>{formatToMaxTwoDecimal(service["Implementation Days"])}</TableCell> */}
 
                         <TableCell align="right">
                             {(!!RatesEditing[service.field] || RatesEditing[service.field] === 0) ? (

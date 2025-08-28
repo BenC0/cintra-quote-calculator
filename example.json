@@ -1,0 +1,122 @@
+{
+    "jsonOutput": {
+        "details": {
+            "ClientName": "",
+            "CreateDate": "August 2025",
+            "ClientFullName": "",
+            "ClientLegalName": "",
+            "CompanyNumber": "",
+            "RegisteredAddress": "",
+            "ContractLength": "12 Months",
+            "EstGoLive": ""
+        },
+        "tables": [
+            {
+                "name": "Payroll 1: 16 Monthly Employees",
+                "TotalFees": "£119.03",
+                "Type": "Product",
+                "rows": [
+                    {
+                        "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll",
+                        "PricingStructure": "Per Payslip",
+                        "Quantity": "16",
+                        "UnitPrice": "£7.44",
+                        "TotalFee": "£119.03"
+                    }
+                ]
+            },
+            {
+                "name": "Payroll 2: 16 Lunar Employees",
+                "TotalFees": "£124.94",
+                "Type": "Product",
+                "rows": [
+                    {
+                        "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll",
+                        "PricingStructure": "Per Payslip",
+                        "Quantity": "17.33",
+                        "UnitPrice": "£7.21",
+                        "TotalFee": "£124.94"
+                    }
+                ]
+            },
+            {
+                "name": "Payroll 3: 16 Lunar Employees",
+                "TotalFees": "£124.94",
+                "Type": "Product",
+                "rows": [
+                    {
+                        "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll",
+                        "PricingStructure": "Per Payslip",
+                        "Quantity": "17.33",
+                        "UnitPrice": "£7.21",
+                        "TotalFee": "£124.94"
+                    }
+                ]
+            },
+            {
+                "name": "Payroll 4: 16 Lunar Employees",
+                "TotalFees": "£124.94",
+                "Type": "Product",
+                "rows": [
+                    {
+                        "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll",
+                        "PricingStructure": "Per Payslip",
+                        "Quantity": "17.33",
+                        "UnitPrice": "£7.21",
+                        "TotalFee": "£124.94"
+                    }
+                ]
+            },
+            {
+                "name": "Implementation Fees",
+                "TotalFees": "£1,100.00",
+                "Type": "Implementation",
+                "rows": [
+                    {
+                        "ProductType": "Cintra Payroll Product: Cintra Outsourced Payroll, Cintra Outsourced Payroll, Cintra Outsourced Payroll, Cintra Outsourced Payroll",
+                        "PricingStructure": "One Time Fee",
+                        "Quantity": "4.6",
+                        "UnitPrice": "£1,100.00",
+                        "TotalFee": "£1,100.00"
+                    }
+                ]
+            },
+            {
+                "name": "Total Overall Costs",
+                "TotalFees": "£7,026.07",
+                "Type": "Summary",
+                "rows": [
+                    {
+                        "ProductType": "Total Estimated Monthly Charges",
+                        "PricingStructure": "",
+                        "Quantity": "",
+                        "UnitPrice": "",
+                        "TotalFee": "£493.84"
+                    },
+                    {
+                        "ProductType": "Total Estimated Annual Charges",
+                        "PricingStructure": "",
+                        "Quantity": "",
+                        "UnitPrice": "",
+                        "TotalFee": "£5,926.07"
+                    },
+                    {
+                        "ProductType": "Total Implementation Charges",
+                        "PricingStructure": "",
+                        "Quantity": "",
+                        "UnitPrice": "",
+                        "TotalFee": "£1,100.00"
+                    }
+                ]
+            }
+        ],
+        "htmlTables": [
+            "<table><tr><td>Payroll 1: 16 Monthly Employees</td></tr></table>",
+            "<table><tr><td>Payroll 2: 16 Lunar Employees</td></tr></table>",
+            "<table><tr><td>Payroll 3: 16 Lunar Employees</td></tr></table>",
+            "<table><tr><td>Payroll 4: 16 Lunar Employees</td></tr></table>",
+            "<table><tr><td>Implementation Fees</td></tr></table>",
+            "<table><tr><td>Total Overall Costs</td></tr></table>"
+        ]
+    }
+}

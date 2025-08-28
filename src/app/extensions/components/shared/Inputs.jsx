@@ -78,7 +78,7 @@ export const renderNumber = (field, onChange, planId, existingValue, supressLabe
                 <StepperInput
                     value={existingValue ?? field.value}
                     min={0}
-                    max={max_value}
+                    // max={max_value}
                     id={`${planId}__${field.field}`}
                     name={`${planId}__${field.field}`}
                     onChange={e => onChange(field, e, planId)}
