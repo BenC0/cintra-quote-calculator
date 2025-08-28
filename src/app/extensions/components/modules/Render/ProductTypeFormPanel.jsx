@@ -1,4 +1,3 @@
-// ProductTypeFormPanel.jsx
 import { useState, useEffect } from "react";
 import {
     Panel,
@@ -10,8 +9,8 @@ import {
     Text,
     Divider,
 } from "@hubspot/ui-extensions";
-import { renderField } from "./Inputs/Inputs";
-import { generateID } from "./utils";
+import { renderField } from "../Inputs/Inputs";
+import { generateID } from "../utils";
 
 export const ProductTypeFormPanel = ({
     name = "",

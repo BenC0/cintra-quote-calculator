@@ -1,6 +1,22 @@
 import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";  // Core React hooks
-import { ProductTypeAccordion } from "./components/modules/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
-import { getDealProps, setLineItems, pushQuoteToContract, useFetchDefs, useDynamicFetchDefs, getFirstValue, generateID, useGetQuotes, useCreateQuote, useUpdateQuote, toTitleCase, formatToMaxTwoDecimal, formatPrice, isEmptyArray, getCompanies, formatInt } from "./components/modules/utils";  // Data-fetching and helper functions
+import { ProductTypeAccordion } from "./components/modules/Render/ProductTypeAccordion";  // Accordion UI for product types and PSQ sections
+
+import { getDealProps } from "./components/modules/Utils/getDealProps";
+import { setLineItems } from "./components/modules/Utils/setLineItems";
+import { pushQuoteToContract } from "./components/modules/Utils/pushQuoteToContract";
+import { useFetchDefs } from "./components/modules/Utils/useFetchDefs";
+import { useDynamicFetchDefs } from "./components/modules/Utils/useDynamicFetchDefs";
+import { getFirstValue } from "./components/modules/Utils/getFirstValue";
+import { generateID } from "./components/modules/Utils/generateID";
+import { useGetQuotes } from "./components/modules/Utils/useGetQuotes";
+import { useCreateQuote } from "./components/modules/Utils/useCreateQuote";
+import { useUpdateQuote } from "./components/modules/Utils/useUpdateQuote";
+import { toTitleCase } from "./components/modules/Utils/toTitleCase";
+import { formatPrice } from "./components/modules/Utils/formatPrice";
+import { isEmptyArray } from "./components/modules/Utils/isEmptyArray";
+import { getCompanies } from "./components/modules/Utils/getCompanies";
+import { formatInt } from "./components/modules/Utils/formatInt";
+
 import { Divider, Button, hubspot, Flex, Heading, Alert } from "@hubspot/ui-extensions";  // HubSpot UI components
 import { QuoteSummaryComponent } from "./components/summary/QuoteSummary";  // Summary of quote details
 import { CalculateQuote } from "./components/modules/Calculate/Calculate";  // Business logic for quote calculation
@@ -8,7 +24,7 @@ import { checkPSQRequirements } from "./components/modules/Utils/checkPSQRequire
 import { quoteReducer } from "./components/modules/quoteReducer";  // Reducer for state management
 import { QuoteSheet } from "./components/summary/QuoteSheet";
 
-import { PSQTables } from "./components/modules/PSQTables";
+import { PSQTables } from "./components/modules/Render/PSQTables";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
@@ -684,14 +700,6 @@ const Extension = ({ context, actions }) => {
     // ------------------------- PSQ Fee Requirement -------------------------
 
     const [RequiresPSQFee, setRequiresPSQFee] = useState(false);
-    // useEffect(() => {
-    //     console.log({
-    //         selectedValues, productDefs, productTypeAccordions, planIdsByType
-    //     })
-    //     const needsFee = checkPSQRequirements(selectedValues, productDefs, productTypeAccordions, planIdsByType);
-    //     setRequiresPSQFee(needsFee);
-    //     if (debug && debugPSQ) console.log("PSQ Fee Requirement Updated:", needsFee);
-    // }, [selectedValues, productDefs, productTypeAccordions, planIdsByType]);
 
     // ------------------------- Quote Calculation -------------------------
     

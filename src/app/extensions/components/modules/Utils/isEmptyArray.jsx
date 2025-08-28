@@ -1,0 +1,1 @@
+export const isEmptyArray = a => a.length == 0

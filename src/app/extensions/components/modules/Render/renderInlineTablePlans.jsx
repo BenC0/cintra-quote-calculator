@@ -11,7 +11,7 @@ import {
     TableBody,
     TableCell,
 } from "@hubspot/ui-extensions";
-import { renderField } from "./Inputs/Inputs";
+import { renderField } from "../Inputs/Inputs";
 
 export const renderInlineTablePlans = (
     productType,
