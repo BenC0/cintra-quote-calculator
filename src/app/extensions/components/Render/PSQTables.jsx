@@ -18,7 +18,7 @@ import { renderField } from "../Inputs/Inputs";
 export const PSQTables = ({
     quote = {},
     psqAccordions = [],
-    PSQImplementationCustomHours = {},
+    customPSQUnits = {},
     PSQHandler = _ => null
 }) => {
     if (

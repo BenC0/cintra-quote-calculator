@@ -12,9 +12,9 @@ export const CalculateQuote = ({
     psqAccordions= [],
     psqImpHours = [],
     psqImpConfig = [],
-    PSQImplementationCustomHours = {},
-    quoteDiscountValues = {},
-    quoteCustomRates = {},
+    customPSQUnits = {},
+    customDiscounts = {},
+    customPrices = {},
     QUOTE_ID = "",
     psqPayrollMultiplerReference = []
 }) => {
@@ -35,6 +35,12 @@ export const CalculateQuote = ({
         productTypeAccordions,
     ]
     if (conditions.some(a => a.length == 0)) return;
+
+    console.log({
+        event: "Calculating Quote",
+        customDiscounts,
+        customPrices,
+    })
     
     const PayrollDetails = productTypeAccordions.find(a => a.is_payroll_product_type)
     const payrollDetailsPlanIDs = planIdsByType[PayrollDetails.label]
@@ -122,7 +128,15 @@ export const CalculateQuote = ({
                         let field = productDefs.find(a => a.field == fieldKey)
                         if (!!fieldValue && !!field) {
                             let output = {...field}
-                            let discount = quoteDiscountValues[field.field]
+                            let discount = 0
+                            console.log({
+                                customDiscounts,
+                                planId,
+                                fieldId: field.field
+                            })
+                            if (!!customDiscounts[planId]) {
+                                discount = customDiscounts[planId][field.field]
+                            }
                             output["discount"] = 0
                             if (!!discount) output["discount"] = discount
                             let qty = selectedPlanValues.quantity_value
@@ -168,7 +182,7 @@ export const CalculateQuote = ({
                                 output["band_price"] = output["price_band"]["band_price"]
                             }
                             
-                            let customRate = quoteCustomRates[field.field]
+                            let customRate = customPrices[planId][field.field]
                             if (!!customRate) {
                                 output["adjusted_price"] = customRate
                             } else {
@@ -337,7 +351,10 @@ export const CalculateQuote = ({
                 services[serviceLabel]["Implementation Days"] = 0
                 services[serviceLabel]["field"] = `implementation_${serviceLabel}`
                 services[serviceLabel]["discount"] = 0
-                let qdv = quoteDiscountValues[services[serviceLabel]["field"]]
+                let qdv = null
+                if (!!customDiscounts[serviceLabel]) {
+                    qdv = customDiscounts[serviceLabel][services[serviceLabel]["field"]]
+                }
                 if (!!qdv) services[serviceLabel]["discount"] = qdv
 
                 if (productType.standard_implementation_calculation_type == "default") {
@@ -390,7 +407,10 @@ export const CalculateQuote = ({
                         if (ratesRef.length > 0) {
                             ratesRef = ratesRef[ratesRef.length - 1]
 
-                            let customRate = quoteCustomRates[services[serviceLabel]["field"]]
+                            let customRate = null
+                            if (!!customPrices[serviceLabel]) {
+                                customRate = customPrices[serviceLabel][services[serviceLabel]["field"]]
+                            }
                             if (!!customRate) {
                                 ratesRef = {band_price: customRate}
                                 services[serviceLabel]["Implementation Fee"] = ratesRef.band_price
@@ -423,9 +443,11 @@ export const CalculateQuote = ({
                             }
                         })
 
-                        let customRate = quoteCustomRates[services[serviceLabel]["field"]]
-                        if (!!customRate) {
-                            fee = customRate
+                        if (!!customPrices[serviceLabel]) {
+                            let customRate = customPrices[serviceLabel][services[serviceLabel]["field"]] ?? null
+                            if (!!customRate) {
+                                fee = customRate
+                            }
                         }
                         services[serviceLabel]["Implementation Unit Price"] = fee
                         services[serviceLabel]["Implementation Fee"] = fee
@@ -463,7 +485,7 @@ export const CalculateQuote = ({
         let validPayrolls = validPlanIdsByType[PayrollDetails.label]
 
         let psqConfig = {
-            CustomHours: PSQImplementationCustomHours,
+            CustomHours: customPSQUnits,
         }
         psqConfig["Headcount"] = Quote["Summary"]["PayrollHeadcount"]
         psqConfig["Payrolls"] = validPayrolls.length
@@ -520,7 +542,11 @@ export const CalculateQuote = ({
                     let psqFee = 0
                     let discount = 0
                     let hours = 0
-                    if (!!quoteDiscountValues[field.field]) discount = quoteDiscountValues[field.field]
+                    if (!!customDiscounts[psqAccord.field]) {
+                        if (!!customDiscounts[psqAccord.field][field.field]){
+                            discount = customDiscounts[psqAccord.field][field.field]
+                        }
+                    }
                     let associatedConfigValue = null 
                     field.psq_config_reference.forEach(configField => {
                         if (!!psqConfig[configField]) {
@@ -546,10 +572,11 @@ export const CalculateQuote = ({
                             hoursBand = { hours: 0 }
                         }
                     }
-                    if (!!psqConfig["CustomHours"][field.field] || psqConfig["CustomHours"][field.field] === 0) {
-                        hours = psqConfig["CustomHours"][field.field]
-                    } else {
-                        hours = Math.round(hoursBand.hours * psqConfig["PayrollModifier"] * sectorModifier)
+                    hours = Math.round(hoursBand.hours * psqConfig["PayrollModifier"] * sectorModifier)
+                    if (!!customPSQUnits[psqAccord.field]) {
+                        if (!!customPSQUnits[psqAccord.field][field.field] || customPSQUnits[psqAccord.field][field.field] === 0) {
+                            hours = customPSQUnits[psqAccord.field][field.field]
+                        }
                     }
                     
                     let hourly_rate = 0
@@ -558,15 +585,17 @@ export const CalculateQuote = ({
                             event: `"${field.field}" is NaN Hours!`,
                             hoursBand,
                             sectorModifier,
-                            CustomHours: psqConfig["CustomHours"][field.field],
+                            CustomHours: customPSQUnits[psqAccord.field][field.field],
                             psqImpHours,
                         })
                     }
                     if (!isNaN(hours)) {
                         hourly_rate = field.resource.hourly_rate || 0
-                        let customRate = quoteCustomRates[field.field]
-                        if (!!customRate) {
-                            hourly_rate = customRate
+                        if (!!customPrices[psqAccord.field]) {
+                            let customRate = customPrices[psqAccord.field][field.field]
+                            if (!!customRate) {
+                                hourly_rate = customRate
+                            }
                         }
                         psqFee = hours * hourly_rate
                     }

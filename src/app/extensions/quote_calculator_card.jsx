@@ -56,8 +56,6 @@ hubspot.extend(({ context, actions }) => (
 const Extension = ({ context, actions }) => {
     // Debug flags for console logging various parts of state and logic
     const debug = false;
-    const debugValues = false;
-    const debugPlans = false;
     const debugQuote = false;
     const versionLabel = "Cintra Quote Calculator: v0.18.3"
 
@@ -88,13 +86,13 @@ const Extension = ({ context, actions }) => {
     // Quote Associated Information
     const [quote, setQuote] = useState({});
     const [ExistingQuote, setExistingQuote] = useState(null);
-    const [quoteCustomRates, setquoteCustomRates] = useState({});
-    const [quoteDiscountValues, setquoteDiscountValues] = useState({});
-    const [PSQImplementationCustomHours, setPSQImplementationCustomHours] = useState({});
     const [{
         plansById,
         planIdsByType,
-        selectedValues
+        selectedValues,
+        customPrices,
+        customDiscounts,
+        customPSQUnits,
     }, dispatch ] = useReducer(quoteReducer, initialState);
     
     // Functional information
@@ -248,9 +246,36 @@ const Extension = ({ context, actions }) => {
     }, [productTypeAccordions, valueTables]);
 
     // Custom Value Handlers
-    const PSQHandler = (fieldID, value) => { setPSQImplementationCustomHours(prev => ({ ...prev, [fieldID]: value })) }
-    const QuoteDiscountValueHandler = (fieldID, value) => { setquoteDiscountValues(prev => ({ ...prev, [fieldID]: value })) }
-    const quoteCustomRatesHandler = (fieldID, value) => { setquoteCustomRates(prev => ({ ...prev, [fieldID]: value })) }
+    const PSQHandler = (planId, fieldID, value) => {
+        dispatch({
+            type: "UPDATE_CUSTOM_PSQ_UNIT",
+            payload: {
+                planId,
+                fieldKey: fieldID,
+                value: value,
+            },
+        });
+    }
+    const quoteDiscountValueHandler = (planId, fieldID, value) => {
+        dispatch({
+            type: "UPDATE_CUSTOM_DISCOUNT",
+            payload: {
+                planId,
+                fieldKey: fieldID,
+                value: value,
+            },
+        });
+    }
+    const quoteCustomRatesHandler = (planId, fieldID, value) => {
+        dispatch({
+            type: "UPDATE_CUSTOM_PRICE",
+            payload: {
+                planId,
+                fieldKey: fieldID,
+                value: value,
+            },
+        });
+    }
 
     // ------------------------- Field Change Handlers -------------------------
     const fieldHandler = (field, value, planId) => {
@@ -292,9 +317,9 @@ const Extension = ({ context, actions }) => {
                 psqAccordions: psqAccordions,
                 psqImpHours: psqImpHours,
                 psqImpConfig: psqImpConfig,
-                PSQImplementationCustomHours: PSQImplementationCustomHours,
-                quoteDiscountValues: quoteDiscountValues,
-                quoteCustomRates: quoteCustomRates,
+                customPSQUnits: customPSQUnits,
+                customDiscounts: customDiscounts,
+                customPrices: customPrices,
                 QUOTE_ID: ExistingQuote.id,
                 psqPayrollMultiplerReference: psqPayrollMultiplerReference,
             });
@@ -311,7 +336,7 @@ const Extension = ({ context, actions }) => {
             }
             if ((debug && debugQuote) && !!result) console.log({ event: "Quote Calculated", result });
         }
-    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, PSQImplementationCustomHours, quoteDiscountValues, quoteCustomRates, DealId, ExistingQuote]);
+    }, [planIdsByType, selectedValues, productPriceDefs, productTypeDefs, RequiresPSQFee, StandardImplementationDefs, productDefs, productTypeAccordions, psqAccordions, customPSQUnits, customDiscounts, customPrices, DealId, ExistingQuote]);
 
     const progressToImplementation = () => {
         if (RequiresPSQFee) {
@@ -477,7 +502,7 @@ const Extension = ({ context, actions }) => {
                     <PSQTables
                         quote = {quote}
                         psqAccordions = {psqAccordions}
-                        PSQImplementationCustomHours = {PSQImplementationCustomHours}
+                        customPSQUnits = {customPSQUnits}
                         PSQHandler = {PSQHandler}
                     />
 
@@ -521,8 +546,8 @@ const Extension = ({ context, actions }) => {
                         selectedValues={selectedValues}
                         planIdsByType={planIdsByType}
                         productTypeAccordions={productTypeAccordions}
-                        quoteDiscountValues={quoteDiscountValues}
-                        QuoteDiscountValueHandler={QuoteDiscountValueHandler}
+                        customDiscounts={customDiscounts}
+                        quoteDiscountValueHandler={quoteDiscountValueHandler}
                         quoteCustomRatesHandler={quoteCustomRatesHandler}
                         disableEdit = {QuoteSubmitting || QuoteSubmitted}
                         isManager = {isManager}

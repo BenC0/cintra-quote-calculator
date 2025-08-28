@@ -23,7 +23,7 @@ export const QuoteSheet = ({
     productTypeAccordions = {},
     selectedValues = {},
     planIdsByType = {},
-    QuoteDiscountValueHandler = {},
+    quoteDiscountValueHandler = {},
     quoteCustomRatesHandler = {},
     disableEdit = false,
     isManager = false,
@@ -95,6 +95,7 @@ export const QuoteSheet = ({
 
                         let planDetails = {
                             heading,
+                            planId: plan,
                             rows: [],
                             coreProductMonthlyFee: 0,
                             addonProductMonthlyFee: 0,
@@ -225,10 +226,10 @@ export const QuoteSheet = ({
                                                                     variant="primary"
                                                                     onClick={_ => {
                                                                         if (typeof discountEditing[row.field] == "number") {
-                                                                            QuoteDiscountValueHandler(row.field, discountEditing[row.field])
+                                                                            quoteDiscountValueHandler(accordion.planId, row.field, discountEditing[row.field])
                                                                         }
                                                                         if (typeof RatesEditing[row.field] == "number") {
-                                                                            quoteCustomRatesHandler(row.field, RatesEditing[row.field])
+                                                                            quoteCustomRatesHandler(accordion.planId, row.field, RatesEditing[row.field])
                                                                         }
                                                                         RatesHandler(row.field, null, "remove")
                                                                         discountHandler(row.field, null, "remove")
@@ -342,10 +343,10 @@ export const QuoteSheet = ({
                                                             variant="primary"
                                                             onClick={_ => {
                                                                 if (typeof discountEditing[row.field] == "number") {
-                                                                    QuoteDiscountValueHandler(row.field, discountEditing[row.field])
+                                                                    quoteDiscountValueHandler(accordion.planId, row.field, discountEditing[row.field])
                                                                 }
                                                                 if (typeof RatesEditing[row.field] == "number") {
-                                                                    quoteCustomRatesHandler(row.field, RatesEditing[row.field])
+                                                                    quoteCustomRatesHandler(accordion.planId, row.field, RatesEditing[row.field])
                                                                 }
                                                                 RatesHandler(row.field, null, "remove")
                                                                 discountHandler(row.field, null, "remove")
@@ -432,10 +433,10 @@ export const QuoteSheet = ({
                                             variant="primary"
                                             onClick={_ => {
                                                 if (typeof discountEditing[service.field] == "number") {
-                                                    QuoteDiscountValueHandler(service.field, discountEditing[service.field])
+                                                    quoteDiscountValueHandler(serviceKey, service.field, discountEditing[service.field])
                                                 }
                                                 if (typeof RatesEditing[service.field] == "number") {
-                                                    quoteCustomRatesHandler(service.field, RatesEditing[service.field])
+                                                    quoteCustomRatesHandler(serviceKey, service.field, RatesEditing[service.field])
                                                 }
                                                 RatesHandler(service.field, null, "remove")
                                                 discountHandler(service.field, null, "remove")
