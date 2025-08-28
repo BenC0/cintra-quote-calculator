@@ -19,8 +19,9 @@ export const renderTablePlans = (
     canAdd = false,
     actions,
     handler,
-    plan_handler,
+    planHandler,
     productBasedValidationRules,
+    dispatch
 ) => {
     const validPlanIds = planIds.filter(id => id != "temp")
     if (validPlanIds.length === 0) {
@@ -67,9 +68,7 @@ export const renderTablePlans = (
                                         actions={actions}
                                         planId={planId}
                                         initialLookup={selectedPlanValues}
-                                        onSubmit={(generatedId) => {
-                                            plan_handler.edit(productType.label, generatedId);
-                                        }}
+                                        onSubmit={(generatedId) => { }}
                                         productBasedValidationRules = {productBasedValidationRules}
                                     />
                                 }
@@ -79,14 +78,14 @@ export const renderTablePlans = (
                                 {canAdd && (
                                     <Button
                                         variant="transparent"
-                                        onClick={() => plan_handler.clone(productType.label, planId)}
+                                        onClick={() => planHandler.clone(dispatch, productType.label, planId, selectedValues)}
                                     >
                                         <Icon name="copy"/> Clone
                                     </Button>
                                 )}
                                 <Button
                                     variant="transparent"
-                                    onClick={() => plan_handler.delete(productType.label, planId)}
+                                    onClick={() => planHandler.delete(dispatch, productType.label, planId)}
                                 >
                                     <Icon name="delete"/> Remove
                                 </Button>

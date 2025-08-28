@@ -44,6 +44,10 @@ import { impResourceDictHandler } from "./components/Data/impResourceDictHandler
 import { psqProductDefsHandler } from "./components/Data/psqProductDefsHandler";
 import { getTablesToFetch } from "./components/Data/getTablesToFetch";
 import { productBasedValidationRulesHandler } from "./components/Data/ProductBasedValidationRulesHandler";
+import { psqTypeDefsMap } from "./components/Data/psqTypeDefsMap";
+import { productTypeAccordionsMap } from "./components/Data/productTypeAccordionsMap";
+import { getDefaultFields } from "./components/Data/getDefaultFields";
+import { planHandler } from "./components/Data/planHandler";
 
 // Register the extension in the HubSpot CRM sidebar
 hubspot.extend(({ context, actions }) => (
@@ -186,159 +190,15 @@ const Extension = ({ context, actions }) => {
     // PSQ accordion sections state
     useEffect(() => {
         // Initialize PSQ accordions once types and products are loaded
-        setPSQAccordions(
-            psqTypeDefs.map((psqType) => {
-                const output = { ...psqType };
-                // Attach product-level fields to each PSQ type
-                output.fields = psqProductDefs
-                    .filter((a) => a.product_type.id === psqType.field)
-                    .map((field) => ({
-                        ...field,
-                        value: 0,
-                        defaultValue: 0,
-                        input_type: { name: "Number" },
-                        product_sub_type: { name: "N/A" }
-                    }));
-                return output;
-            })
-        );
+        setPSQAccordions(_ => psqTypeDefsMap(psqTypeDefs, psqProductDefs))
     }, [psqTypeDefs, psqProductDefs]);
 
     // Product-type accordion sections state
     useEffect(() => {
         // Initialize product-type accordions once definitions and tables are ready
-        if (
-            productTypeDefs.length > 0
-            && productDefs.length > 0
-            && Object.keys(valueTables).length
-        ) {
+        if ( productTypeDefs.length > 0 && productDefs.length > 0 && Object.keys(valueTables).length ) {
             if (!!debug) console.count("Initialising Product Type Accoridons")
-            const customProductTypeDef = {
-                "field": "CustomProductType",
-                "label": "Custom Products",
-                "sort_order": productTypeDefs.length,
-                "max_plans": -1,
-                "quantity_field_label": "Quantity",
-                "input_display_type": "table",
-                "is_payroll_product_type": false,
-                "is_quote_details_type": false,
-                "use_quantity_as_implementation_headcount": false,
-                "standard_implementation_calculation_type": "default",
-                "standard_implementation_calculation_product": null,
-                "quantityFieldDef": {
-                    "field": "quantity",
-                    "label": "Quantity",
-                    "input_values_table": "",
-                    "input_type": "Number",
-                    "pricing_structure": {"label": "N/A",},
-                    "product_type": {
-                        "id": "CustomProductType",
-                        "name": "Custom Products",
-                        "type": "foreignid"
-                    },
-                    "product_sub_type": {
-                        "label": "Details",
-                        "name": "details"
-                    },
-                    "requires_psq": false,
-                    "contract_length_dropdown": false,
-                    "education_client_toggle": false,
-                    "public_sector_toggle": false,
-                    "value": 0
-                },
-            }
-            const customProductFields = [
-                {
-                    "field": "CustomProductName",
-                    "label": "Custom Product Name",
-                    "input_values_table": "",
-                    "input_type": "Text",
-                    "pricing_structure": {
-                        "label": "N/A",
-                    },
-                    "product_type": {
-                        "id": "CustomProductType",
-                        "name": "Custom Products",
-                        "type": "foreignid"
-                    },
-                    "product_sub_type": {
-                        "id": "1",
-                        "name": "core",
-                        "label": "Core",
-                        "type": "option",
-                        "order": 0
-                    },
-                    "requires_psq": false,
-                    "contract_length_dropdown": false,
-                    "education_client_toggle": false,
-                    "public_sector_toggle": false
-                },
-                {
-                    "field": "CustomProductPrice",
-                    "label": "Custom Product Price",
-                    "input_values_table": "",
-                    "input_type": "Number",
-                    "pricing_structure": {
-                        "label": "N/A",
-                    },
-                    "product_type": {
-                        "id": "CustomProductType",
-                        "name": "Custom Products",
-                        "type": "foreignid"
-                    },
-                    "product_sub_type": {
-                        "id": "1",
-                        "name": "core",
-                        "label": "Core",
-                        "type": "option",
-                        "order": 0
-                    },
-                    "requires_psq": false,
-                    "contract_length_dropdown": false,
-                    "education_client_toggle": false,
-                    "public_sector_toggle": false
-                }
-            ]
-            setProductTypeAccordions(
-                [...productTypeDefs, customProductTypeDef].map((productType) => {
-                    const output = { ...productType };
-                    // Populate frequency field options from dynamic tables
-                    if (output.frequencyFieldDef) {
-                        output.frequencyFieldDef.values = valueTables[output.quantity_frequency_values_table] || null;
-                    }
-                    // Build field definitions including default values per input type
-                    output.fields = [...productDefs, ...customProductFields]
-                        .filter((a) => a.product_type.id === productType.field)
-                        .map((field) => {
-                            let values = null;
-                            let defaultValue = null;
-                            switch (field.input_type) {
-                                case "Toggle":
-                                    values = { active: "Yes", inactive: "No" };
-                                    defaultValue = false;
-                                    break;
-                                case "Number":
-                                    values = { min: 0 };
-                                    defaultValue = 0;
-                                    break;
-                                case "Text":
-                                    values = { default: "" };
-                                    defaultValue = "";
-                                    break;
-                                case "Radio":
-                                case "Dropdown":
-                                    values = valueTables[field.input_values_table];
-                                    defaultValue = values ? values[0].value : null;
-                                    break;
-                                default:
-                                    return null;
-                            }
-                            return { ...field, values, defaultValue };
-                        })
-                        .filter((f) => f !== null);
-                    return output;
-                })
-            );
+            setProductTypeAccordions(_ => productTypeAccordionsMap(productTypeDefs, productDefs, valueTables));
         }
     }, [productTypeDefs, productDefs, valueTables]);
 
@@ -357,38 +217,15 @@ const Extension = ({ context, actions }) => {
         // Don't re-run
         if (plansInitialised.current) return;
         if (productTypeAccordions.length === 0) return;
-
+        if (debug) console.count("Initial Plan Setup");
         plansInitialised.current = true
 
-        if (debug) console.count("Initial Plan Setup");
-
-        // Helper to get default field entries based on type
-        const getDefaultFields = (pt) => pt.fields.map((f) => {
-            let defaultValue = f.defaultValue;
-            switch (f.input_type) {
-                case "Toggle": defaultValue = false; break;
-                case "Number": defaultValue = 0; break;
-                case "Text": defaultValue = ""; break;
-                case "Radio":
-                case "Dropdown":
-                    const vals = valueTables[f.input_values_table];
-                    defaultValue = !!vals ? vals.find(v => !!v.values.default) : null
-                    if (!!defaultValue) {
-                        defaultValue = defaultValue.values.value
-                    } else if (!!vals) {
-                        defaultValue = vals[0].values.value
-                    }
-                    break;
-            }
-            return { field: f.field, label: f.label, value: defaultValue };
-        });
-
-        // Initialize one plan for each accordion of inline or inline-table type
+        // Initialise one plan for each accordion of inline or inline-table type
         productTypeAccordions.forEach((pt) => {
             const needsInline = pt.input_display_type === "inline" || pt.input_display_type === "inline-table";
             if (needsInline) {
-                const planId = addPlan(pt.label);
-                getDefaultFields(pt).forEach((field) => {
+                const planId = planHandler.add(dispatch, pt.label);
+                getDefaultFields(pt, valueTables).forEach((field) => {
                     dispatch({
                         type: "UPDATE_SELECTED_VALUE",
                         payload: {
@@ -400,61 +237,14 @@ const Extension = ({ context, actions }) => {
                 })
             }
         });
-    }, [productTypeAccordions]);
+    }, [productTypeAccordions, valueTables]);
 
-    const PSQHandler = (fieldID, value) => {
-        setPSQImplementationCustomHours(prev => ({
-            ...prev,
-            [fieldID]: value
-        }))
-    }
+    // Custom Value Handlers
+    const PSQHandler = (fieldID, value) => { setPSQImplementationCustomHours(prev => ({ ...prev, [fieldID]: value })) }
+    const QuoteDiscountValueHandler = (fieldID, value) => { setquoteDiscountValues(prev => ({ ...prev, [fieldID]: value })) }
+    const quoteCustomRatesHandler = (fieldID, value) => { setquoteCustomRates(prev => ({ ...prev, [fieldID]: value })) }
 
-    const QuoteDiscountValueHandler = (fieldID, value) => {
-        setquoteDiscountValues(prev => ({
-            ...prev,
-            [fieldID]: value
-        }))
-    }
 
-    const quoteCustomRatesHandler = (fieldID, value) => {
-        setquoteCustomRates(prev => ({
-            ...prev,
-            [fieldID]: value
-        }))
-    }
-
-    // ------------------------- Plan CRUD Handlers -------------------------
-
-    // Add a new plan for a given product type
-    const addPlan = (productTypeName, planIdArg = null) => {
-        const newId = planIdArg || generateID();
-        dispatch({
-            type: 'ADD_PLAN',
-            payload: { plan: { id: newId, type: productTypeName } }
-        });
-        return newId;
-    };
-
-    // Clone an existing plan by copying its values
-    const clonePlan = (typeName, planId) => {
-        const newId = generateID();
-        const originalValues = selectedValues[planId] || {};
-        dispatch({
-            type: 'ADD_PLAN',
-            payload: { plan: { id: newId, type: typeName, initialValues: originalValues } }
-        });
-    };
-
-    // Delete a plan by removing it via reducer
-    const deletePlan = (typeName, planId) => {
-        dispatch({
-            type: 'REMOVE_PLAN',
-            payload: { planId }
-        });
-    };
-
-    // Bundle plan handlers for passing into child components
-    const plan_handler = { add: addPlan, clone: clonePlan, delete: deletePlan };
 
     // ------------------------- Field Change Handlers -------------------------
 
@@ -702,7 +492,7 @@ const Extension = ({ context, actions }) => {
                     });
                 })
             } else {
-                deletePlan(plan.type, plan.id)
+                planHandler.deletePlan(dispatch, plan.type, plan.id)
             }
         }
     }
@@ -908,8 +698,9 @@ const Extension = ({ context, actions }) => {
                                 actions={actions}
                                 selectedValues={selectedValues}
                                 handler={handler}
-                                plan_handler={plan_handler}
+                                planHandler={planHandler}
                                 productBasedValidationRules={productBasedValidationRules}
+                                dispatch={dispatch}
                             />
                             <Divider />
                         </React.Fragment>
